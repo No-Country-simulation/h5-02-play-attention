@@ -55,7 +55,52 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
     └── 📁lib
         └── utils.js
     └── 📁shared
-        └── 📁components            
-        └── 📁providers            
-        └── 📁ui            
+        └── 📁components
+        └── 📁providers
+        └── 📁ui
 ```
+
+## Color Pallete
+
+# Color Palette Documentation (OKLCH)
+
+This document visualizes the CSS variables defined in your `:root` using OKLCH color space.
+
+## Core Colors
+
+| Variable        | Color Preview                                                                                     | OKLCH Value                 | Approx. HEX |
+| --------------- | ------------------------------------------------------------------------------------------------- | --------------------------- | ----------- |
+| `--background`  | <div style="background-color: #FFFFFF; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(1 0 0)`              | `#FFFFFF`   |
+| `--foreground`  | <div style="background-color: #252525; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.145 0 0)`          | `#252525`   |
+| `--primary`     | <div style="background-color: #8365F7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.65 0.22 290.5)`    | `#8365F7`   |
+| `--secondary`   | <div style="background-color: #2B5ABA; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.48 0.19 264.5)`    | `#2B5ABA`   |
+| `--destructive` | <div style="background-color: #E74C3C; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.577 0.245 27.325)` | `#E74C3C`   |
+
+## UI States
+
+| Variable             | Color Preview                                                                                     | OKLCH Value        |
+| -------------------- | ------------------------------------------------------------------------------------------------- | ------------------ |
+| `--muted`            | <div style="background-color: #F7F7F7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.97 0 0)`  |
+| `--muted-foreground` | <div style="background-color: #8E8E8E; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.556 0 0)` |
+| `--border`           | <div style="background-color: #EBEBEB; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.922 0 0)` |
+
+## Chart Colors
+
+| Variable    | Color Preview                                                                                     | OKLCH Value                 |
+| ----------- | ------------------------------------------------------------------------------------------------- | --------------------------- |
+| `--chart-1` | <div style="background-color: #A78BFA; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.646 0.222 41.116)` |
+| `--chart-2` | <div style="background-color: #60A5FA; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.6 0.118 184.704)`  |
+| `--chart-3` | <div style="background-color: #5B7CF7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.398 0.07 227.392)` |
+
+## Sidebar Colors
+
+| Variable            | Color Preview                                                                                     | OKLCH Value              |
+| ------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ |
+| `--sidebar`         | <div style="background-color: #FFFFFF; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.985 0 0)`       |
+| `--sidebar-primary` | <div style="background-color: #8365F7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.65 0.22 290.5)` |
+
+## Key Notes
+
+- **OKLCH** is a perceptually uniform color space (better than HSL/HEX for visual consistency).
+- **Primary**: Purple (`#8365F7`), **Secondary**: Blue (`#2B5ABA`).
+- HEX values are approximations for quick reference.

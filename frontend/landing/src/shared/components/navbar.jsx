@@ -62,7 +62,7 @@ export function Navbar() {
         {/* Logo */}
         <button
           onClick={() => scrollToSection("hero")}
-          className="text-2xl font-bold text-primary-600"
+          className="text-2xl font-bold text-secondary"
         >
           Play Attention
         </button>
@@ -82,8 +82,8 @@ export function Navbar() {
             onClick={() => scrollToSection("hero")}
             variant="link"
             className={cn(
-              "text-base font-medium text-primary-600",
-              activeSection === "hero" ? "text-primary/100" : "text-primary/85"
+              "text-base font-medium",
+              activeSection === "hero" ? "text-foreground/100" : "text-foreground/85"
             )}
           >
             Inicio
@@ -94,8 +94,8 @@ export function Navbar() {
             className={cn(
               "text-base font-medium text-primary-600",
               activeSection === "demo-videos"
-                ? "text-primary/100"
-                : "text-primary/85"
+                ? "text-foreground/100"
+                : "text-foreground/85"
             )}
           >
             Beneficios
@@ -105,8 +105,8 @@ export function Navbar() {
               className={cn(
                 "flex items-center gap-1 text-base font-medium",
                 activeSection === "audience-segmentation"
-                  ? "text-primary/100"
-                  : "text-primary/85"
+                  ? "text-foreground/100"
+                  : "text-foreground/85"
               )}
             >
               Soluciones <ChevronDown size={16} />
@@ -131,17 +131,17 @@ export function Navbar() {
           </DropdownMenu>
           <Button
             onClick={() => scrollToSection("contact")}
-            variant="link"
+            variant="link"            
             className={cn(
               "text-base font-medium",
               activeSection === "contact"
-                ? "text-primary/100"
-                : "text-primary/85"
+                ? "text-foreground/100"
+                : "text-foreground/85"
             )}
           >
             Contacto
           </Button>
-          <Button className="rounded-md">Acceder</Button>
+          <Button variant="secondary" className="rounded-md">Acceder</Button>
         </div>
 
         {/* Mobile Navigation */}
@@ -157,8 +157,8 @@ export function Navbar() {
               className={cn(
                 "text-left text-base font-medium",
                 activeSection === "hero"
-                  ? "text-primary/100"
-                  : "text-primary/85"
+                  ? "text-foreground/100"
+                  : "text-foreground/85"
               )}
             >
               Inicio
@@ -168,8 +168,8 @@ export function Navbar() {
               className={cn(
                 "text-left text-base font-medium",
                 activeSection === "demo-videos"
-                  ? "text-primary/100"
-                  : "text-primary/85"
+                  ? "text-foreground/100"
+                  : "text-foreground/85"
               )}
             >
               Beneficios
@@ -179,8 +179,8 @@ export function Navbar() {
                 className={cn(
                   "text-base font-medium",
                   activeSection === "audience-segmentation"
-                    ? "text-primary/100"
-                    : "text-primary/85"
+                    ? "text-foreground/100"
+                    : "text-foreground/85"
                 )}
               >
                 Soluciones
@@ -209,8 +209,8 @@ export function Navbar() {
               className={cn(
                 "text-left text-base font-medium",
                 activeSection === "contact"
-                  ? "text-primary/100"
-                  : "text-primary/85"
+                  ? "text-foreground/100"
+                  : "text-foreground/85"
               )}
             >
               Contacto
