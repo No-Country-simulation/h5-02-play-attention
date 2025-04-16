@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import LanguageSwitcher from '../../ui/langage-selector';
-import { Link } from '@/i18n/routing';
+import Link from 'next/link';
 import {
   LayoutDashboard,
   FileText,
@@ -20,23 +18,25 @@ import {
 
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
-  const t = useTranslations('sidebar');
-  const commonT = useTranslations('common');
 
   const menuItems = [
-    { name: t('dashboard'), icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Panel de control', icon: LayoutDashboard, path: '/dashboard' },
     {
-      name: t('educationalMaterial'),
+      name: 'Material Educativo',
       icon: FileText,
       path: '/educational-material'
     },
-    { name: t('tutorials'), icon: Video, path: '/tutorials' },
-    { name: t('medicalArticles'), icon: BookOpen, path: '/medical-articles' },
-    { name: t('demoVideos'), icon: Video, path: '/demo-videos' },
-    { name: t('marketingMaterial'), icon: Images, path: '/marketing-material' },
-    { name: t('activities'), icon: PenTool, path: '/activities' },
-    { name: t('support'), icon: MessageCircle, path: '/support' },
-    { name: t('settings'), icon: Settings, path: '/settings' }
+    { name: 'Tutoriales', icon: Video, path: '/tutorials' },
+    { name: 'Artículos Médicos', icon: BookOpen, path: '/medical-articles' },
+    { name: 'Videos de Demostración', icon: Video, path: '/demo-videos' },
+    {
+      name: 'Material de Marketing',
+      icon: Images,
+      path: '/marketing-material'
+    },
+    { name: 'Actividades', icon: PenTool, path: '/activities' },
+    { name: 'Soporte', icon: MessageCircle, path: '/support' },
+    { name: 'Configuración', icon: Settings, path: '/settings' }
   ];
 
   return (
@@ -49,9 +49,7 @@ export default function Sidebar() {
         {/* Logo and toggle */}
         <div className='flex items-center justify-between p-4 border-b border-gray-800'>
           {expanded && (
-            <h1 className='text-white text-xl font-bold'>
-              {commonT('appName')}
-            </h1>
+            <h1 className='text-white text-xl font-bold'>Play Attention</h1>
           )}
           <button
             onClick={() => setExpanded(!expanded)}
@@ -85,20 +83,6 @@ export default function Sidebar() {
             ))}
           </ul>
         </nav>
-
-        {/* Language switcher at bottom */}
-        <div className='p-4 border-t border-gray-800'>
-          {expanded ? (
-            <div className='flex justify-between items-center'>
-              <span className='text-gray-400 text-sm'>{t('language')}</span>
-              <LanguageSwitcher />
-            </div>
-          ) : (
-            <div className='flex justify-center'>
-              <LanguageSwitcher />
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

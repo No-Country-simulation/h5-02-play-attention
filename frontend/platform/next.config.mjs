@@ -1,7 +1,3 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin();
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Configuración mejorada para el manejo de páginas de error
@@ -13,4 +9,4 @@ const nextConfig = {
   }
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;

@@ -1,7 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -11,8 +10,6 @@ import {
 } from '@/shared/ui/card';
 
 export default function ResourceCard({ category }) {
-  const t = useTranslations('dashboard');
-  const commonT = useTranslations('common');
   const { title, description, icon: Icon, path, color } = category;
 
   return (
@@ -31,7 +28,7 @@ export default function ResourceCard({ category }) {
           href={path}
           className='inline-block mt-4 text-primary hover:underline'
         >
-          {commonT('explore')} →
+          Explorar →
         </Link>
       </CardContent>
     </Card>

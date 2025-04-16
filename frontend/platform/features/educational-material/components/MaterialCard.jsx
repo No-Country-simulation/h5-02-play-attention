@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { FileText, Download } from 'lucide-react';
 import {
   Card,
@@ -11,8 +10,6 @@ import {
 } from '@/shared/ui/card';
 
 export default function MaterialCard({ material }) {
-  const t = useTranslations('educationalMaterial');
-
   return (
     <Card key={material.id}>
       <CardHeader className='pb-3'>
@@ -36,7 +33,7 @@ export default function MaterialCard({ material }) {
             className='flex items-center text-blue-600 hover:text-blue-800'
           >
             <Download size={16} className='mr-1' />
-            {t('download')}
+            Descargar
           </a>
         </div>
       </CardContent>

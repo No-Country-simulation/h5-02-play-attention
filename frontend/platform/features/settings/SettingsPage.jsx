@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { User, Bell, Globe, ChevronDown, Save } from 'lucide-react';
+import { User, Bell, ChevronDown, Save } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -10,11 +9,8 @@ import {
   CardHeader,
   CardTitle
 } from '@/shared/ui/card';
-import LanguageSwitcher from '@/shared/ui/langage-selector';
 
 export default function SettingsPage() {
-  const t = useTranslations('settings');
-
   const [userData, setUserData] = useState({
     name: 'John Doe',
     email: 'john.doe@example.com',
@@ -49,13 +45,16 @@ export default function SettingsPage() {
   const handleSave = e => {
     e.preventDefault();
     // Save logic would go here (API call in production)
-    alert(t('settingsSaved'));
+    alert('Tu configuración se ha guardado correctamente');
   };
 
   return (
     <div className='p-8'>
-      <h1 className='text-3xl font-bold mb-6'>{t('title')}</h1>
-      <p className='text-gray-600 mb-8'>{t('description')}</p>
+      <h1 className='text-3xl font-bold mb-6'>Configuración</h1>
+      <p className='text-gray-600 mb-8'>
+        Administra la configuración de tu cuenta, preferencias de notificación y
+        opciones de idioma.
+      </p>
 
       <div className='flex flex-col md:flex-row gap-8'>
         {/* Settings Navigation */}
@@ -74,7 +73,7 @@ export default function SettingsPage() {
                       }`}
                     >
                       <User className='h-5 w-5 mr-3' />
-                      {t('profileSettings')}
+                      Perfil
                     </button>
                   </li>
                   <li>
@@ -87,20 +86,7 @@ export default function SettingsPage() {
                       }`}
                     >
                       <Bell className='h-5 w-5 mr-3' />
-                      {t('notificationSettings')}
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab('language')}
-                      className={`flex items-center w-full p-4 text-left ${
-                        activeTab === 'language'
-                          ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <Globe className='h-5 w-5 mr-3' />
-                      {t('languageSettings')}
+                      Notificaciones
                     </button>
                   </li>
                 </ul>
@@ -114,14 +100,14 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {activeTab === 'profile' && t('profileSettings')}
-                {activeTab === 'notifications' && t('notificationSettings')}
-                {activeTab === 'language' && t('languageSettings')}
+                {activeTab === 'profile' && 'Perfil'}
+                {activeTab === 'notifications' && 'Notificaciones'}
               </CardTitle>
               <CardDescription>
-                {activeTab === 'profile' && t('profileSettingsDesc')}
-                {activeTab === 'notifications' && t('notificationSettingsDesc')}
-                {activeTab === 'language' && t('languageSettingsDesc')}
+                {activeTab === 'profile' &&
+                  'Actualiza tu información personal y detalles de la cuenta'}
+                {activeTab === 'notifications' &&
+                  'Controla cómo y cuándo recibes notificaciones'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -130,7 +116,7 @@ export default function SettingsPage() {
                 <form onSubmit={handleSave} className='space-y-4'>
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>
-                      {t('name')}
+                      Nombre
                     </label>
                     <input
                       type='text'
@@ -143,7 +129,7 @@ export default function SettingsPage() {
 
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>
-                      {t('email')}
+                      Correo electrónico
                     </label>
                     <input
                       type='email'
@@ -156,7 +142,7 @@ export default function SettingsPage() {
 
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-1'>
-                      {t('role')}
+                      Tipo de cuenta
                     </label>
                     <div className='relative'>
                       <select
@@ -165,11 +151,9 @@ export default function SettingsPage() {
                         onChange={handleInputChange}
                         className='w-full p-2 border rounded-md appearance-none pr-10'
                       >
-                        <option value='Client'>{t('client')}</option>
-                        <option value='Professional'>
-                          {t('professional')}
-                        </option>
-                        <option value='Company'>{t('company')}</option>
+                        <option value='Client'>Cliente</option>
+                        <option value='Professional'>Profesional</option>
+                        <option value='Company'>Empresa</option>
                       </select>
                       <ChevronDown className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
                     </div>
@@ -180,7 +164,7 @@ export default function SettingsPage() {
                     className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
                   >
                     <Save className='h-4 w-4 mr-2' />
-                    {t('saveChanges')}
+                    Guardar cambios
                   </button>
                 </form>
               )}
@@ -213,11 +197,12 @@ export default function SettingsPage() {
                         />
                       </div>
                       <span className='ml-3 text-gray-700'>
-                        {t('emailNotifications')}
+                        Notificaciones por correo
                       </span>
                     </label>
                     <p className='text-sm text-gray-500 mt-1 ml-14'>
-                      {t('emailNotificationsDesc')}
+                      Recibe actualizaciones importantes e información por
+                      correo electrónico
                     </p>
                   </div>
 
@@ -246,11 +231,12 @@ export default function SettingsPage() {
                         />
                       </div>
                       <span className='ml-3 text-gray-700'>
-                        {t('pushNotifications')}
+                        Notificaciones push
                       </span>
                     </label>
                     <p className='text-sm text-gray-500 mt-1 ml-14'>
-                      {t('pushNotificationsDesc')}
+                      Recibe alertas en tiempo real en tu navegador o
+                      dispositivo móvil
                     </p>
                   </div>
 
@@ -279,81 +265,21 @@ export default function SettingsPage() {
                         />
                       </div>
                       <span className='ml-3 text-gray-700'>
-                        {t('smsNotifications')}
+                        Notificaciones SMS
                       </span>
                     </label>
                     <p className='text-sm text-gray-500 mt-1 ml-14'>
-                      {t('smsNotificationsDesc')}
+                      Recibe mensajes de texto para actualizaciones críticas
                     </p>
                   </div>
 
                   <button
                     onClick={handleSave}
-                    className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
+                    className='mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
                   >
                     <Save className='h-4 w-4 mr-2' />
-                    {t('saveChanges')}
+                    Guardar cambios
                   </button>
-                </div>
-              )}
-
-              {/* Language Settings */}
-              {activeTab === 'language' && (
-                <div className='space-y-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      {t('selectLanguage')}
-                    </label>
-                    <div className='w-full max-w-xs'>
-                      <LanguageSwitcher />
-                    </div>
-                    <p className='text-sm text-gray-500 mt-2'>
-                      {t('languageChangeInfo')}
-                    </p>
-                  </div>
-
-                  <div className='mt-6'>
-                    <h3 className='text-md font-medium text-gray-800 mb-2'>
-                      {t('subtitleLanguageTitle')}
-                    </h3>
-                    <p className='text-sm text-gray-600 mb-3'>
-                      {t('subtitleLanguageDesc')}
-                    </p>
-
-                    <div className='space-y-2'>
-                      <label className='flex items-center'>
-                        <input
-                          type='radio'
-                          name='subtitles'
-                          className='h-4 w-4 text-blue-600'
-                          defaultChecked
-                        />
-                        <span className='ml-2 text-gray-700'>
-                          {t('useSelectedLanguage')}
-                        </span>
-                      </label>
-                      <label className='flex items-center'>
-                        <input
-                          type='radio'
-                          name='subtitles'
-                          className='h-4 w-4 text-blue-600'
-                        />
-                        <span className='ml-2 text-gray-700'>
-                          {t('alwaysShowSubtitles')}
-                        </span>
-                      </label>
-                      <label className='flex items-center'>
-                        <input
-                          type='radio'
-                          name='subtitles'
-                          className='h-4 w-4 text-blue-600'
-                        />
-                        <span className='ml-2 text-gray-700'>
-                          {t('neverShowSubtitles')}
-                        </span>
-                      </label>
-                    </div>
-                  </div>
                 </div>
               )}
             </CardContent>

@@ -17,12 +17,12 @@ export const ErrorBackgroundGrid = () => {
 
   return (
     <div className='absolute inset-0 z-0 overflow-hidden pointer-events-none'>
-      <div className='absolute inset-0 bg-[#121217] opacity-60' />
-      <div className='absolute inset-0 bg-grid-pattern [mask-image:radial-gradient(ellipse_at_center,transparent_20%,#000_70%)]' />
+      {/* Fondo con grid */}
+      <div className='absolute inset-0 bg-[#0a1128] bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:50px_50px] opacity-30'></div>
 
-      {/* Decorative glowing circles with blur effect */}
-      <div className='absolute top-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-[#00ff99] opacity-10 blur-[100px]' />
-      <div className='absolute bottom-[10%] right-[5%] w-[250px] h-[250px] rounded-full bg-[#00e187] opacity-10 blur-[100px]' />
+      {/* Efectos de brillo */}
+      <div className='absolute w-[300px] h-[300px] rounded-full bg-[#1282a2] opacity-10 blur-[100px] top-[20%] left-[10%]'></div>
+      <div className='absolute w-[300px] h-[300px] rounded-full bg-[#034078] opacity-10 blur-[100px] bottom-[10%] right-[5%]'></div>
     </div>
   );
 };

@@ -1,33 +1,34 @@
 'use client';
 
 import { ArrowLeft, Home } from 'lucide-react';
-import { Link } from '@/i18n/routing';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { Button } from '@/shared/ui/button';
 
 /**
  * Componente para mostrar acciones disponibles en páginas de error
  * Sigue el principio de Segregación de Interfaces (ISP) de SOLID
  */
 export const ErrorActions = () => {
-  const t = useTranslations('common');
-
   return (
     <div className='flex flex-col sm:flex-row justify-center gap-4'>
-      <button
+      <Button
         onClick={() => window.history.back()}
-        className='inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-[#2a2a32] hover:bg-[#3a3a42] focus:ring-4 focus:ring-[#00ff9940] transition-all'
+        variant='secondary'
+        className='w-full sm:w-auto bg-[#001f54] hover:bg-[#034078] text-white'
       >
-        <ArrowLeft className='w-5 h-5 mr-2' />
-        {t('goBack')}
-      </button>
+        <ArrowLeft className='w-5 h-5' />
+        Volver
+      </Button>
 
-      <Link
-        href='/'
-        className='inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-[#1c1c22] rounded-lg bg-[#00ff99] hover:bg-[#00e187] focus:ring-4 focus:ring-[#00ff9940] transition-all'
+      <Button
+        asChild
+        className='w-full sm:w-auto bg-[#1282a2] hover:bg-[#0a7e9e] text-white'
       >
-        <Home className='w-5 h-5 mr-2' />
-        {t('backToHome')}
-      </Link>
+        <Link href='/'>
+          <Home className='w-5 h-5' />
+          Volver al inicio
+        </Link>
+      </Button>
     </div>
   );
 };

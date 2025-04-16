@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import {
   MessageSquare,
   Ticket,
@@ -21,7 +20,6 @@ import {
 } from '@/shared/ui/card';
 
 export default function SupportPage() {
-  const t = useTranslations('support');
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -58,16 +56,21 @@ export default function SupportPage() {
 
   return (
     <div className='p-8'>
-      <h1 className='text-3xl font-bold mb-6'>{t('title')}</h1>
-      <p className='text-gray-600 mb-8'>{t('description')}</p>
+      <h1 className='text-3xl font-bold mb-6'>Centro de Soporte</h1>
+      <p className='text-gray-600 mb-8'>
+        Obtén ayuda y asistencia con Play Attention. Elige entre las opciones a
+        continuación para contactar a nuestro equipo.
+      </p>
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
         {/* Support Options */}
         <div className='md:col-span-1'>
           <Card>
             <CardHeader>
-              <CardTitle>{t('supportOptions')}</CardTitle>
-              <CardDescription>{t('chooseOption')}</CardDescription>
+              <CardTitle>Opciones de Soporte</CardTitle>
+              <CardDescription>
+                Selecciona cómo te gustaría obtener ayuda
+              </CardDescription>
             </CardHeader>
             <CardContent className='p-0'>
               <nav>
@@ -83,7 +86,7 @@ export default function SupportPage() {
                     >
                       <div className='flex items-center'>
                         <Mail className='h-5 w-5 mr-3' />
-                        <span>{t('contactForm')}</span>
+                        <span>Formulario de Contacto</span>
                       </div>
                       <ChevronRight className='h-4 w-4' />
                     </button>
@@ -99,7 +102,7 @@ export default function SupportPage() {
                     >
                       <div className='flex items-center'>
                         <MessageSquare className='h-5 w-5 mr-3' />
-                        <span>{t('liveChat')}</span>
+                        <span>Chat en Vivo</span>
                       </div>
                       <ChevronRight className='h-4 w-4' />
                     </button>
@@ -115,7 +118,7 @@ export default function SupportPage() {
                     >
                       <div className='flex items-center'>
                         <Ticket className='h-5 w-5 mr-3' />
-                        <span>{t('supportTicket')}</span>
+                        <span>Ticket de Soporte</span>
                       </div>
                       <ChevronRight className='h-4 w-4' />
                     </button>
@@ -131,7 +134,7 @@ export default function SupportPage() {
                     >
                       <div className='flex items-center'>
                         <HelpCircle className='h-5 w-5 mr-3' />
-                        <span>{t('faq')}</span>
+                        <span>Preguntas Frecuentes</span>
                       </div>
                       <ChevronRight className='h-4 w-4' />
                     </button>
@@ -144,33 +147,33 @@ export default function SupportPage() {
           <div className='mt-8'>
             <Card>
               <CardHeader>
-                <CardTitle>{t('directContact')}</CardTitle>
+                <CardTitle>Contacto Directo</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='space-y-4'>
                   <div className='flex items-center'>
                     <Phone className='h-5 w-5 mr-3 text-blue-600' />
                     <div>
-                      <p className='font-medium'>{t('phone')}</p>
+                      <p className='font-medium'>Teléfono</p>
                       <p className='text-sm text-gray-500'>+1 (800) 123-4567</p>
                     </div>
                   </div>
                   <div className='flex items-center'>
                     <Mail className='h-5 w-5 mr-3 text-blue-600' />
                     <div>
-                      <p className='font-medium'>{t('email')}</p>
+                      <p className='font-medium'>Correo electrónico</p>
                       <p className='text-sm text-gray-500'>
                         support@playattention.com
                       </p>
                     </div>
                   </div>
                   <div>
-                    <p className='font-medium mb-1'>{t('businessHours')}</p>
+                    <p className='font-medium mb-1'>Horario de Atención</p>
                     <p className='text-sm text-gray-500'>
-                      {t('mondayToFriday')}: 9:00 AM - 5:00 PM EST
+                      Lunes a Viernes: 9:00 AM - 5:00 PM EST
                     </p>
                     <p className='text-sm text-gray-500'>
-                      {t('weekends')}: {t('closed')}
+                      Fines de semana: Cerrado
                     </p>
                   </div>
                 </div>
@@ -185,8 +188,11 @@ export default function SupportPage() {
             {activeTab === 'contact' && (
               <>
                 <CardHeader>
-                  <CardTitle>{t('contactUs')}</CardTitle>
-                  <CardDescription>{t('fillForm')}</CardDescription>
+                  <CardTitle>Contáctanos</CardTitle>
+                  <CardDescription>
+                    Completa el formulario a continuación y te responderemos lo
+                    antes posible
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {submitted ? (
@@ -205,14 +211,17 @@ export default function SupportPage() {
                           />
                         </svg>
                       </div>
-                      <p>{t('messageSent')}</p>
+                      <p>
+                        Tu mensaje ha sido enviado correctamente. Responderemos
+                        lo antes posible.
+                      </p>
                     </div>
                   ) : (
                     <form onSubmit={handleSubmit} className='space-y-4'>
                       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         <div>
                           <label className='block text-sm font-medium text-gray-700 mb-1'>
-                            {t('name')} *
+                            Nombre *
                           </label>
                           <input
                             type='text'
@@ -225,7 +234,7 @@ export default function SupportPage() {
                         </div>
                         <div>
                           <label className='block text-sm font-medium text-gray-700 mb-1'>
-                            {t('email')} *
+                            Correo electrónico *
                           </label>
                           <input
                             type='email'
@@ -240,7 +249,7 @@ export default function SupportPage() {
 
                       <div>
                         <label className='block text-sm font-medium text-gray-700 mb-1'>
-                          {t('subject')} *
+                          Asunto *
                         </label>
                         <input
                           type='text'
@@ -254,16 +263,16 @@ export default function SupportPage() {
 
                       <div>
                         <label className='block text-sm font-medium text-gray-700 mb-1'>
-                          {t('message')} *
+                          Mensaje *
                         </label>
                         <textarea
                           name='message'
                           required
-                          rows='6'
                           value={contactForm.message}
                           onChange={handleInputChange}
-                          className='w-full p-2 border rounded-md resize-none'
-                        />
+                          rows={4}
+                          className='w-full p-2 border rounded-md'
+                        ></textarea>
                       </div>
 
                       <button
@@ -271,7 +280,7 @@ export default function SupportPage() {
                         className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
                       >
                         <Send className='h-4 w-4 mr-2' />
-                        {t('send')}
+                        Enviar Mensaje
                       </button>
                     </form>
                   )}
@@ -282,21 +291,24 @@ export default function SupportPage() {
             {activeTab === 'chat' && (
               <>
                 <CardHeader>
-                  <CardTitle>{t('liveChat')}</CardTitle>
-                  <CardDescription>{t('chatDescription')}</CardDescription>
+                  <CardTitle>Chat en Vivo</CardTitle>
+                  <CardDescription>
+                    Habla con nuestros agentes de soporte en tiempo real
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className='bg-gray-50 p-8 rounded-md text-center'>
-                    <MessageSquare className='h-12 w-12 mx-auto text-blue-600 mb-4' />
+                  <div className='text-center py-10 px-4'>
+                    <MessageSquare className='h-16 w-16 mx-auto text-blue-600 mb-4' />
                     <h3 className='text-lg font-medium mb-2'>
-                      {t('startChat')}
+                      Iniciar un Chat en Vivo
                     </h3>
                     <p className='text-gray-500 mb-6'>
-                      {t('agentAvailability')}
+                      Nuestros agentes de soporte están disponibles de lunes a
+                      viernes, de 9:00 AM a 5:00 PM EST
                     </p>
-                    <button className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center mx-auto'>
-                      <MessageSquare className='h-4 w-4 mr-2' />
-                      {t('startChatButton')}
+                    <button className='px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 inline-flex items-center'>
+                      <MessageSquare className='h-5 w-5 mr-2' />
+                      Iniciar Chat Ahora
                     </button>
                   </div>
                 </CardContent>
@@ -306,19 +318,25 @@ export default function SupportPage() {
             {activeTab === 'ticket' && (
               <>
                 <CardHeader>
-                  <CardTitle>{t('createTicket')}</CardTitle>
-                  <CardDescription>{t('ticketDescription')}</CardDescription>
+                  <CardTitle>Crear un Ticket de Soporte</CardTitle>
+                  <CardDescription>
+                    Envía un ticket para problemas que requieren investigación
+                    detallada
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className='bg-gray-50 p-8 rounded-md text-center'>
-                    <Ticket className='h-12 w-12 mx-auto text-blue-600 mb-4' />
+                  <div className='text-center py-10 px-4'>
+                    <Ticket className='h-16 w-16 mx-auto text-blue-600 mb-4' />
                     <h3 className='text-lg font-medium mb-2'>
-                      {t('supportTicketSystem')}
+                      Sistema de Tickets de Soporte
                     </h3>
-                    <p className='text-gray-500 mb-6'>{t('ticketHelp')}</p>
-                    <button className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center mx-auto'>
-                      <ArrowRight className='h-4 w-4 mr-2' />
-                      {t('createNewTicket')}
+                    <p className='text-gray-500 mb-6'>
+                      Crea un nuevo ticket y nuestros especialistas revisarán tu
+                      problema
+                    </p>
+                    <button className='px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 inline-flex items-center'>
+                      <ArrowRight className='h-5 w-5 mr-2' />
+                      Crear Nuevo Ticket
                     </button>
                   </div>
                 </CardContent>
@@ -328,40 +346,76 @@ export default function SupportPage() {
             {activeTab === 'faq' && (
               <>
                 <CardHeader>
-                  <CardTitle>{t('faq')}</CardTitle>
-                  <CardDescription>{t('faqDescription')}</CardDescription>
+                  <CardTitle>Preguntas Frecuentes</CardTitle>
+                  <CardDescription>
+                    Encuentra respuestas a preguntas comunes sobre Play
+                    Attention
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-6'>
                     <div>
-                      <h3 className='font-medium text-lg mb-2'>
-                        {t('faqQuestion1')}
+                      <h3 className='text-lg font-medium mb-2'>
+                        ¿Qué es Play Attention y cómo funciona?
                       </h3>
-                      <p className='text-gray-600'>{t('faqAnswer1')}</p>
+                      <p className='text-gray-600'>
+                        Play Attention es un programa de entrenamiento cognitivo
+                        que utiliza tecnología inspirada en la NASA para ayudar
+                        a mejorar el enfoque, la atención y la función
+                        ejecutiva. Funciona proporcionando retroalimentación en
+                        tiempo real durante ejercicios interactivos, entrenando
+                        tu cerebro para mantener la atención.
+                      </p>
                     </div>
                     <div>
-                      <h3 className='font-medium text-lg mb-2'>
-                        {t('faqQuestion2')}
+                      <h3 className='text-lg font-medium mb-2'>
+                        ¿Cuánto tiempo toma ver resultados?
                       </h3>
-                      <p className='text-gray-600'>{t('faqAnswer2')}</p>
+                      <p className='text-gray-600'>
+                        La mayoría de los usuarios comienzan a notar mejoras
+                        después de 8-10 sesiones. Se recomienda una práctica
+                        constante (2-3 sesiones por semana) para obtener
+                        resultados óptimos. Cambios más significativos
+                        típicamente se observan después de 3-6 meses de uso
+                        regular.
+                      </p>
                     </div>
                     <div>
-                      <h3 className='font-medium text-lg mb-2'>
-                        {t('faqQuestion3')}
+                      <h3 className='text-lg font-medium mb-2'>
+                        ¿Es Play Attention adecuado para todas las edades?
                       </h3>
-                      <p className='text-gray-600'>{t('faqAnswer3')}</p>
+                      <p className='text-gray-600'>
+                        Sí, Play Attention puede ser beneficioso para niños
+                        (7+), adolescentes y adultos. El programa se ajusta al
+                        nivel de habilidad de cada usuario y proporciona
+                        desafíos apropiados para cada edad.
+                      </p>
                     </div>
                     <div>
-                      <h3 className='font-medium text-lg mb-2'>
-                        {t('faqQuestion4')}
+                      <h3 className='text-lg font-medium mb-2'>
+                        ¿Necesito algún equipo especial para usar Play
+                        Attention?
                       </h3>
-                      <p className='text-gray-600'>{t('faqAnswer4')}</p>
+                      <p className='text-gray-600'>
+                        El requisito básico es una computadora con acceso a
+                        internet. La tecnología BrainAware™ funciona con nuestro
+                        hardware especializado que está incluido con tu compra.
+                      </p>
                     </div>
                     <div>
-                      <h3 className='font-medium text-lg mb-2'>
-                        {t('faqQuestion5')}
+                      <h3 className='text-lg font-medium mb-2'>
+                        ¿Puede Play Attention reemplazar la medicación para el
+                        TDAH?
                       </h3>
-                      <p className='text-gray-600'>{t('faqAnswer5')}</p>
+                      <p className='text-gray-600'>
+                        Play Attention no está destinado a reemplazar la
+                        medicación, pero puede usarse como un enfoque
+                        complementario. Muchos usuarios reportan mejores
+                        resultados cuando combinan Play Attention con su
+                        tratamiento médico. Siempre consulta con un profesional
+                        de la salud con respecto a las decisiones de
+                        tratamiento.
+                      </p>
                     </div>
                   </div>
                 </CardContent>

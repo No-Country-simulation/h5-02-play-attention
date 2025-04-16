@@ -1,10 +1,40 @@
-import '../app/[locale]/globals.css';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import Sidebar from '@/shared/layout/sidebar/sidebar';
+import { QueryProvider } from '@/shared/providers';
 
-/**
- * Layout global que solo importa los estilos CSS
- * Permite que la página not-found.js tenga acceso a los estilos de Tailwind
- * sin interferir con el RootLayout principal en [locale]/layout.js
- */
-export default function GlobalStylesLayout({ children }) {
-  return children;
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin']
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin']
+});
+
+export const metadata = {
+  title: 'Play Attention',
+  description:
+    'Cognitive training platform for improving attention and executive functions'
+};
+
+// Define pages that don't require authentication
+const publicPages = ['/login', '/register', '/forgot-password'];
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang='es'>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <QueryProvider>
+          <div className='flex h-screen'>
+            <Sidebar />
+            <main className='flex-1 overflow-auto'>{children}</main>
+          </div>
+        </QueryProvider>
+      </body>
+    </html>
+  );
 }
