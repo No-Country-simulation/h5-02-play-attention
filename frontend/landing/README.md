@@ -62,45 +62,42 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Color Pallete
 
-# Color Palette Documentation (OKLCH)
+### 🎨 Design Tokens - Custom Theme
 
-This document visualizes the CSS variables defined in your `:root` using OKLCH color space.
+This document describes the color and radius tokens used in your Tailwind + ShadCN-based theme. All colors are defined using OKLCH values and exposed as CSS variables.
 
-## Core Colors
+#### 🌈 Colors
 
-| Variable        | Color Preview                                                                                     | OKLCH Value                 | Approx. HEX |
-| --------------- | ------------------------------------------------------------------------------------------------- | --------------------------- | ----------- |
-| `--background`  | <div style="background-color: #FFFFFF; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(1 0 0)`              | `#FFFFFF`   |
-| `--foreground`  | <div style="background-color: #252525; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.145 0 0)`          | `#252525`   |
-| `--primary`     | <div style="background-color: #8365F7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.65 0.22 290.5)`    | `#8365F7`   |
-| `--secondary`   | <div style="background-color: #2B5ABA; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.48 0.19 264.5)`    | `#2B5ABA`   |
-| `--destructive` | <div style="background-color: #E74C3C; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.577 0.245 27.325)` | `#E74C3C`   |
+| Token                    | Sample                                                                                                               | OKLCH Value                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `--background`           | <span style="background:oklch(1 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>              | `oklch(1 0 0)`              |
+| `--foreground`           | <span style="background:oklch(0.145 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.145 0 0)`          |
+| `--primary`              | <span style="background:oklch(0.45 0.22 290);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>      | `oklch(0.65 0.22 290.5)`    |
+| `--primary-foreground`   | <span style="background:oklch(0.985 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.985 0 0)`          |
+| `--secondary`            | <span style="background:oklch(0.48 0.19 264.5);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>    | `oklch(0.48 0.19 264.5)`    |
+| `--secondary-foreground` | <span style="background:oklch(0.985 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.985 0 0)`          |
+| `--destructive`          | <span style="background:oklch(0.577 0.245 27.325);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.577 0.245 27.325)` |
+| `--border`               | <span style="background:oklch(0.922 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.922 0 0)`          |
+| `--accent`               | <span style="background:oklch(0.97 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>           | `oklch(0.97 0 0)`           |
+| `--accent-foreground`    | <span style="background:oklch(0.205 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.205 0 0)`          |
+| `--muted`                | <span style="background:oklch(0.97 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>           | `oklch(0.97 0 0)`           |
+| `--muted-foreground`     | <span style="background:oklch(0.556 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.556 0 0)`          |
+| `--ring`                 | <span style="background:oklch(0.708 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.708 0 0)`          |
+| `--input`                | <span style="background:oklch(0.922 0 0);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>          | `oklch(0.922 0 0)`          |
 
-## UI States
+---
 
-| Variable             | Color Preview                                                                                     | OKLCH Value        |
-| -------------------- | ------------------------------------------------------------------------------------------------- | ------------------ |
-| `--muted`            | <div style="background-color: #F7F7F7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.97 0 0)`  |
-| `--muted-foreground` | <div style="background-color: #8E8E8E; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.556 0 0)` |
-| `--border`           | <div style="background-color: #EBEBEB; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.922 0 0)` |
+## 🌈 Primary Color Shades
 
-## Chart Colors
-
-| Variable    | Color Preview                                                                                     | OKLCH Value                 |
-| ----------- | ------------------------------------------------------------------------------------------------- | --------------------------- |
-| `--chart-1` | <div style="background-color: #A78BFA; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.646 0.222 41.116)` |
-| `--chart-2` | <div style="background-color: #60A5FA; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.6 0.118 184.704)`  |
-| `--chart-3` | <div style="background-color: #5B7CF7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.398 0.07 227.392)` |
-
-## Sidebar Colors
-
-| Variable            | Color Preview                                                                                     | OKLCH Value              |
-| ------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ |
-| `--sidebar`         | <div style="background-color: #FFFFFF; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.985 0 0)`       |
-| `--sidebar-primary` | <div style="background-color: #8365F7; width: 50px; height: 20px; border: 1px solid #ddd;"></div> | `oklch(0.65 0.22 290.5)` |
-
-## Key Notes
-
-- **OKLCH** is a perceptually uniform color space (better than HSL/HEX for visual consistency).
-- **Primary**: Purple (`#8365F7`), **Secondary**: Blue (`#2B5ABA`).
-- HEX values are approximations for quick reference.
+| Token           | Sample                                                                                                          | OKLCH Value            |
+| --------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `--primary-50`  | <span style="background:oklch(0.93 0.04 296);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.93 0.04 296)` |
+| `--primary-100` | <span style="background:oklch(0.82 0.08 292);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.82 0.08 292)` |
+| `--primary-200` | <span style="background:oklch(0.74 0.12 290);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.74 0.12 290)` |
+| `--primary-300` | <span style="background:oklch(0.65 0.16 288);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.65 0.16 288)` |
+| `--primary-400` | <span style="background:oklch(0.58 0.19 286);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.58 0.19 286)` |
+| `--primary-500` | <span style="background:oklch(0.45 0.22 290);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.45 0.22 290)` |
+| `--primary-600` | <span style="background:oklch(0.42 0.21 291);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.42 0.21 291)` |
+| `--primary-700` | <span style="background:oklch(0.36 0.2 292);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>  | `oklch(0.36 0.2 292)`  |
+| `--primary-800` | <span style="background:oklch(0.3 0.18 293);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span>  | `oklch(0.3 0.18 293)`  |
+| `--primary-900` | <span style="background:oklch(0.25 0.16 294);padding:0.5em 1em;border-radius:4px;display:inline-block;"></span> | `oklch(0.25 0.16 294)` |
