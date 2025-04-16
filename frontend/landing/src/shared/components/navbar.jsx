@@ -57,14 +57,14 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-200 bg-sidebar py-3 px-4 md:px-6">
+    <nav className="sticky top-0 z-50 w-full bg-sidebar py-3 px-4 lg:px-20 border border-secondary shadow-[0_4px_8px_-2px_theme('colors.primary.DEFAULT')]">
       <div className="flex items-center justify-between">
         {/* Logo */}
         <button
           onClick={() => scrollToSection("hero")}
           className="text-2xl font-bold text-secondary"
         >
-          Play Attention
+          <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
         </button>
 
         {/* Mobile menu button */}
@@ -77,13 +77,15 @@ export function Navbar() {
         </button>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
           <Button
             onClick={() => scrollToSection("hero")}
             variant="link"
             className={cn(
               "text-base font-medium",
-              activeSection === "hero" ? "text-foreground/100" : "text-foreground/85"
+              activeSection === "hero"
+                ? "text-foreground/100"
+                : "text-foreground/85"
             )}
           >
             Inicio
@@ -98,7 +100,7 @@ export function Navbar() {
                 : "text-foreground/85"
             )}
           >
-            Beneficios
+            Beneficio
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -131,7 +133,7 @@ export function Navbar() {
           </DropdownMenu>
           <Button
             onClick={() => scrollToSection("contact")}
-            variant="link"            
+            variant="link"
             className={cn(
               "text-base font-medium",
               activeSection === "contact"
@@ -141,7 +143,7 @@ export function Navbar() {
           >
             Contacto
           </Button>
-          <Button variant="secondary" className="rounded-md">Acceder</Button>
+          <Button className="rounded-md">Acceder</Button>
         </div>
 
         {/* Mobile Navigation */}

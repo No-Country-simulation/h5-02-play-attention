@@ -12,8 +12,8 @@ export function Footer() {
   };
 
   return (
-    <footer className="w-full border-t border-gray-200 bg-black text-white py-10 px-4 md:px-20">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="w-full border-t border-gray-200 bg-black text-white py-10 px-4 lg:px-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Columna 1: Logo + descripción + redes */}
         <div className="flex flex-col gap-4">
           <h2 className="text-2xl font-bold text-white">Play Attention</h2>
