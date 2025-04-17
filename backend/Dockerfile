@@ -18,5 +18,7 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/dist ./dist
 
+ENV MONGODB_URI=mongodb+srv://juanmapimientae:playattentionh502@cluster0.yzjmu4m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
