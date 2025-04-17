@@ -19,12 +19,12 @@ export const getMailConfig: (...args: any[]) => Promise<MailerOptions> = async (
   defaults: {
     from: `"No Reply" <${configService.get('MAIL_FROM_ADDRESS')}>`,
   },
-  preview: {
-    open: {
-      app: 'chrome',
-      wait: false,
-    },
-  },
+  // preview: {
+  //   open: {
+  //     app: 'firefox',
+  //     wait: false,
+  //   },
+  // },
   template: {
     dir: join(__dirname, 'templates'),
     adapter: new HandlebarsAdapter(),

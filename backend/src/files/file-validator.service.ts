@@ -8,7 +8,6 @@ export class FileValidatorService {
 
   checkFileExists(filePath: string, fileName: string, extension = 'hbs'): void {
     const fullPath = join(filePath, `${fileName}.${extension}`);
-    this.logger.debug(`Checking file: ${fullPath}`);
 
     if (!existsSync(fullPath)) {
       this.logger.error(`File not found: ${fullPath}`);

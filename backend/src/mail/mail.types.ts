@@ -4,7 +4,7 @@ type PasswordUpdatedVars = { name: string };
 type ResetPasswordVars = { name: string; url: string };
 type ExampleVars = { name: string; url: string };
 
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 enum EmailTemplatesEnum {
   CONFIRM_EMAIL = 'CONFIRM_EMAIL',
   EMAIL_UPDATED = 'EMAIL_UPDATED',
@@ -20,7 +20,9 @@ type TemplateData<T> = {
 };
 
 export type EmailTemplateMap = {
-  [K in keyof TemplateContextVariables]: TemplateData<TemplateContextVariables[K]>;
+  [K in keyof TemplateContextVariables]: TemplateData<
+    TemplateContextVariables[K]
+  >;
 };
 
 export type TemplateContextVariables = {

@@ -27,7 +27,11 @@ export class MailService {
   ) {
     const { templateName, defaultSubject } =
       EmailTemplatesDefault[emailTemplate];
-    this.fileValidator.checkFileExists(join(__dirname, '/templates'),templateName, 'hbs');
+    this.fileValidator.checkFileExists(
+      join(__dirname, '/templates'),
+      templateName,
+      'hbs',
+    );
     try {
       await this.mailerService.sendMail({
         to: emailAddress,
@@ -48,7 +52,6 @@ export class MailService {
         'Failed to send email due to a server issue',
       );
     } else {
-      console.log(error)
       this.emailLogger.error('Non-technical error', error.stack);
       throw new BadRequestException('Invalid email or request data');
     }
