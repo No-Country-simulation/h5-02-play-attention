@@ -1,14 +1,14 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { MailService } from './mail.service';
 
-@Controller('mail') // Ruta base: /mail
+@Controller('mail')
 export class MailController {
-  constructor(private readonly mailService: MailService) {}
+  constructor(private readonly mailService: MailService) { }
 
   @Post('test')
   async sendTestEmail(@Body() body: { email: string }) {
     try {
-      await this.mailService.sendEmail('CONFIRM_EMAIL', body.email, {
+      await this.mailService.sendTemplateEmail('CONFIRM_EMAIL', body.email, {
         name: '',
         url: 'asasd',
       });

@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
 import { MailController } from './mail.controller';
 import { getMailConfig } from './mail.config';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   providers: [MailService],
@@ -13,6 +14,7 @@ import { getMailConfig } from './mail.config';
       useFactory: getMailConfig,
       inject: [ConfigService],
     }),
+    FilesModule
   ],
   exports: [MailService],
 })

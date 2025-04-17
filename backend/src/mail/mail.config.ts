@@ -21,7 +21,7 @@ export const getMailConfig: (...args: any[]) => Promise<MailerOptions> = async (
   },
   preview: {
     open: {
-      app: 'firefox',
+      app: 'chrome',
       wait: false,
     },
   },

@@ -2,24 +2,25 @@ type ConfirmEmailVars = { name: string; url: string };
 type EmailUpdatedVars = { name: string };
 type PasswordUpdatedVars = { name: string };
 type ResetPasswordVars = { name: string; url: string };
+type ExampleVars = { name: string; url: string };
 
-export type EmailTemplatesT =
-  | 'CONFIRM_EMAIL'
-  | 'EMAIL_UPDATED'
-  | 'PASSWORD_UPDATED'
-  | 'RESET_PASSWORD';
+
+enum EmailTemplatesEnum {
+  CONFIRM_EMAIL = 'CONFIRM_EMAIL',
+  EMAIL_UPDATED = 'EMAIL_UPDATED',
+  PASSWORD_UPDATED = 'PASSWORD_UPDATED',
+  RESET_PASSWORD = 'RESET_PASSWORD',
+  EXAMPLE_TEMPLATE = 'EXAMPLE_TEMPLATE',
+}
 
 type TemplateData<T> = {
-  relativePath: string;
+  templateName: string;
   defaultSubject: string;
-  vars: (keyof T)[];
+  vars: (keyof T)[] & Required<(keyof T)[]>;
 };
 
 export type EmailTemplateMap = {
-  CONFIRM_EMAIL: TemplateData<ConfirmEmailVars>;
-  EMAIL_UPDATED: TemplateData<EmailUpdatedVars>;
-  PASSWORD_UPDATED: TemplateData<PasswordUpdatedVars>;
-  RESET_PASSWORD: TemplateData<ResetPasswordVars>;
+  [K in keyof TemplateContextVariables]: TemplateData<TemplateContextVariables[K]>;
 };
 
 export type TemplateContextVariables = {
@@ -27,4 +28,7 @@ export type TemplateContextVariables = {
   EMAIL_UPDATED: EmailUpdatedVars;
   PASSWORD_UPDATED: PasswordUpdatedVars;
   RESET_PASSWORD: ResetPasswordVars;
+  EXAMPLE_TEMPLATE: ExampleVars;
 };
+
+export type EmailTemplates = keyof typeof EmailTemplatesEnum;
