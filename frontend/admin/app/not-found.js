@@ -43,7 +43,7 @@ export default function NotFound() {
                 Volver
               </button>
               <a
-                href='/es'
+                href='/'
                 className='py-3 px-6 rounded-lg font-medium bg-[#00ff99] text-[#121217] hover:bg-[#00e187] transition-colors'
               >
                 Volver al inicio

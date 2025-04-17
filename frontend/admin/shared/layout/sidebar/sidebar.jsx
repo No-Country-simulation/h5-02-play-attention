@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import LanguageSwitcher from '../../ui/langage-selector';
-import { Link } from '@/i18n/routing';
+import Link from 'next/link';
 import {
   LayoutDashboard,
   Users,
@@ -15,13 +13,12 @@ import {
 
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
-  const t = useTranslations('sidebar');
 
   const menuItems = [
-    { name: t('dashboard'), icon: LayoutDashboard, path: '/' },
-    { name: t('users'), icon: Users, path: '/users' },
-    { name: t('products'), icon: ShoppingBag, path: '/products' },
-    { name: t('settings'), icon: Settings, path: '/settings' }
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { name: 'Usuarios', icon: Users, path: '/users' },
+    { name: 'Productos', icon: ShoppingBag, path: '/products' },
+    { name: 'Configuración', icon: Settings, path: '/settings' }
   ];
 
   return (
@@ -69,18 +66,11 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        {/* Language switcher at bottom */}
+        {/* Footer */}
         <div className='p-4 border-t border-gray-800'>
-          {expanded ? (
-            <div className='flex justify-between items-center'>
-              <span className='text-gray-400 text-sm'>Language</span>
-              <LanguageSwitcher />
-            </div>
-          ) : (
-            <div className='flex justify-center'>
-              <LanguageSwitcher />
-            </div>
-          )}
+          <div className='flex justify-center'>
+            <span className='text-gray-400 text-xs'>v1.0.0</span>
+          </div>
         </div>
       </div>
     </div>
