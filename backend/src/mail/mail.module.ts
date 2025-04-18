@@ -14,7 +14,7 @@ import { FilesModule } from 'src/files/files.module';
       useFactory: getMailConfig,
       inject: [ConfigService],
     }),
-    FilesModule
+    FilesModule,
   ],
   exports: [MailService],
 })

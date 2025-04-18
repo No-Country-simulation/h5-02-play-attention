@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { MailerService } from '@nestjs-modules/mailer';
 import {
   BadRequestException,
@@ -7,8 +8,7 @@ import {
 } from '@nestjs/common';
 import { EmailTemplates, TemplateContextVariables } from './mail.types';
 import { EmailTemplatesDefault, TECHNICAL_ERRORS } from './mail.constants';
-import { FileValidatorService } from 'src/files/file-validator.service';
-import { join } from 'path';
+import { FileValidatorService } from '../files/file-validator.service';
 
 @Injectable()
 export class MailService {
@@ -27,12 +27,16 @@ export class MailService {
   ) {
     const { templateName, defaultSubject } =
       EmailTemplatesDefault[emailTemplate];
-    this.fileValidator.checkFileExists(
-      join(__dirname, '/templates'),
-      templateName,
-      'hbs',
-    );
     try {
+      if (!emailAddress || !this.isValidEmail(emailAddress)) {
+        throw new Error('Invalid recipient email');
+      }
+
+      this.fileValidator.checkFileExistsOrThrow(
+        join(__dirname, '/templates'),
+        templateName,
+        'hbs',
+      );
       await this.mailerService.sendMail({
         to: emailAddress,
         subject: defaultSubject,
@@ -51,10 +55,13 @@ export class MailService {
       throw new InternalServerErrorException(
         'Failed to send email due to a server issue',
       );
-    } else {
-      this.emailLogger.error('Non-technical error', error.stack);
-      throw new BadRequestException('Invalid email or request data');
     }
+    this.emailLogger.error('Non-technical error', error.stack);
+    throw new BadRequestException('Invalid email or request data');
+  }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
   private isTechnicalError(error: Error): boolean {

@@ -1,4 +1,4 @@
-import { EmailTemplateMap } from "./mail.types";
+import { EmailTemplateMap } from './mail.types';
 
 export const EmailTemplatesDefault: EmailTemplateMap = {
   CONFIRM_EMAIL: {
