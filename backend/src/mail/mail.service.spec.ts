@@ -1,34 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MailService } from './mail.service';
-import { EmailTemplateMap } from './mail.types';
-
-const EmailTemplatesDefault: EmailTemplateMap = {
-  CONFIRM_EMAIL: {
-    relativePath: './confirmEmail',
-    defaultSubject: 'Verify Email Address',
-    vars: ['name', 'url'],
-  },
-  EMAIL_UPDATED: {
-    relativePath: './emailChanged',
-    defaultSubject: 'Account Email Changed',
-    vars: ['name'],
-  },
-  PASSWORD_UPDATED: {
-    relativePath: './passwordChanged',
-    defaultSubject: 'Account Password Changed',
-    vars: ['name'],
-  },
-  RESET_PASSWORD: {
-    relativePath: './pswrdReset',
-    defaultSubject: 'Password Reset',
-    vars: ['name', 'url'],
-  },
-};
+import { EmailTemplates } from './mail.types';
+import { EmailTemplatesDefault } from './mail.constants';
+import { FileValidatorService } from '../files/file-validator.service';
 
 describe('MailService', () => {
   let mailService: MailService;
   let mailerService: MailerService;
+  let fileValidatorService: FileValidatorService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,14 +17,18 @@ describe('MailService', () => {
         {
           provide: MailerService,
           useValue: {
-            sendMail: jest.fn().mockResolvedValue(undefined),
+            sendMail: jest.fn().mockResolvedValue(true),
           },
         },
+        FileValidatorService,
       ],
+      imports: [],
     }).compile();
 
     mailService = module.get<MailService>(MailService);
     mailerService = module.get<MailerService>(MailerService);
+    fileValidatorService =
+      module.get<FileValidatorService>(FileValidatorService);
   });
 
   it('should be defined', () => {
@@ -56,24 +40,31 @@ describe('MailService', () => {
     const template = 'CONFIRM_EMAIL';
     const context = { name: 'sda', url: 'sdasd' };
 
-    await mailService.sendEmail(template, email, context);
+    await mailService.sendTemplateEmail(template, email, context);
+    jest.spyOn(fileValidatorService, 'checkFileExists').mockReturnValue(true);
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: email,
-      template: EmailTemplatesDefault[template].relativePath,
+      template: EmailTemplatesDefault[template].templateName,
       subject: EmailTemplatesDefault[template].defaultSubject,
       context: context,
     });
   });
 
-  it('testMissingTemplateHandling', () => {
-    const templateKey = 'NON_EXISTENT_TEMPLATE';
-    expect(() => {
-      const template =
-        EmailTemplatesDefault[templateKey as keyof EmailTemplateMap];
-      if (!template) {
-        throw new Error('Template not found');
-      }
-    }).toThrow('Template not found');
+  it('testMissingTemplateHandling', async () => {
+    const templateKey: EmailTemplates = 'CONFIRM_EMAIL';
+    jest.spyOn(fileValidatorService, 'checkFileExists').mockReturnValue(false);
+    try {
+      await mailService.sendTemplateEmail(templateKey, '', {
+        name: '',
+        url: '',
+      });
+      fail('Expected sendTemplateEmail to throw');
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toContain(
+        'Failed to send email due to a server issue',
+      );
+    }
   });
 });
