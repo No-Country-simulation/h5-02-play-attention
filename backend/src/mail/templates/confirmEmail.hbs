@@ -1,7 +1,97 @@
-<p>Hey {{ name }},</p>
-<p>Please click below to confirm your email</p>
-<p>
-    <a href="{{ url }}">Confirm</a>
-</p>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenido</title>
+  <style type="text/css">
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+      color: #333333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+    .header {
+      background: #4a6baf;
+      padding: 20px;
+      text-align: center;
+    }
+    .logo {
+      max-width: 150px;
+      height: auto;
+    }
+    .content {
+      padding: 20px;
+    }
+    .button {
+      display: inline-block;
+      background: #4a6baf;
+      color: #ffffff !important;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .footer {
+      background: #f1f1f1;
+      padding: 15px;
+      text-align: center;
+      font-size: 12px;
+      color: #777777;
+    }
+    /* Media queries para móviles */
+    @media only screen and (max-width: 600px) {
+      .container {
+        width: 100% !important;
+      }
+      .button {
+        width: 100% !important;
+        text-align: center !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img 
+        src="https://ci3.googleusercontent.com/meips/ADKq_Na_IPoxkmBJIiWpePKmVDaxtfnQd2LnrZImwxICZA3uCilAW5F-apvG0lfMZBfTAZoxWJ8GrX94-5dYarlRl5Grgbgr4Yz4vjb8qs7PZYVSPJTWzjf5ICcluiVZFtKpmladclJVXtjrFF_EQ4RpmdGPsbGaWtOnRIY=s0-d-e1-ft#https://secureir.ebaystatic.com/cr/mscdn/6618275c738c826fced3b3d85f21149a/ebay_logo_placeholder.png" 
+        alt="Logo de la Empresa" 
+        class="logo"
+        style="display: block; margin: 0 auto;"
+      />
+    </div>
 
-<p>If you did not request this email you can safely ignore it.</p>
+    <!-- Contenido dinámico -->
+    <div class="content">
+      <h1 style="color: #4a6baf;">¡Hola {{name}}!</h1>
+      <p>Gracias por registrarte en nuestro servicio. Estamos emocionados de tenerte con nosotros.</p>
+      
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="{{url}}" class="button" style="color: #ffffff;">
+          Activar mi cuenta
+        </a>
+      </p>
+
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
+        <h3 style="margin-top: 0;">¿Necesitas ayuda?</h3>
+        <p>Consulta nuestra <a href="/" style="color: #4a6baf;">guía de inicio</a>.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>© 2025 Mi Empresa. Todos los derechos reservados.</p>
+      <p>
+        <a href="/" style="color: #777777;">Darme de baja</a> | 
+        <a href="/" style="color: #777777;">Política de privacidad</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
