@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/shared/lib/utils';
 import Image from 'next/image';
+import Link from 'next/link';
 
 /**
  * Componente que maneja la visualización del logo en el sidebar
@@ -8,7 +9,7 @@ import Image from 'next/image';
  */
 export function SidebarLogo({ expanded, className }) {
   return (
-    <div className={cn('flex items-start', className)}>
+    <Link href='/' className={cn('flex items-start', className)}>
       {expanded ? (
         // Logo completo para sidebar expandido
         <Image
@@ -30,7 +31,7 @@ export function SidebarLogo({ expanded, className }) {
           priority
         />
       )}
-    </div>
+    </Link>
   );
 }
 

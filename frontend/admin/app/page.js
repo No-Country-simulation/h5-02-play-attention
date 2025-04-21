@@ -1,10 +1,12 @@
-export default function Home() {
-  return (
-    <div className='p-8'>
-      <h1 className='text-2xl font-bold mb-4'>
-        Bienvenido al Panel de Administración
-      </h1>
-      <p>El contenido del dashboard irá aquí</p>
-    </div>
-  );
+'use client';
+
+import Dashboard from '@/features/dashboard/Dashboard';
+
+/**
+ * Página principal - Dashboard Admin
+ * Siguiendo el principio de Responsabilidad Única (SRP), esta página solo se encarga
+ * de renderizar el componente principal del dashboard
+ */
+export default function HomePage() {
+  return <Dashboard />;
 }
