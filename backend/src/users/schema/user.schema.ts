@@ -6,6 +6,7 @@ export type UserDocument = User & Document;
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
+  COMERCIAL = 'comercial',
 }
 export enum Services {
   PROFESIONAL = 'profesional',
