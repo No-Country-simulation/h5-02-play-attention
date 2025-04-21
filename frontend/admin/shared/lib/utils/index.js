@@ -4,12 +4,30 @@
  */
 
 // Utilidades comunes
-export * from './common-utils';
+import { formatDate, formatCurrency, truncateText } from './common-utils';
 
 // Utilidades de colores
-export * from './color-utils';
+import * as ColorUtils from './color-utils';
 
 // Utilidades de metadatos
-export { getPageMetadata } from './page-metadata';
-export { default as pageMetadata } from './page-metadata';
- 
+import { getPageMetadata } from './page-metadata';
+import pageMetadata from './page-metadata';
+
+// Dependencias externas para utilidades de UI
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+// Función cn para combinar clases condicionalmente (usado por componentes shadcn)
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+
+// Exportar todas las utilidades
+export {
+  formatDate,
+  formatCurrency,
+  truncateText,
+  getPageMetadata,
+  pageMetadata,
+  ColorUtils
+};
