@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
       >
         <div className='flex min-h-screen flex-col md:flex-row'>
           <Sidebar />
-          <main className='flex-1 overflow-auto px-4 pt-16 md:pt-0 md:px-6 pb-6 relative'>
+          <main className='flex-1 overflow-auto px-4 pt-16 md:pt-6 pb-6 relative'>
             {children}
           </main>
         </div>

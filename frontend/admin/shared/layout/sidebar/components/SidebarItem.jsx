@@ -8,7 +8,8 @@ export default function SidebarItem({
   item,
   active,
   expanded,
-  highlighted = false
+  highlighted = false,
+  isMobile = false
 }) {
   const Icon = item.icon;
 
@@ -47,7 +48,9 @@ export default function SidebarItem({
         )}
         {expanded && (
           <span
-            className={`truncate text-sm ${highlighted ? 'tracking-wide' : ''}`}
+            className={`truncate ${isMobile ? 'text-[15px]' : 'text-sm'} ${
+              highlighted ? 'tracking-wide' : ''
+            }`}
           >
             {item.name}
           </span>
