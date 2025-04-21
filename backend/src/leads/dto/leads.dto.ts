@@ -1,17 +1,14 @@
-import { IsString, IsEmail, IsNotEmpty } from "class-validator";
+import { IsString, IsEmail, IsNotEmpty, IsOptional } from "class-validator";
 import { PartialType } from "@nestjs/mapped-types";
 
 export class CreateLeadDto {
 
     @IsString()
     @IsNotEmpty()
-    name: string;
+    fullname: string;
 
     @IsString()
-    @IsNotEmpty()
-    lastname: string;
-
-    @IsString()
+    @IsOptional()
     company: string;
 
     @IsString()
@@ -27,7 +24,7 @@ export class CreateLeadDto {
     service: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     message: string;
 
     @IsString()

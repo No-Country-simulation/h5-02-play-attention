@@ -10,13 +10,7 @@ export class Leads {
         type: String,
         required: true,
     })
-    name: string;
-
-    @Prop({
-        type: String,
-        required: true,
-    })
-    lastname: string;
+    fullname: string;
 
     @Prop({
         type: String,
