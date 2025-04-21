@@ -1,16 +1,15 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/shared/providers/react-query-provider";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const roboto = Roboto({
   subsets: ["latin"],
+  variable: "--font-roboto",
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
   subsets: ["latin"],
+  variable: "--font-roboto-mono",
 });
 
 export const metadata = {
@@ -68,7 +67,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${roboto.variable} ${robotoMono.variable} antialiased`}
       >
         <ReactQueryProvider>
           {children}
