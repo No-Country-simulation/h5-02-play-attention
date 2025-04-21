@@ -1,0 +1,36 @@
+{
+  "name": "crm-admin-dashboard",
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
+  "devCommand": "npm run dev",
+  "outputDirectory": ".next",
+  "regions": ["cdg1"],
+  "public": false,
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
