@@ -26,7 +26,7 @@ export const menuItems = [
   {
     name: 'CRM',
     icon: Briefcase,
-    path: '/leads',
+    path: '/crm',
     category: 'crm_destacado'
   },
 

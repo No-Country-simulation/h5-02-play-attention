@@ -391,7 +391,7 @@ export default function Dashboard() {
               description='Registra un nuevo lead de ventas'
               icon={UserPlus}
               color='leads'
-              link='/leads/new'
+              link='/crm/new'
             />
             <ActionCard
               title='Responder Tickets'
