@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
+
 dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -12,7 +13,17 @@ async function bootstrap() {
     .setTitle('Play Attention')
     .setDescription('Gestión de endpoints para Play Attention')
     .setVersion('1.0')
-    .addTag('endpoints', 'leads')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'playAttentionToken',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'playAttentionToken',
+    )
     .build();
   
   const document = SwaggerModule.createDocument(app, config);
