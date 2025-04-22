@@ -22,9 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
-import { Textarea } from "@/shared/ui/textarea"; // Nuevo import
+import { Textarea } from "@/shared/ui/textarea";
+import { Checkbox } from "@/shared/ui/checkbox"; // Nuevo import
 
-// 1. Actualiza el esquema con el campo de texto
+// 1. Actualiza el esquema con el checkbox
 const formSchema = z.object({
   username: z.string().min(2, {
     message: "Username must be at least 2 characters.",
@@ -33,8 +34,11 @@ const formSchema = z.object({
     required_error: "Please select an interest",
   }),
   message: z.string().min(10, {
-    // Validación para el textarea
     message: "Message must be at least 10 characters.",
+  }),
+  terms: z.literal(true, {
+    // Validación para checkbox requerido
+    error_map: () => ({ message: "You must accept the terms" }),
   }),
 });
 
@@ -45,7 +49,8 @@ export function ContactSection() {
     defaultValues: {
       username: "",
       interest: "",
-      message: "", // Valor inicial para el textarea
+      message: "",
+      terms: false, // Valor inicial para el checkbox
     },
   });
 
@@ -99,7 +104,6 @@ export function ContactSection() {
           )}
         />
 
-        {/* Nuevo campo Textarea */}
         <FormField
           control={form.control}
           name="message"
@@ -109,13 +113,36 @@ export function ContactSection() {
               <FormControl>
                 <Textarea
                   placeholder="Type your message here..."
-                  className="min-h-[120px]" // Altura mínima
+                  className="min-h-[120px]"
                   {...field}
                 />
               </FormControl>
               <FormDescription>
                 Please provide detailed information.
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Nuevo campo Checkbox */}
+        <FormField
+          control={form.control}
+          name="terms"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Accept terms and conditions</FormLabel>
+                <FormDescription>
+                  You agree to our Terms of Service and Privacy Policy
+                </FormDescription>
+              </div>
               <FormMessage />
             </FormItem>
           )}
