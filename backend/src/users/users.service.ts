@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
+import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { MongoIdValidationPipe } from '../common/pipes/isMongoIdValidation.pipe';
 
 @Injectable()
 export class UsersService {
@@ -37,12 +38,37 @@ export class UsersService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+    if (!user) {
+      throw new BadRequestException(`Usuario con ID ${id} no encontrado`);
+    }
+
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.userModel.findOne({ email: updateUserDto.email }).exec();
+      if (existingUser) {
+        throw new BadRequestException('El email ya está en uso');
+      }
+    }
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    Object.keys(updateUserDto).forEach(key => {
+      if (updateUserDto[key] !== undefined) {
+        user[key] = updateUserDto[key];
+      }
+    });
+
+    return user.save();
   }
 
-  update(id: number) {
-    return `This action updates a #${id} user`;
+  async findOne(id: string): Promise<User> {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new BadRequestException(`Usuario con ID ${id} no encontrado`);
+    }
+    return user;
   }
 
   async remove(id: string) {

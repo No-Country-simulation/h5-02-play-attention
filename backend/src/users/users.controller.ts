@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { QueryUsersDto } from './dto/query-user.dto';
 import { MongoIdValidationPipe } from '../common/pipes/isMongoIdValidation.pipe';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('api/users')
 export class UsersController {
@@ -30,13 +32,15 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  findOne(@Param('id', MongoIdValidationPipe) id: string) {
+    return this.usersService.findById(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.usersService.update(+id);
+  @Put(':id')
+  update(
+    @Param('id', MongoIdValidationPipe) id: string,
+   @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
