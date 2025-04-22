@@ -12,12 +12,12 @@ export class Leads {
     })
     fullname: string;
 
-    @Prop({
-        type: [mongoose.Schema.Types.ObjectId],
-        required: false,
-        ref: 'contacts'
-    })
-    contact_id: Types.ObjectId[];
+    // @Prop({
+    //     type: [mongoose.Schema.Types.ObjectId],
+    //     required: false,
+    //     ref: 'engegements'
+    // })
+    // contact_id: Types.ObjectId[];
 
     @Prop({
         type: String,
