@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/shared/ui/select';
-import { generateLeadsPDF } from '../../lib/services/pdf-service';
+import { generateLeadsPDF } from '../../lib/adapters/pdf-adapter';
 import MeetingCalendar from '../meetings/MeetingCalendar';
 import ScheduleMeetingModal from '../meetings/ScheduleMeetingModal';
 import { useMeetingsStore } from '../../lib/store/meetings-store';

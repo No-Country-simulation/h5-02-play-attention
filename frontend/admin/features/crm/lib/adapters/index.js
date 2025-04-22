@@ -5,3 +5,4 @@
 
 export * from './leads.adapter';
 export * from './contacts.adapter';
+export * from './pdf-adapter';
