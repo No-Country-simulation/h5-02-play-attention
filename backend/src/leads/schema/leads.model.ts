@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
 
 export type LeadsDocument = HydratedDocument<Leads>;
 
@@ -11,6 +11,13 @@ export class Leads {
         required: true,
     })
     fullname: string;
+
+    @Prop({
+        type: [mongoose.Schema.Types.ObjectId],
+        required: false,
+        ref: 'contacts'
+    })
+    contact_id: Types.ObjectId[];
 
     @Prop({
         type: String,
@@ -46,9 +53,16 @@ export class Leads {
     @Prop({
         type: String,
         required: true,
-        enum: ['active', 'pending', 'completed']
+        enum: ['Nuevo', 'Activo', 'Cliente']
     })
     status: string;
+
+    @Prop({
+        type: String,
+        required: false,
+        enum: ['Referencia', 'Sitio web', 'Redes sociales', 'LinkedIn', 'Otro']
+    })
+    origen: string
 }
 
 export const LeadsSchema = SchemaFactory.createForClass(Leads);
