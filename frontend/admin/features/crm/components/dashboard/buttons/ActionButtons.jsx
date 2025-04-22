@@ -1,5 +1,5 @@
 import { Button } from '@/shared/ui/button';
-import { CalendarIcon, FileText } from 'lucide-react';
+import { CalendarIcon, Download } from 'lucide-react';
 
 /**
  * Componente para agrupar los botones de acción del dashboard
@@ -24,7 +24,7 @@ export const ActionButtons = ({ onAddMeeting, onExport }) => {
         size='sm'
         className='flex-1 sm:flex-none'
       >
-        <FileText className='h-4 w-4 mr-2' />
+        <Download className='h-4 w-4 mr-2' />
         <span className='whitespace-nowrap'>Exportar</span>
       </Button>
     </div>

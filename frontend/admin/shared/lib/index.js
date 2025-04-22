@@ -4,6 +4,7 @@
  */
 
 export * from './utils';
+export * from './services';
 
 // Re-exportamos directamente cn para mantener compatibilidad con importaciones existentes
 export { cn } from './utils/common-utils';
@@ -13,4 +14,3 @@ export {
   getPageMetadata,
   default as pageMetadata
 } from './utils/page-metadata';
- 

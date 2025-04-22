@@ -4,4 +4,3 @@
  */
 
 export * from './api';
-export * from './pdf-service';
