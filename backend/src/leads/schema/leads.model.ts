@@ -53,7 +53,8 @@ export class Leads {
     @Prop({
         type: String,
         required: true,
-        enum: ['Nuevo', 'Activo', 'Cliente']
+        enum: ['Nuevo', 'Activo', 'Cliente'],
+        default: 'Nuevo'
     })
     status: string;
 
@@ -62,7 +63,13 @@ export class Leads {
         required: false,
         enum: ['Referencia', 'Sitio web', 'Redes sociales', 'LinkedIn', 'Otro']
     })
-    origen: string
+    origen: string;
+
+    @Prop({
+        type: String,
+        required: true
+    })
+    relation: string;
 }
 
 export const LeadsSchema = SchemaFactory.createForClass(Leads);

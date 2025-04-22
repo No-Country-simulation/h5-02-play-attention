@@ -77,13 +77,13 @@ export class LeadsController {
         return this.leadsService.updateLead(id, updateLeadDto);
     }
 
+    @Delete(':id')
     @ApiOperation({summary: 'Eliminar un lead'})
     @ApiParam({
         name: 'id',
         description: 'ID del lead a eliminar',
         type: String
     })
-    @Delete(':id')
     erase(@Param('id') id: string) {
         return this.leadsService.deleteLead(id);
     }
