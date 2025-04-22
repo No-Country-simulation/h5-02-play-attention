@@ -48,15 +48,16 @@ export function HeroSection() {
             />
           </div>
         </div>
-        <div className="relative -mx-30 z-20 my-0 overflow-hidden -mt-8">
+
+        <div className="relative w-screen left-1/2 -translate-x-1/2 z-20 overflow-hidden -mt-8 pb-8">
           <div className="relative">
             <div
-              className="absolute inset-x-0 h-[36px] w-full -rotate-[3deg] sm:-rotate-[2deg]
-              bg-secondary-200 top-1/2 -translate-y-1/2 z-0"
+              className="absolute inset-x-0 h-[36px] w-screen -rotate-[4deg] sm:-rotate-[2deg]
+      bg-secondary-200 top-1/2 -translate-y-1/2 z-0"
               style={{ transformOrigin: "75% 50%" }}
             />
 
-            <div className="relative z-10 py-8 px-6">
+            <div className="relative z-10 py-8">
               <MarqueeBenefits />
             </div>
           </div>
