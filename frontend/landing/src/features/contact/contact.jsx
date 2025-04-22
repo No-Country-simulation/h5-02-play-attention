@@ -15,20 +15,31 @@ import {
   FormMessage,
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
-// 1. Define el esquema de validación
+// 1. Define el esquema de validación (actualizado con el select)
 const formSchema = z.object({
   username: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
+  interest: z.string({
+    required_error: "Please select an interest",
+  }),
 });
 
 export function ContactSection() {
-  // 2. Inicializa el formulario
+  // 2. Inicializa el formulario (con el nuevo campo)
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      interest: "", // Valor inicial para el select
     },
   });
 
@@ -56,6 +67,33 @@ export function ContactSection() {
             </FormItem>
           )}
         />
+
+        {/* Nuevo campo Select */}
+        <FormField
+          control={form.control}
+          name="interest"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Area of Interest</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an interest" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="design">Design</SelectItem>
+                  <SelectItem value="development">Development</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="support">Customer Support</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>What are you interested in?</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit">Submit</Button>
       </form>
     </Form>
