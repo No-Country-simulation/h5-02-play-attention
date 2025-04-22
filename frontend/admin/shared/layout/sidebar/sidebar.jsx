@@ -47,8 +47,8 @@ export default function Sidebar() {
     'principal',
     'crm_destacado',
     'administracion',
-    'contenido',
     'soporte',
+    'contenido',
     'otros'
   ];
 
