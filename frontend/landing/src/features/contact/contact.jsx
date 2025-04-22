@@ -75,7 +75,7 @@ export function ContactSection() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-[75.23vw] h-[50.37%] bg-white p-6"
+          className="space-y-8 w-[75.23vw] h-[50.37%] bg-white md:p-6"
         >
           <h5 className=" py-4 m-0">Solicita información</h5>
           {/* Sección de 2x2 columnas*/}
