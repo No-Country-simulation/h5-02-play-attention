@@ -22,14 +22,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { Textarea } from "@/shared/ui/textarea"; // Nuevo import
 
-// 1. Define el esquema de validación (actualizado con el select)
+// 1. Actualiza el esquema con el campo de texto
 const formSchema = z.object({
   username: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
   interest: z.string({
     required_error: "Please select an interest",
+  }),
+  message: z.string().min(10, {
+    // Validación para el textarea
+    message: "Message must be at least 10 characters.",
   }),
 });
 
@@ -39,13 +44,14 @@ export function ContactSection() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      interest: "", // Valor inicial para el select
+      interest: "",
+      message: "", // Valor inicial para el textarea
     },
   });
 
   // 3. Define la función de envío
   function onSubmit(values) {
-    console.log(values); // Aquí procesas los datos
+    console.log(values);
   }
 
   return (
@@ -68,7 +74,6 @@ export function ContactSection() {
           )}
         />
 
-        {/* Nuevo campo Select */}
         <FormField
           control={form.control}
           name="interest"
@@ -89,6 +94,28 @@ export function ContactSection() {
                 </SelectContent>
               </Select>
               <FormDescription>What are you interested in?</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Nuevo campo Textarea */}
+        <FormField
+          control={form.control}
+          name="message"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Your Message</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Type your message here..."
+                  className="min-h-[120px]" // Altura mínima
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Please provide detailed information.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
