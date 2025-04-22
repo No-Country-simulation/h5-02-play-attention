@@ -1,8 +1,9 @@
 "use client";
 
+import { BackgroundShapes } from "@/shared/ui/background-shapes";
 import { Button } from "@/shared/ui/button";
-import { Lens } from "@/shared/ui/lens";
 import Image from "next/image";
+import { MarqueeBenefits } from "./components/marquee-benefits";
 
 export function HeroSection() {
   const scrollToSection = (sectionId) => {
@@ -12,38 +13,51 @@ export function HeroSection() {
     }
   };
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="container mx-auto px-4 lg:px-20 py-16 md:py-24 lg:py-32">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 items-center">
-          <div className="space-y-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-              Mejora tu atención con BrainAware
+    <div className="relative overflow-hidden px-4 lg:px-20 py-12 md:py-16 lg:py-20">
+      <div className="container mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-6">
+            <h1 className="text-4xl font-bold text-primary-900 leading-tight">
+              Entrenamiento Cerebral con Tecnología de la NASA.
+              <span className="block">Ahora en Argentina.</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/90">
-              Basado en tecnología desarrollada por la NASA, Play Attention es
-              un sistema de entrenamiento cognitivo con eficacia comprobada para
-              mejorar la atención y reducir la impulsividad.
+            <p className="text-2xl text-primary-400">
+              Transformá la concentración, el autocontrol y el rendimiento
+              cognitivo con Play Attention, el sistema de neurofeedback más
+              completo del mundo.
             </p>
             <Button
-              variant="outline"
-              size="lg"
               onClick={() => scrollToSection("contact")}
+              className="min-w-3xs my-2"
             >
-              Solicitar Información
+              Contacto
             </Button>
           </div>
-          <div className="flex justify-center">
-            <div className="relative w-full max-w-md aspect-square">
-              <Lens defaultPosition={{ x: 280, y: 300 }}>
-                <Image
-                  src="/hero.png"
-                  alt="BrainAware - Entrenamiento cognitivo"
-                  width={400}
-                  height={400}
-                  className="object-contain"
-                  priority
-                />
-              </Lens>
+          <div className="relative">
+            <div className="absolute inset-0">
+              <BackgroundShapes className="z-0 rounded-2xl w-full" />
+            </div>
+
+            <Image
+              src="/hero.png"
+              alt="Profesional médico mostrando el dispositivo Play Attention BodyWave"
+              width={500}
+              height={600}
+              className="relative z-10 mx-auto"
+              priority
+            />
+          </div>
+        </div>
+        <div className="relative -mx-30 z-20 my-0 overflow-hidden -mt-8">
+          <div className="relative">
+            <div
+              className="absolute inset-x-0 h-[36px] w-full -rotate-[3deg] sm:-rotate-[2deg]
+              bg-secondary-200 top-1/2 -translate-y-1/2 z-0"
+              style={{ transformOrigin: "75% 50%" }}
+            />
+
+            <div className="relative z-10 py-8 px-6">
+              <MarqueeBenefits />
             </div>
           </div>
         </div>
