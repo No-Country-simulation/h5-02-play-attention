@@ -12,8 +12,11 @@ export class EngagementsController {
   constructor(private readonly _service: EngagementService) {}
 
   @Get('lead/:leadId')
-  getEngagementsByid(@Param('leadId', MongoIdValidationPipe) leadId: string) {
-    return this._service.getEngagements(leadId);
+  @ApiOkResponse({ type: [EngagementResponseDto] })
+  getEngagementsByLeadId(
+    @Param('leadId', MongoIdValidationPipe) leadId: string,
+  ) {
+    return this._service.getEngagementsByLeadId(leadId);
   }
 
   @Get(':itemId')

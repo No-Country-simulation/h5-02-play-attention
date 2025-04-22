@@ -39,7 +39,7 @@ export class EngagementService implements IEngagementService {
     }
   }
 
-  async getEngagements(leadId: string): Promise<Engagements[]> {
+  async getEngagementsByLeadId(leadId: string): Promise<Engagements[]> {
     try {
       await this._leadService.findById(leadId);
       const engagements =

@@ -7,7 +7,7 @@ import { EngagementResponseDto } from '../dto/response-engagement.dto';
 
 export type EngagementsDocument = HydratedDocument<Engagements>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Engagements {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

@@ -41,6 +41,16 @@ export class EngagementResponseDto {
   @Expose()
   created_by: string;
 
+  @ApiProperty()
+  @Expose()
+  @Transform(({ obj }) => obj.createdAt.toISOString())
+  created_at: Date;
+
+  @ApiProperty()
+  @Expose()
+  @Transform(({ obj }) => obj.updatedAt.toISOString())
+  updated_at: Date;
+
   @Exclude()
   lead: Leads;
 

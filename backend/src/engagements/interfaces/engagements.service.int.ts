@@ -7,7 +7,7 @@ export interface IEngagementService {
     generateEngagementItemDto: GenerateEngagementDto,
   ): Promise<Engagements>;
 
-  getEngagements(leadId: string): Promise<Engagements[]>;
+  getEngagementsByLeadId(leadId: string): Promise<Engagements[]>;
 
   getEngagement(itemId: string): Promise<Engagements>;
 
