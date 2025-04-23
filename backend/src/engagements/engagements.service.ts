@@ -11,6 +11,7 @@ import { Engagements } from './schema/engagements.schema';
 import { EngagementsRepository } from './engagements.repository';
 import { UpdateEngagementDto } from './dto/update-engagement.dto';
 import { LeadsService } from '../leads/leads.service';
+import { PaginationResponseDto } from '../common/dtos/pagination.dto';
 
 @Injectable()
 export class EngagementService implements IEngagementService {
@@ -39,12 +40,24 @@ export class EngagementService implements IEngagementService {
     }
   }
 
-  async getEngagementsByLeadId(leadId: string): Promise<Engagements[]> {
+  async getEngagementsByLeadId(
+    leadId: string,
+    take: number = 10,
+    page: number = 1,
+  ): Promise<PaginationResponseDto<Engagements>> {
     try {
       await this._leadService.findById(leadId);
-      const engagements =
-        await this._repository.findEngagementsByLeadId(leadId);
-      return engagements;
+      const [engagements, count] = await Promise.all([
+        this._repository.findEngagementsByLeadId(leadId, take, page),
+        this._repository.countEngagementsById(leadId),
+      ]);
+
+      return this.buildPaginationResponse<Engagements>(
+        engagements,
+        take,
+        count,
+        page,
+      );
     } catch (error) {
       this.logger.error(error.message, error.stack);
       if (error instanceof NotFoundException) {
@@ -87,5 +100,24 @@ export class EngagementService implements IEngagementService {
       this.logger.error(error.message, error.stack);
       throw new BadRequestException();
     }
+  }
+
+  private buildPaginationResponse<T>(
+    data: T[],
+    take: number,
+    count: number,
+    page: number,
+  ): PaginationResponseDto<T> {
+    const lastPage = Math.ceil(count / take);
+
+    return {
+      data,
+      last_page: lastPage,
+      next_page: page < lastPage ? page + 1 : undefined,
+      current_page: page,
+      prev_page: page > 1 ? page - 1 : undefined,
+      page_records: data.length,
+      total_records: count,
+    };
   }
 }

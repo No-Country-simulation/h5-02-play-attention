@@ -9,6 +9,7 @@ export type EngagementsDocument = HydratedDocument<Engagements>;
 
 @Schema({ timestamps: true })
 export class Engagements {
+  readonly _id?: string;
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Leads.name,

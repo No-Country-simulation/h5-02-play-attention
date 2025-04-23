@@ -5,7 +5,12 @@ export interface IEngagementsRepository {
   createEngagement(
     createHistoryDto: GenerateEngagementDto,
   ): Promise<Engagements>;
-  findEngagementsByLeadId(leadId: string): Promise<Engagements[]>;
+  findEngagementsByLeadId(
+    leadId: string,
+    take?: number,
+    cursor?: number,
+  ): Promise<Engagements[]>;
+  countEngagementsById(leadId: string): Promise<number>;
   findEngagement(id: string): Promise<Engagements>;
   updateEngagement(
     id: string,

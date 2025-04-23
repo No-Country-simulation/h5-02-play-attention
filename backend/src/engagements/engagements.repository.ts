@@ -22,8 +22,21 @@ export class EngagementsRepository implements IEngagementsRepository {
     return engagements.save();
   }
 
-  async findEngagementsByLeadId(leadId: string): Promise<Engagements[]> {
-    return this.engagementsModel.find({ lead: leadId }).exec();
+  async findEngagementsByLeadId(
+    leadId: string,
+    take: number = 10,
+    page: number = 1,
+  ): Promise<Engagements[]> {
+    return this.engagementsModel
+      .find({ lead: leadId })
+      .skip((page - 1) * take)
+      .sort({ _id: 1 })
+      .limit(take)
+      .exec();
+  }
+
+  async countEngagementsById(leadId: string): Promise<number> {
+    return this.engagementsModel.countDocuments({ lead: leadId }).exec();
   }
 
   async findEngagement(id: string): Promise<Engagements> {

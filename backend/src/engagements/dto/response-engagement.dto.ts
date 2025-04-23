@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { Leads } from '../../leads/schema/leads.model';
+import { PaginationResponseDto } from 'src/common/dtos/pagination.dto';
 
 export class EngagementResponseDto {
   @ApiProperty()
@@ -43,12 +44,16 @@ export class EngagementResponseDto {
 
   @ApiProperty()
   @Expose()
-  @Transform(({ obj }) => obj.createdAt.toISOString())
+  @Transform(({ obj }) =>
+    obj.createdAt ? obj.createdAt.toISOString() : new Date(),
+  )
   created_at: Date;
 
   @ApiProperty()
   @Expose()
-  @Transform(({ obj }) => obj.updatedAt.toISOString())
+  @Transform(({ obj }) =>
+    obj.createdAt ? obj.createdAt.toISOString() : new Date(),
+  )
   updated_at: Date;
 
   @Exclude()
@@ -56,4 +61,9 @@ export class EngagementResponseDto {
 
   @Exclude()
   __v: number;
+}
+
+export class EngagementPaginationDto extends PaginationResponseDto<EngagementResponseDto> {
+  @ApiProperty({ type: EngagementResponseDto, isArray: true })
+  data: EngagementResponseDto[];
 }

@@ -1,10 +1,14 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { EngagementService } from './engagements.service';
 import { GenerateEngagementDto } from './dto/generate-engagement.dto';
 import { ResponseEngagementDto } from './dto/update-engagement.dto';
-import { EngagementResponseDto } from './dto/response-engagement.dto';
+import {
+  EngagementPaginationDto,
+  EngagementResponseDto,
+} from './dto/response-engagement.dto';
 import { MongoIdValidationPipe } from 'src/common/pipes/isMongoIdValidation.pipe';
+import { QueryPaginationDto } from 'src/common/dtos/pagination.dto';
 
 @ApiTags('Engagements')
 @Controller('/api/engagements')
@@ -12,11 +16,12 @@ export class EngagementsController {
   constructor(private readonly _service: EngagementService) {}
 
   @Get('lead/:leadId')
-  @ApiOkResponse({ type: [EngagementResponseDto] })
+  @ApiOkResponse({ type: EngagementPaginationDto })
   getEngagementsByLeadId(
     @Param('leadId', MongoIdValidationPipe) leadId: string,
+    @Query() pag: QueryPaginationDto,
   ) {
-    return this._service.getEngagementsByLeadId(leadId);
+    return this._service.getEngagementsByLeadId(leadId, pag.take, pag.page);
   }
 
   @Get(':itemId')
