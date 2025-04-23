@@ -10,10 +10,18 @@ export const getMailConfig: (...args: any[]) => Promise<MailerOptions> = async (
     host: configService.get('MAIL_HOST'),
     port: configService.get('MAIL_PORT'),
     connectionTimeout: 10000,
-    secure: false,
+    secure: configService.get('MAIL_ENCRIPTION') == 'true' ? true : false,
     auth: {
       user: configService.get('MAIL_USERNAME'),
       pass: configService.get('MAIL_PASSWORD'),
+    },
+  },
+  options: {
+    partials: {
+      dir: join(__dirname, 'templates', 'layouts'),
+      options: {
+        strict: true,
+      },
     },
   },
   defaults: {

@@ -61,7 +61,7 @@
   <div class="container">
     <div class="header">
       <img 
-        src="https://framerusercontent.com/images/jhXEwk0PeDpLgoJ5PZFagA5OpQ.svg" 
+        src="https://ci3.googleusercontent.com/meips/ADKq_Na_IPoxkmBJIiWpePKmVDaxtfnQd2LnrZImwxICZA3uCilAW5F-apvG0lfMZBfTAZoxWJ8GrX94-5dYarlRl5Grgbgr4Yz4vjb8qs7PZYVSPJTWzjf5ICcluiVZFtKpmladclJVXtjrFF_EQ4RpmdGPsbGaWtOnRIY=s0-d-e1-ft#https://secureir.ebaystatic.com/cr/mscdn/6618275c738c826fced3b3d85f21149a/ebay_logo_placeholder.png" 
         alt="Logo de la Empresa" 
         class="logo"
         style="display: block; margin: 0 auto;"
@@ -70,14 +70,9 @@
 
     <!-- Contenido dinámico -->
     <div class="content">
-      <h1 style="color: #4a6baf;">¡Hola {{name}}!</h1>
       
-      {{{body}}}
+      {{> @partial-block }}
 
-      <div style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
-        <h3 style="margin-top: 0;">¿Necesitas ayuda?</h3>
-        <p>Consulta nuestra <a href="/" style="color: #4a6baf;">guía de inicio</a>.</p>
-      </div>
     </div>
 
     <div class="footer">
