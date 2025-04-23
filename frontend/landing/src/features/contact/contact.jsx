@@ -8,7 +8,6 @@ import { Button } from "@/shared/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormLabel,
   FormMessage,
@@ -23,6 +22,15 @@ import {
 } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 import { Checkbox } from "@/shared/ui/checkbox";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/shared/ui/dialog";
+import { useState } from "react";
 
 const formSchema = z.object({
   nombre: z
@@ -52,12 +60,13 @@ const formSchema = z.object({
       message: "El mensaje debe tener al menos 10 caracteres.",
     })
     .max(1100, { message: "El mensaje debe tener máximo 1100 carácteres" }),
-  // terms: z.literal(true, {
-  //   error_map: () => ({ message: "Debes aceptar los términos" }),
-  // }),
+
+  terms: z.boolean().default(false),
 });
 
 export function ContactSection() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [contactUser, setContactUser] = useState("");
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,6 +82,10 @@ export function ContactSection() {
 
   function onSubmit(values) {
     console.log(values);
+    const firstName = values.nombre.split(" ")[0];
+
+    setContactUser(firstName);
+    setIsModalOpen(true);
   }
 
   return (
@@ -191,7 +204,7 @@ export function ContactSection() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="design">Diseño</SelectItem>
+                    <SelectItem value="sitio web">Sitio Web</SelectItem>
                     <SelectItem value="development">Desarrollo</SelectItem>
                     <SelectItem value="marketing">Marketing</SelectItem>
                     <SelectItem value="support">Soporte al cliente</SelectItem>
@@ -250,6 +263,20 @@ export function ContactSection() {
           </Button>
         </form>
       </Form>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Formulario completado</DialogTitle>
+            <DialogDescription>
+              {contactUser} gracias por completar nuestro formulario de contacto
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {/* Contenido personalizado aquí */}
+            <p>¡Nos pondremos en contacto contigo!</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
