@@ -13,9 +13,11 @@ export class Leads {
     fullname: string;
 
     @Prop({
-        type: [mongoose.Schema.Types.ObjectId],
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Contacts'
+        }],
         required: false,
-        ref: 'contacts'
     })
     contact_id: Types.ObjectId[];
 

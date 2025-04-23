@@ -20,8 +20,8 @@ export class Categories {
 
     @Prop({
         type: [{ 
-            type: mongoose.Schema.Types.ObjectId, // ✅ Tipo correcto
-            ref: 'Resource' // Reemplaza 'Resource' por el nombre de tu modelo relacionado
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Resource' 
         }],
         required: false
     })
