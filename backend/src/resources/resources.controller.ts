@@ -25,8 +25,7 @@ export class ResourcesController {
   async findAll() {
     const resources = await this.resourcesService.findAll();
     return {
-      message: 'Recursos encontrados',
-      resources,
+      resources
     };
   }
 
@@ -34,17 +33,15 @@ export class ResourcesController {
   async findOne(@Param('id', MongoIdValidationPipe) id: string) {
     const resource = await this.resourcesService.findOne(id);
     return {
-      message: 'Recurso encontrado',
-      resource,
+      resource
     };
   }
 
   @Delete(':id')
   async remove(@Param('id', MongoIdValidationPipe) id: string) {
-    const resource = await this.resourcesService.remove(id);
+     await this.resourcesService.remove(id);
     return {
-      message: 'Recurso eliminado correctamente',
-      resource,
+      message: 'Recurso eliminado correctamente'
     };
   }
 }
