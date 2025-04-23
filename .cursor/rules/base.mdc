@@ -1,0 +1,63 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+{
+  "configVersion": 1,
+  "rules": [
+    {
+      "pattern": "app/features/.*",
+      "description": "Cada feature debe estar completamente aislada y contener su propio dominio.",
+      "rules": [
+        "Agrupar componentes, hooks, api-calls y validaciones por feature.",
+        "Evitar importar lógica entre features. Usar shared/lib solo si es estrictamente genérico.",
+        "Si se necesita compartir algo entre features, moverlo explícitamente a shared."
+      ]
+    },
+    {
+      "pattern": "app/shared/.*",
+      "description": "El código compartido debe ser atómico y sin dependencias de dominio.",
+      "rules": [
+        "No incluir lógica de negocio en `shared`.",
+        "Evitar acoplamiento a features o a datos de negocio.",
+        "Organizar en subcarpetas como `ui`, `lib`, `hooks`, `schema`, etc."
+      ]
+    },
+    {
+      "pattern": "lib/.*|shared/lib/.*",
+      "description": "Utilidades puras, validaciones y abstracciones comunes.",
+      "rules": [
+        "Funciones puras, sin efectos secundarios.",
+        "Ideal para funciones de fetch, formateo, validación, etc.",
+        "Validaciones con Zod deben estar acá si son globales."
+      ]
+    },
+    {
+      "pattern": ".*\\.js$",
+      "description": "Reglas generales para mantener clean code y SOLID en JS",
+      "rules": [
+        "No exceder 200 líneas por archivo.",
+        "Funciones de máximo 30-40 líneas.",
+        "Preferir composición antes que herencia.",
+        "Usar `use` prefix en hooks (`useSomething`).",
+        "Evitar código muerto y console.logs innecesarios.",
+        "Mantener separación clara de responsabilidades (SRP)."
+      ]
+    },
+    {
+      "pattern": "middleware.js",
+      "description": "Middleware debe ser simple, rápido y reutilizable.",
+      "rules": [
+        "Evitar lógica pesada.",
+        "Validaciones mínimas para redirección o auth.",
+        "Extraer funciones auxiliares a lib si crecen."
+      ]
+    }
+  ]
+}

@@ -149,15 +149,17 @@ export default function LeadDashboard({
             description={
               timeRange === 'all'
                 ? 'Con estado "nuevo"'
-                : `Últimos ${
-                    timeRange === '7days'
+                : `Creados en los últimos ${
+                    timeRange === '5min'
+                      ? '5 minutos'
+                      : timeRange === '7days'
                       ? '7'
                       : timeRange === '90days'
                       ? '90'
                       : timeRange === 'year'
                       ? '365'
                       : '30'
-                  } días`
+                  } ${timeRange === '5min' ? '' : 'días'}`
             }
           />
         </div>
@@ -193,15 +195,17 @@ export default function LeadDashboard({
             description={
               timeRange === 'all'
                 ? 'Con estado "nuevo"'
-                : `Últimos ${
-                    timeRange === '7days'
+                : `Creados en los últimos ${
+                    timeRange === '5min'
+                      ? '5 minutos'
+                      : timeRange === '7days'
                       ? '7'
                       : timeRange === '90days'
                       ? '90'
                       : timeRange === 'year'
                       ? '365'
                       : '30'
-                  } días`
+                  } ${timeRange === '5min' ? '' : 'días'}`
             }
           />
           <div className='mt-4 flex-grow'>

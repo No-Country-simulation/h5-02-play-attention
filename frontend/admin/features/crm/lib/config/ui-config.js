@@ -82,25 +82,25 @@ export const typeOptions = [
 export const leadUserTypeConfig = {
   profesional: {
     variant: 'outline',
-    className: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    className: 'bg-background text-foreground border-border',
     label: 'Profesional',
     description: 'Psicólogos, terapeutas, etc.'
   },
   persona: {
     variant: 'outline',
-    className: 'bg-teal-50 text-teal-700 border-teal-200',
+    className: 'bg-background text-foreground border-border',
     label: 'Persona',
     description: 'Padres, madres, usuarios finales'
   },
   individual: {
     variant: 'outline',
-    className: 'bg-teal-50 text-teal-700 border-teal-200',
+    className: 'bg-background text-foreground border-border',
     label: 'Persona',
     description: 'Padres, madres, usuarios finales'
   },
   empresa: {
     variant: 'outline',
-    className: 'bg-amber-50 text-amber-700 border-amber-200',
+    className: 'bg-background text-foreground border-border',
     label: 'Empresa',
     description: 'Colegios, centros, instituciones'
   }
@@ -147,17 +147,11 @@ export const leadContactTypeConfig = {
 
 // Fuentes de leads
 export const leadSourceOptions = [
+  'Sitio web',
   'Formulario Landing',
   'WhatsApp',
-  'Referido',
-  'Google',
-  'Evento Educativo',
-  'Recomendación',
-  'LinkedIn',
-  'Email Marketing',
-  'Llamada entrante',
-  'Sitio web',
   'Redes sociales',
+  'Recomendación',
   'Otro'
 ];
 
