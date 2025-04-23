@@ -14,6 +14,7 @@ import { Leads, LeadsSchema } from './schema/leads.model';
     ])
   ],
   controllers: [LeadsController],
-  providers: [LeadsService]
+  providers: [LeadsService],
+  exports: [LeadsService]
 })
 export class LeadsModule {}

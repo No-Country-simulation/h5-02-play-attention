@@ -10,6 +10,7 @@ import { MailModule } from './mail/mail.module';
 import { ResourcesModule } from './resources/resources.module';
 import configuration from './config/configuration';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { EngagementsModule } from './engagements/engagements.module';
 import { CategoriesModule } from './categories/categories.module';
 
 @Module({
@@ -18,14 +19,15 @@ import { CategoriesModule } from './categories/categories.module';
       isGlobal: true,
       load: [configuration],
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI), 
+    MongooseModule.forRoot(process.env.MONGODB_URI),
     LeadsModule,
     AuthModule,
     UsersModule,
     MailModule,
     ResourcesModule,
     CloudinaryModule,
-    CategoriesModule
+    CategoriesModule,
+    EngagementsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
