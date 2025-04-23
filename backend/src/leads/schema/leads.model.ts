@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, Types } from "mongoose";
+import { LEAD_ORIGINS, LEAD_SERVICE_OPTIONS, LEAD_STATUS } from "../leads.constants";
 
 export type LeadsDocument = HydratedDocument<Leads>;
 
-@Schema()
+@Schema({timestamps: true})
 export class Leads {
 
     @Prop({
@@ -40,7 +41,7 @@ export class Leads {
     @Prop({
         type: String,
         required: true,
-        enum: ['Profesional', 'Individuo', 'Empresa']
+        enum: LEAD_SERVICE_OPTIONS
     })
     service: string;
 
@@ -53,7 +54,7 @@ export class Leads {
     @Prop({
         type: String,
         required: true,
-        enum: ['Nuevo', 'Activo', 'Cliente'],
+        enum: LEAD_STATUS,
         default: 'Nuevo'
     })
     status: string;
@@ -61,7 +62,7 @@ export class Leads {
     @Prop({
         type: String,
         required: false,
-        enum: ['Referencia', 'Sitio web', 'Redes sociales', 'LinkedIn', 'Otro']
+        enum: LEAD_ORIGINS
     })
     origen: string;
 
