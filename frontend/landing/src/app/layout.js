@@ -33,34 +33,7 @@ export const metadata = {
   ],
   authors: [{ name: "Play Attention ARG" }],
   creator: "Play Attention ARG",
-  publisher: "Play Attention ARG",
-
-  openGraph: {
-    title: "Play Attention",
-    description:
-      "Descubrí cómo Play Attention mejora la atención y el rendimiento cognitivo con tecnología basada en la NASA.",
-    images: [
-      {
-        url: "/hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Persona usando el sistema Play Attention con un casco neurotecnológico",
-      },
-    ],
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Play Attention",
-    description:
-      "Tecnología de neurofeedback para potenciar habilidades cognitivas. Ideal para personas con TDAH y entornos educativos.",
-    images: [
-      {
-        url: "/hero.png",
-        alt: "Persona utilizando Play Attention en un entorno educativo",
-      },
-    ],
-  },
+  publisher: "Play Attention ARG", 
 };
 
 export default function RootLayout({ children }) {

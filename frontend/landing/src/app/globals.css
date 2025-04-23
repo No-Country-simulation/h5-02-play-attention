@@ -142,7 +142,7 @@
   /* Primary (previously primario) */
   --primary: oklch(0.28 0.142 296.71);
   --primary-foreground: oklch(0.985 0 0);
-  --primary-50: oklch(0.93 0.02 287);
+  --primary-50: oklch(0.93 0.0144 308.29); 
   --primary-100: oklch(0.78 0.0433 307.12);
   --primary-200: oklch(0.68 0.0661 305.84);
   --primary-300: oklch(0.52 0.1 304.7);

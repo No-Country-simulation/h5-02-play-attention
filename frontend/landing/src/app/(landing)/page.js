@@ -4,6 +4,7 @@ import { DemoVideosSection } from "@/features/demo-videos/demo-videos";
 import { HeroSection } from "@/features/hero/hero";
 import { PricingPlansSection } from "@/features/pricing-plans/pricing-plans";
 import { TestimonialsSection } from "@/features/testimonials/testimonials";
+import { AboutUsSection } from "@/shared/components/about-us/about-us";
 
 export default function Home() {
   return (
@@ -17,12 +18,7 @@ export default function Home() {
       <section id="demo-videos" className="min-h-screen">
         <DemoVideosSection />
       </section>
-
-      {/* Audience Segmentation */}
-      <section id="audience-segmentation" className="min-h-screen">
-        <AudienceSegmentationSection />
-      </section>
-
+     
       {/* Contact */}
       <section id="contact" className="min-h-screen">
         <ContactSection />
@@ -36,6 +32,11 @@ export default function Home() {
       {/* Testimonials */}
       <section id="testimonials" className="min-h-screen">
         <TestimonialsSection />
+      </section>
+
+      {/* About Us */}
+      <section id="about-us" className="min-h-screen">
+        <AboutUsSection />
       </section>
     </main>
   );

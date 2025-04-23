@@ -20,11 +20,11 @@ export function Navbar() {
     const handleScroll = () => {
       const sections = [
         "hero",
-        "demo-videos",
-        "audience-segmentation",
+        "demo-videos",        
         "contact",
         "pricing-plans",
         "testimonials",
+        "about-us",
       ];
       const scrollPosition = window.scrollY + 100;
 
@@ -56,7 +56,17 @@ export function Navbar() {
           onClick={() => scrollToSection("hero")}
           className="text-2xl font-bold text-secondary"
         >
-          <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
+          <img
+            src="/logo.svg"
+            alt="Logo"
+            className="h-8 w-auto block lg:hidden xl:block"
+          />
+          
+          <img
+            src="/logo-dipper.svg"
+            alt="Logo"
+            className="h-8 w-auto hidden lg:block xl:hidden"
+          />
         </button>
 
         <NavbarDesktop

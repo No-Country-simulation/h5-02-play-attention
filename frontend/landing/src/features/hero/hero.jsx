@@ -52,7 +52,7 @@ export function HeroSection() {
         <div className="relative w-screen left-1/2 -translate-x-1/2 z-20 overflow-hidden -mt-8 pb-8">
           <div className="relative">
             <div
-              className="absolute inset-x-0 h-[36px] w-screen -rotate-[4deg] lg:-rotate-[1deg] md:-rotate-[2deg] sm:-rotate-[3deg]
+              className="absolute inset-x-0 h-[54px] w-screen -rotate-[4deg] lg:-rotate-[1deg] md:-rotate-[2deg] sm:-rotate-[3deg]
       bg-secondary-200 top-1/2 -translate-y-1/2 z-0"
               style={{ transformOrigin: "75% 50%" }}
             />

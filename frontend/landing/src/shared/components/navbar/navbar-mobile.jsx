@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function NavbarMobile({
   isMenuOpen,
@@ -11,6 +12,7 @@ export default function NavbarMobile({
   activeSection,
 }) {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -66,7 +68,7 @@ export default function NavbarMobile({
                   : "underline-offset-4"
               )}
             >
-              Soluciones
+              ¿Para quién es?
               <ChevronDown
                 size={16}
                 className={cn(
@@ -79,30 +81,30 @@ export default function NavbarMobile({
               <div className="ml-4 flex flex-col space-y-2">
                 <button
                   onClick={() => {
-                    scrollToSection("audience-segmentation");
+                    router.push("/personas");
                     setIsMenuOpen(false);
                   }}
                   className="text-left text-sm text-gray-700"
                 >
-                  Para empresas
+                  Personas
                 </button>
                 <button
                   onClick={() => {
-                    scrollToSection("audience-segmentation");
+                    router.push("/profesionales");
                     setIsMenuOpen(false);
                   }}
                   className="text-left text-sm text-gray-700"
                 >
-                  Para educación
+                  Profesionales
                 </button>
                 <button
                   onClick={() => {
-                    scrollToSection("audience-segmentation");
+                    router.push("/empresas");
                     setIsMenuOpen(false);
                   }}
                   className="text-left text-sm text-gray-700"
                 >
-                  Personal
+                  Empresas
                 </button>
               </div>
             )}
@@ -146,10 +148,10 @@ export default function NavbarMobile({
               activeSection === "about-us" ? "underline" : "underline-offset-4"
             )}
           >
-            Sobre nosotros
+            Nosotros
           </button>
           <Button
-            className="w-full rounded-md"
+            className="max-w-3xs rounded-md"
             onClick={() => {
               scrollToSection("contact");
               setIsMenuOpen(false);

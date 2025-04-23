@@ -7,8 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export default function NavbarDesktop({ scrollToSection, activeSection }) {
+  const router = useRouter();
   return (
     <div className="hidden items-center gap-2 lg:flex">
       <Button
@@ -40,30 +42,33 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
                 : "underline-offset-4"
             )}
           >
-            Soluciones <ChevronDown size={16} />
+            ¿Para quién es? <ChevronDown size={16} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
-            onSelect={(e) =>  {
-              e.preventDefault();
-              scrollToSection("audience-segmentation")}}
+            onSelect={(e) => {
+              e.preventDefault(); 
+              router.push("/personas");
+            }}
           >
-            Para empresas
+            Personas
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={(e) =>  {
-              e.preventDefault();
-              scrollToSection("audience-segmentation")}}
+            onSelect={(e) => {
+              e.preventDefault(); 
+              router.push("/profesionales");
+            }}
           >
-            Para educación
+            Profesionales
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={(e) =>  {
-              e.preventDefault();
-              scrollToSection("audience-segmentation")}}
+            onSelect={(e) => {
+              e.preventDefault(); 
+              router.push("/profesionales");
+            }}
           >
-            Personal
+            Empresas
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -93,9 +98,11 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
           activeSection === "about-us" ? "underline" : "underline-offset-4"
         )}
       >
-        Sobre nosotros
+        Nosotros
       </Button>
-      <Button className="rounded-md" onClick={() => scrollToSection("contact")}>Contacto</Button>
+      <Button className="rounded-md" onClick={() => scrollToSection("contact")}>
+        Contacto
+      </Button>
     </div>
   );
 }
