@@ -108,6 +108,7 @@ export default function LeadFilters({
           <Button
             onClick={onCreateLead}
             className='w-full sm:w-auto px-4 h-9 sm:h-10'
+            variant='purple'
           >
             <Plus className='mr-2 h-4 w-4' />
             <span className='whitespace-nowrap'>Nuevo Lead</span>
