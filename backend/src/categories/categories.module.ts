@@ -13,6 +13,7 @@ import { Categories, CategoriesSchema } from './schema/categories.model';
     ])
   ],
   controllers: [CategoriesController],
-  providers: [CategoriesService]
+  providers: [CategoriesService],
+  exports: [CategoriesService]
 })
 export class CategoriesModule {}

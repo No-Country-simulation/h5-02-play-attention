@@ -10,7 +10,7 @@ export enum UserRole {
 }
 export enum Services {
   PROFESIONAL = 'profesional',
-  ENTERPRICE = 'enterprice',
+  EMPRESA = 'empresa',
   INDIVIDUAL = 'individual',
 }
 

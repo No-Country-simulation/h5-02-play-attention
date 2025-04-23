@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/categories.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Categories } from './schema/categories.model';
-import { get, Model } from 'mongoose';
+import {  Model } from 'mongoose';
 
 @Injectable()
 export class CategoriesService {
@@ -22,7 +22,7 @@ export class CategoriesService {
     }
 
     async findById(id: string) {
-        const getCategory = await this.categoriesModel.findById(id).exec();
+        const getCategory = await this.categoriesModel.findById(id).populate('resources_id').exec();
         if(!getCategory) {
             throw new NotFoundException(`No se encontró categoría con ID ${id}`)
         }
