@@ -24,29 +24,37 @@ import {
 import { Textarea } from "@/shared/ui/textarea";
 import { Checkbox } from "@/shared/ui/checkbox";
 
-// 1. Actualiza el esquema con los nuevos campos
 const formSchema = z.object({
-  nombre: z.string().min(2, {
-    message: "El nombre debe tener al menos 2 caracteres.",
-  }),
+  nombre: z
+    .string()
+    .min(2, {
+      message: "El nombre debe tener al menos 2 caracteres.",
+    })
+    .max(50, { message: "El nombre debe tener máximo 50 caracteres." }),
   correo: z.string().email({
     message: "Por favor ingresa un correo válido.",
   }),
   telefono: z.string().min(6, {
     message: "El teléfono debe tener al menos 6 caracteres.",
   }),
-  institucion: z.string().min(2, {
-    message: "La institución debe tener al menos 2 caracteres.",
-  }),
+  institucion: z
+    .string()
+    .min(2, {
+      message: "La institución debe tener al menos 2 caracteres.",
+    })
+    .max(50, { message: "La institución debe tener máximo 50 caracteres" }),
   interest: z.string({
     required_error: "Por favor selecciona un área de interés",
   }),
-  message: z.string().min(10, {
-    message: "El mensaje debe tener al menos 10 caracteres.",
-  }),
-  terms: z.literal(true, {
-    error_map: () => ({ message: "Debes aceptar los términos" }),
-  }),
+  message: z
+    .string()
+    .min(10, {
+      message: "El mensaje debe tener al menos 10 caracteres.",
+    })
+    .max(1100, { message: "El mensaje debe tener máximo 1100 carácteres" }),
+  // terms: z.literal(true, {
+  //   error_map: () => ({ message: "Debes aceptar los términos" }),
+  // }),
 });
 
 export function ContactSection() {
