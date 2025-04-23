@@ -19,6 +19,7 @@ export const TimeRangeSelector = ({ timeRange, onTimeRangeChange }) => {
           <SelectValue placeholder='Periodo' />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value='5min'>Últimos 5 minutos</SelectItem>
           <SelectItem value='7days'>Últimos 7 días</SelectItem>
           <SelectItem value='30days'>Últimos 30 días</SelectItem>
           <SelectItem value='90days'>Últimos 90 días</SelectItem>

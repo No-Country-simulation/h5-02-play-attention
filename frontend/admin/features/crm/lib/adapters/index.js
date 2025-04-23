@@ -3,6 +3,5 @@
  * Facilita las importaciones y mantiene una API limpia
  */
 
-export * from './leads.adapter';
-export * from './contacts.adapter';
-export * from './pdf-adapter';
+export { default as pdfAdapter } from './pdf-adapter';
+export { default as contactsAdapter } from './contacts.adapter';

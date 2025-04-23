@@ -24,23 +24,18 @@ import { cn } from '@/shared/lib/utils';
  * Realiza la paginación en el cliente
  */
 export default function LeadList({
-  leads = [], // Recibe TODOS los leads filtrados
+  leads = [], // Recibe leads ya paginados desde LeadManager
   loading = false,
   onViewLead,
   currentPage = 1,
-  pageSize = 4, // Recibe pageSize
+  pageSize = 10, // Cambiar a 10 para coincidir con LeadManager
   totalPages = 1, // Recibe totalPages calculado en el store
   totalLeads = 0,
   onPageChange
 }) {
-  // Calcular los leads a mostrar para la página actual
-  const getCurrentPageLeads = () => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return leads.slice(startIndex, endIndex);
-  };
-
-  const currentLeads = getCurrentPageLeads();
+  // Ya no necesitamos calcular los leads de la página actual aquí
+  // porque recibimos los leads ya paginados
+  const currentLeads = leads;
   const currentLeadsCount = currentLeads.length; // Contar los leads de la página actual
 
   // Verificar si tenemos leads para mostrar (basado en el total real)
@@ -74,7 +69,22 @@ export default function LeadList({
 
   // Renderizar el badge de estado según la configuración
   const renderStatusBadge = status => {
-    const config = leadStatusConfig[status] || {
+    // Normalizar status a minúsculas y quitar espacios
+    const normalizedStatus = (status || '').toLowerCase().trim();
+
+    // Mapeo de posibles valores del backend a las claves de configuración
+    const statusMapping = {
+      nuevo: 'nuevo',
+      'en proceso': 'proceso',
+      proceso: 'proceso',
+      cliente: 'cliente',
+      convertido: 'cliente'
+    };
+
+    // Usar el mapeo o el status normalizado directamente
+    const configKey = statusMapping[normalizedStatus] || normalizedStatus;
+
+    const config = leadStatusConfig[configKey] || {
       variant: 'outline',
       className: 'bg-neutral-light text-neutral border-neutral',
       label: status || 'Desconocido'

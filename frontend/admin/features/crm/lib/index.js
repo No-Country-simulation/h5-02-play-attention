@@ -9,8 +9,5 @@ export * from './config/mock-data';
 // Exportar adaptadores
 export * from './adapters';
 
-// Exportar servicios de API
-export * from './services';
-
 // Exportar utilidades
 export * from './utils';
