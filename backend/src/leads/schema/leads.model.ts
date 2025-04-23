@@ -3,7 +3,9 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 
 export type LeadsDocument = HydratedDocument<Leads>;
 
-@Schema()
+@Schema({
+    timestamps: true
+})
 export class Leads {
 
     @Prop({
@@ -50,7 +52,7 @@ export class Leads {
         type: String,
         required: true,
     })
-    message: string;
+    notes: string;
 
     @Prop({
         type: String,
