@@ -36,10 +36,10 @@ export class CreateLeadDto {
     @IsIn(LEAD_SERVICE_OPTIONS)
     service: string;
 
-    @ApiProperty({ example: 'Buen día, me comunico por...', description: 'Mensaje enviado por el usuario'})
+    @ApiProperty({ example: 'Buen día, me comunico por...', description: 'Notas escritas por el usuario'})
     @IsString()
     @IsOptional()
-    message: string;
+    notes: string;
     
     @ApiProperty({ example: 'Nuevo', description: 'Estado del lead', enum: LEAD_STATUS})
     @IsString()

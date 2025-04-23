@@ -49,7 +49,7 @@ export class Leads {
         type: String,
         required: true,
     })
-    message: string;
+    notes: string;
 
     @Prop({
         type: String,
