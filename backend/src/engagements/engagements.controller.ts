@@ -30,6 +30,7 @@ export class EngagementsController {
     return this._service.getEngagement(itemId);
   }
 
+  //TODO: add UserId to creation
   @Post('')
   @ApiCreatedResponse({ type: EngagementResponseDto })
   createEngagementItem(@Body() dto: GenerateEngagementDto) {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EngagementsController } from './engagements.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LeadsModule } from 'src/leads/leads.module';
@@ -9,7 +9,7 @@ import { EngagementsRepository } from './engagements.repository';
 @Module({
   controllers: [EngagementsController],
   imports: [
-    LeadsModule,
+    forwardRef(() => LeadsModule),
     MongooseModule.forFeature([
       {
         name: Engagements.name,
@@ -18,5 +18,6 @@ import { EngagementsRepository } from './engagements.repository';
     ]),
   ],
   providers: [EngagementService, EngagementsRepository],
+  exports: [EngagementService],
 })
 export class EngagementsModule {}

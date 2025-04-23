@@ -70,4 +70,7 @@ export class GenerateEngagementDto {
   @MinLength(2)
   @MaxLength(512)
   response?: string;
+  @IsOptional()
+  @IsString()
+  created_by?: string = 'system';
 }

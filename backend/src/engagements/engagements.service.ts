@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -19,17 +21,20 @@ export class EngagementService implements IEngagementService {
 
   constructor(
     private readonly _repository: EngagementsRepository,
+    @Inject(forwardRef(() => LeadsService))
     private readonly _leadService: LeadsService,
   ) {}
 
   async generateEngagement(
     generateEngagementDto: GenerateEngagementDto,
+    userId?: string,
   ): Promise<Engagements> {
     try {
       await this._leadService.findById(generateEngagementDto.lead_id);
-      const engagementsItem = await this._repository.createEngagement(
-        generateEngagementDto,
-      );
+      const engagementsItem = await this._repository.createEngagement({
+        ...generateEngagementDto,
+        created_by: userId ? userId : 'system',
+      });
       return engagementsItem;
     } catch (error) {
       this.logger.error('Error at creating', error.stack);
