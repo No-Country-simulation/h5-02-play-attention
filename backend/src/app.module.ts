@@ -11,6 +11,7 @@ import { ResourcesModule } from './resources/resources.module';
 import configuration from './config/configuration';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EngagementsModule } from './engagements/engagements.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EngagementsModule } from './engagements/engagements.module';
     MailModule,
     ResourcesModule,
     CloudinaryModule,
+    CategoriesModule,
     EngagementsModule,
   ],
   controllers: [AppController],
