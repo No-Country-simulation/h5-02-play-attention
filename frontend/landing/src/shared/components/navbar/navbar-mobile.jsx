@@ -26,7 +26,7 @@ export default function NavbarMobile({
 
       <div
         className={cn(
-          "absolute left-0 right-0 top-[61px] z-50 bg-white p-4 shadow-lg lg:hidden",
+          "absolute left-0 right-0 top-[56px] z-50 bg-white p-4 shadow-lg lg:hidden",
           isMenuOpen ? "block" : "hidden"
         )}
       >
