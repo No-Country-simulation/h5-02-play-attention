@@ -11,8 +11,17 @@ export function Navbar() {
   const scrollToSection = (sectionId) => {
     setIsMenuOpen(false);
     const element = document.getElementById(sectionId);
+    const navbarHeight = 56;
+
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      const offsetTop = element.offsetTop;
+
+      const scrollTo = sectionId === "hero" ? 0 : offsetTop - navbarHeight;
+
+      window.scrollTo({
+        top: scrollTo,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -20,7 +29,7 @@ export function Navbar() {
     const handleScroll = () => {
       const sections = [
         "hero",
-        "demo-videos",        
+        "demo-videos",
         "contact",
         "pricing-plans",
         "testimonials",
@@ -61,7 +70,7 @@ export function Navbar() {
             alt="Logo"
             className="h-8 w-auto block lg:hidden xl:block"
           />
-          
+
           <img
             src="/logo-dipper.svg"
             alt="Logo"

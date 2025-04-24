@@ -13,7 +13,7 @@ export function HeroSection() {
     }
   };
   return (
-    <div className="relative overflow-hidden px-4 lg:px-20 py-12 md:py-16 lg:py-20">
+    <div className="relative overflow-hidden px-4 lg:px-20 m-0">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
