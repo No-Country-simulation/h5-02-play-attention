@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { BarChart3, List, Calendar } from 'lucide-react';
@@ -20,8 +20,17 @@ import { useLeads } from './lib/hooks/useLeads';
  */
 export default function LeadManager() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { title, description } = getPageMetadata('leads');
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'dashboard');
+
+  // Actualizar activeTab cuando cambia el parámetro de URL
+  useEffect(() => {
+    if (tabParam && ['dashboard', 'list', 'calendar'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // Estado local en lugar de Zustand store
   const [filters, setFiltersState] = useState({
@@ -168,6 +177,12 @@ export default function LeadManager() {
     setFilters({ search });
   };
 
+  // Función para actualizar la URL cuando cambia la pestaña
+  const handleTabChange = value => {
+    setActiveTab(value);
+    router.push(`/crm?tab=${value}`, { scroll: false });
+  };
+
   return (
     <div className='p-4 md:p-6 max-w-7xl mx-auto'>
       <PageHeader title={title} description={description} />
@@ -175,7 +190,7 @@ export default function LeadManager() {
       <Tabs
         defaultValue='dashboard'
         value={activeTab}
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className='mb-6'
       >
         <div className='w-full overflow-x-auto pb-2 no-scrollbar'>

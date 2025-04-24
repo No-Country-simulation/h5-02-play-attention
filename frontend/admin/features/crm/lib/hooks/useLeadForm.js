@@ -28,7 +28,7 @@ export function useLeadForm() {
   const onSubmit = async data => {
     try {
       await createLeadMutation.mutateAsync(data);
-      router.push('/crm');
+      router.push('/crm?tab=list');
     } catch (error) {
       console.error('Error creating lead:', error);
     }
@@ -37,7 +37,7 @@ export function useLeadForm() {
   const isSubmitting = createLeadMutation.isPending;
 
   const handleCancel = () => {
-    router.push('/crm');
+    router.push('/crm?tab=list');
   };
 
   return {
