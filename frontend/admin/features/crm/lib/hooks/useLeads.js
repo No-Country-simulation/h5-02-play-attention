@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { leadsApi } from '../api/api';
 import { leadsAdapter } from '../adapters';
 import { toast } from 'sonner';
+import { transformStatusToBackend } from '../constants/lead-status';
 
 /**
  * Hook para obtener todos los leads
@@ -85,6 +86,9 @@ export function useUpdateLeadStatus() {
       // Adaptar el lead al formato del frontend
       const adaptedLead = leadsAdapter(currentLead);
 
+      // Transformar el estado al formato que espera el backend
+      const backendStatus = transformStatusToBackend(status);
+
       // Crear payload con todos los campos existentes y solo actualizar el estado
       const payload = {
         fullname: adaptedLead.name || 'Nombre temporal',
@@ -98,7 +102,7 @@ export function useUpdateLeadStatus() {
             ? 'Empresa'
             : 'Profesional',
         message: adaptedLead.notes || '',
-        status: status, // Actualizar solo el estado
+        status: backendStatus, // Enviar el estado transformado al formato del backend
         origen: adaptedLead.source || 'Sitio web',
         relation: adaptedLead.position || 'Usuario' // Proporcionar una relación por defecto
       };

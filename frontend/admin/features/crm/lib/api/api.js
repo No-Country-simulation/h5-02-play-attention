@@ -1,9 +1,10 @@
 /**
- * API centralizada para CRM
- * Contiene todas las funciones de comunicación con el backend en un solo lugar
+ * API para leads
+ * Centraliza todas las llamadas a la API relacionadas con leads
  */
 
 const API_URL = 'https://play-attention.onrender.com/api';
+import { transformStatusToBackend } from '../constants/lead-status';
 
 export const leadsApi = {
   /**
@@ -137,6 +138,9 @@ export const leadsApi = {
         throw new Error(`ID del lead inválido: "${id}"`);
       }
 
+      // Transformar el estado al formato que espera el backend
+      const formattedStatus = transformStatusToBackend(formData.status);
+
       // Asegurarnos que todos los campos requeridos estén presentes
       const payload = {
         fullname:
@@ -154,7 +158,7 @@ export const leadsApi = {
             ? 'Empresa'
             : 'Individuo'),
         message: formData.notes || formData.message || '',
-        status: formData.status || 'Nuevo',
+        status: formattedStatus,
         origen: formData.source || formData.origen || 'Sitio web',
         relation: formData.position || formData.relation || 'Usuario' // Asegurar que relation no esté vacío
       };
