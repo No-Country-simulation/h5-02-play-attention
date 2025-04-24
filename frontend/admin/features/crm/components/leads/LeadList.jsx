@@ -37,7 +37,7 @@ export default function LeadList({
   // porque recibimos los leads ya paginados
   const currentLeads = leads;
   const currentLeadsCount = currentLeads.length; // Contar los leads de la página actual
- console.log(leads)
+
   // Verificar si tenemos leads para mostrar (basado en el total real)
   if (loading) {
     return (
@@ -133,21 +133,19 @@ export default function LeadList({
 
   return (
     <div className='space-y-4'>
-      {/* Vista de tabla - Oculta en pantallas extra pequeñas, visible en el resto */}
-      <div className='hidden sm:block bg-white border rounded-lg overflow-x-auto'>
+      {/* Vista de tabla - Visible en desktop y tablets */}
+      <div className='hidden md:block bg-white border rounded-lg overflow-x-auto'>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className='whitespace-nowrap'>Nombre</TableHead>
-              <TableHead className='whitespace-nowrap hidden sm:table-cell'>
-                Contacto
-              </TableHead>
-              <TableHead className='whitespace-nowrap hidden md:table-cell'>
+              <TableHead className='whitespace-nowrap'>Contacto</TableHead>
+              <TableHead className='whitespace-nowrap hidden lg:table-cell'>
                 Empresa
               </TableHead>
               <TableHead className='whitespace-nowrap'>Tipo</TableHead>
               <TableHead className='whitespace-nowrap'>Estado</TableHead>
-              <TableHead className='whitespace-nowrap hidden md:table-cell'>
+              <TableHead className='whitespace-nowrap hidden lg:table-cell'>
                 Fecha
               </TableHead>
               <TableHead className='whitespace-nowrap text-right'>
@@ -165,11 +163,8 @@ export default function LeadList({
                   <div className='text-xs sm:text-sm text-muted-foreground truncate max-w-[120px] sm:max-w-none'>
                     {lead.position}
                   </div>
-                  <div className='text-xs text-muted-foreground sm:hidden truncate'>
-                    {lead.email}
-                  </div>
                 </TableCell>
-                <TableCell className='hidden sm:table-cell'>
+                <TableCell>
                   <div className='space-y-1'>
                     <div className='flex items-center text-xs sm:text-sm'>
                       <Mail className='h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground' />
@@ -180,17 +175,19 @@ export default function LeadList({
                     {lead.phone && (
                       <div className='flex items-center text-xs sm:text-sm'>
                         <Phone className='h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground' />
-                        {lead.phone}
+                        <span className='truncate max-w-[120px] md:max-w-none'>
+                          {lead.phone}
+                        </span>
                       </div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell className='hidden md:table-cell'>
+                <TableCell className='hidden lg:table-cell'>
                   {lead.company || 'N/A'}
                 </TableCell>
                 <TableCell>{renderUserTypeBadge(lead.userType)}</TableCell>
                 <TableCell>{renderStatusBadge(lead.status)}</TableCell>
-                <TableCell className='hidden md:table-cell'>
+                <TableCell className='hidden lg:table-cell'>
                   <div className='flex items-center text-xs sm:text-sm'>
                     <Calendar className='h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground' />
                     {formatDate(lead.createdAt)}
@@ -209,7 +206,6 @@ export default function LeadList({
                 </TableCell>
               </TableRow>
             ))}
-            {/* Mostrar fila vacía si no hay leads en la página actual pero sí en total */}
             {!loading && totalLeads > 0 && currentLeadsCount === 0 && (
               <TableRow>
                 <TableCell
@@ -224,8 +220,8 @@ export default function LeadList({
         </Table>
       </div>
 
-      {/* Vista de tarjetas para móvil - Vista en pantallas extra pequeñas */}
-      <div className='sm:hidden space-y-3'>
+      {/* Vista de tarjetas para móvil */}
+      <div className='md:hidden space-y-3'>
         {currentLeads.map(lead => (
           <div
             key={lead.id}
@@ -258,8 +254,8 @@ export default function LeadList({
               )}
               {lead.company && (
                 <div className='flex items-center text-xs'>
-                  <span className='text-muted-foreground'>Empresa:</span>
-                  <span className='truncate ml-1'>{lead.company}</span>
+                  <span className='text-muted-foreground mr-1'>Empresa:</span>
+                  <span className='truncate'>{lead.company}</span>
                 </div>
               )}
               <div className='flex items-center text-xs'>

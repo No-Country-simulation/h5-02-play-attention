@@ -194,7 +194,7 @@ export default function LeadManager() {
         className='mb-6'
       >
         <div className='w-full overflow-x-auto pb-2 no-scrollbar'>
-          <TabsList className='w-full md:w-auto justify-start md:justify-center'>
+          <TabsList className='w-full sm:w-auto justify-start sm:justify-center'>
             <TabsTrigger
               value='dashboard'
               className='flex items-center whitespace-nowrap'
