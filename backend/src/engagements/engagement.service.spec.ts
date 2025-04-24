@@ -80,8 +80,9 @@ describe('Engagements Service', () => {
           service: '',
           message: '',
           status: '',
-          contact_id: {},
+          contact_id:[],
           origen: '',
+          relation:''
         },
         detail: 'asdasdp',
         created_by: 'system',
