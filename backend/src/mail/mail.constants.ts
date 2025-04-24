@@ -26,6 +26,11 @@ export const EmailTemplatesDefault: EmailTemplateMap = {
     defaultSubject: 'Example Template',
     vars: ['name'],
   },
+  REGISTER_EMAIL: {
+    templateName: 'registeredEmail',
+    defaultSubject: 'Registered Email',
+    vars: ['email', 'password', 'url'],
+  },
 };
 
 export const TECHNICAL_ERRORS = ['ECONNREFUSED', 'ENOTFOUND', 'EAUTH'] as const;
