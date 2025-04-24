@@ -38,10 +38,6 @@ export const useLeadMetrics = (leads, timeRange, isLoading) => {
       if (timeRange === '5min') {
         // Últimos 5 minutos para pruebas de desarrollo
         cutoffDate.setMinutes(cutoffDate.getMinutes() - 5);
-        console.log(
-          'Mostrando leads de los últimos 5 minutos. Fecha límite:',
-          cutoffDate
-        );
       } else if (timeRange === '7days') {
         cutoffDate.setDate(cutoffDate.getDate() - 7);
       } else if (timeRange === '90days') {
@@ -53,15 +49,10 @@ export const useLeadMetrics = (leads, timeRange, isLoading) => {
         cutoffDate.setDate(cutoffDate.getDate() - 30);
       }
 
-      // Diagnóstico para entender las fechas
-      console.log('Fecha límite:', cutoffDate);
-      console.log('Analizando fechas de creación de leads...');
-
       // Filtrar leads creados después de la fecha límite (sin importar su estado)
       newLeads = leads.filter(lead => {
         try {
           if (!lead.createdAt) {
-            console.log('Lead sin fecha de creación:', lead.id, lead.name);
             return false; // Sin fecha de creación, no podemos considerarlo como creado recientemente
           }
 
@@ -69,39 +60,16 @@ export const useLeadMetrics = (leads, timeRange, isLoading) => {
 
           // Verificar si la fecha es válida
           if (isNaN(createdAt.getTime())) {
-            console.log(
-              'Fecha inválida para lead:',
-              lead.id,
-              lead.name,
-              lead.createdAt
-            );
             return false;
           }
 
           const isRecent = createdAt >= cutoffDate;
 
-          if (isRecent) {
-            console.log(
-              'Lead reciente encontrado:',
-              lead.id,
-              lead.name,
-              'creado el',
-              createdAt.toLocaleString()
-            );
-          }
-
           return isRecent;
         } catch (e) {
-          console.error('Error al procesar fecha:', e, lead);
           return false;
         }
       }).length;
-
-      console.log(
-        `Total de leads creados en los últimos ${
-          timeRange === '5min' ? '5 minutos' : '...'
-        }: ${newLeads}`
-      );
     }
 
     // Tasa de conversión (leads con estado "convertido" o "cliente")

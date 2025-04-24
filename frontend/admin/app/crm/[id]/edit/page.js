@@ -23,7 +23,6 @@ export default function EditLeadPage({ params }) {
 
   const handleSubmit = async data => {
     // En producción, aquí se actualizaría el lead en la API
-    console.log('Lead actualizado:', data);
 
     // Simular retraso de API
     await new Promise(resolve => setTimeout(resolve, 500));
