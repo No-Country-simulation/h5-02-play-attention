@@ -3,6 +3,10 @@
  * Facilita las importaciones y mantiene una API limpia
  */
 
-export { default as pdfAdapter } from './pdf-adapter';
-export { default as contactsAdapter } from './contacts.adapter';
+export { generateLeadsPDF as pdfAdapter } from './pdf-adapter';
+export {
+  contactHistoryAdapter,
+  getContactTypeColor,
+  getContactTypeIcon as contactsAdapter
+} from './contacts.adapter';
 export { default as leadsAdapter } from './leads.adapter';
