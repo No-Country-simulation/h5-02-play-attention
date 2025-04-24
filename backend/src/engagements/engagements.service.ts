@@ -8,7 +8,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IEngagementService } from './interfaces/engagements.service.int';
-import { GenerateEngagementDto } from './dto/generate-engagement.dto';
+import {
+  GenerateEngagementDto,
+  GenerateEngagementFromLandingDto,
+} from './dto/generate-engagement.dto';
 import { Engagements } from './schema/engagements.schema';
 import { EngagementsRepository } from './engagements.repository';
 import { UpdateEngagementDto } from './dto/update-engagement.dto';
@@ -43,6 +46,19 @@ export class EngagementService implements IEngagementService {
       }
       throw new InternalServerErrorException();
     }
+  }
+
+  async generateEngagementFormLanding(
+    dto: GenerateEngagementFromLandingDto,
+    userId?: string,
+  ): Promise<Engagements> {
+    const newData: GenerateEngagementDto = {
+      ...dto,
+      contact_type: 'website',
+      contact_date: new Date(),
+      subject: 'New Lead from website',
+    };
+    return await this.generateEngagement(newData, userId);
   }
 
   async getEngagementsByLeadId(

@@ -1,20 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateLeadDto, UpdateLeadDto } from './dto/leads.dto';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateLeadDto, CreateLeadFromLandingDto, UpdateLeadDto } from './dto/leads.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Leads } from './schema/leads.model';
 import { Model } from 'mongoose';
+import { EngagementService } from 'src/engagements/engagements.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LeadCreatedEvent } from 'src/system-events/lead-created.event';
+import { LEAD_EVENTS } from 'src/system-events/event-names';
 
 @Injectable()
 export class LeadsService {
 
     constructor(
         @InjectModel(Leads.name)
-        private leadsModel: Model<Leads>
+        private leadsModel: Model<Leads>,
+        @Inject(forwardRef(() => EngagementService))
+        private readonly _engagementService: EngagementService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async createLead(createLeadDto: CreateLeadDto) {
         const newLead = new this.leadsModel(createLeadDto);
         return newLead.save();
+    }
+
+    async createFromLanding(dto: CreateLeadFromLandingDto){
+        const newLead = await this.createLead({...dto, origen:'Sitio web', status: 'Nuevo'});
+
+        await this._engagementService.generateEngagementFormLanding({lead_id:newLead._id.toString(), detail: dto.message });
+
+        this.eventEmitter.emit(
+            LEAD_EVENTS.LEAD_CREATED,
+            new LeadCreatedEvent(newLead._id.toString(), dto.email, dto.fullname, dto.message)
+        );
+        return {ok: true,}
     }
 
     async findAll(): Promise<Leads[]>{

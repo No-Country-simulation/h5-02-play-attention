@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { LeadsService } from './leads.service';
-import { CreateLeadDto, UpdateLeadDto } from './dto/leads.dto';
+import { CreateLeadDto, CreateLeadFromLandingDto, UpdateLeadDto } from './dto/leads.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { Leads } from './schema/leads.model';
 
@@ -24,6 +24,11 @@ export class LeadsController {
     })
     create(@Body() createLeadDto: CreateLeadDto) {
         return this.leadsService.createLead(createLeadDto);
+    }
+
+    @Post('form-website')
+    createFromWebsite(@Body() createFromWebsiteDto: CreateLeadFromLandingDto){
+        return this.leadsService.createFromLanding(createFromWebsiteDto);
     }
 
     @Get()

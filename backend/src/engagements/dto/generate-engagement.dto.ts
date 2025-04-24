@@ -74,3 +74,8 @@ export class GenerateEngagementDto {
   @IsString()
   created_by?: string = 'system';
 }
+
+export class GenerateEngagementFromLandingDto {
+  lead_id: string;
+  detail: string;
+}

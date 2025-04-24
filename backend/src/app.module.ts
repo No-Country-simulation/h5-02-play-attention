@@ -12,6 +12,7 @@ import configuration from './config/configuration';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EngagementsModule } from './engagements/engagements.module';
 import { CategoriesModule } from './categories/categories.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CategoriesModule } from './categories/categories.module';
       isGlobal: true,
       load: [configuration],
     }),
+    EventEmitterModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URI),
     LeadsModule,
     AuthModule,
