@@ -72,28 +72,34 @@ export const leadsApi = {
    */
   createLead: async formData => {
     try {
-      // Transformación simple e integrada
+      // Transformación adaptada al formato exacto que funciona en Swagger
       const payload = {
         fullname: formData.name?.trim() || '',
-        company: formData.userType === 'empresa' ? formData.company || '' : '',
+        company: formData.company || '',
         phone: formData.phone || '',
         email: formData.email || '',
-        // Mapeamos userType a service según lo esperado por backend
         service:
           formData.userType === 'persona'
             ? 'Individuo'
             : formData.userType === 'profesional'
             ? 'Profesional'
-            : formData.userType === 'empresa'
-            ? 'Empresa'
-            : 'Individuo',
-        message: formData.notes || '',
+            : 'Empresa',
+        notes: formData.notes || '',
         status: 'Nuevo',
-        origen: formData.source || 'Sitio web',
-        relation: formData.position || ''
+        origen: formData.source || 'Otro',
+        relation: formData.position || 'Cantante'
       };
 
-      console.log('Sending lead data to API:', payload);
+      // Asegurarnos que los campos coincidan exactamente con lo que espera el backend
+      // Esto es crítico para evitar el error 500
+
+      console.log('========== CREATE LEAD API CALL ==========');
+      console.log('URL:', `${API_URL}/leads`);
+      console.log('Payload enviado:', JSON.stringify(payload, null, 2));
+      console.log('Campos formData originales:', Object.keys(formData));
+      console.log('Tipo de userType:', typeof formData.userType);
+      console.log('Notas enviadas:', formData.notes);
+      console.log('==========================================');
 
       const response = await fetch(`${API_URL}/leads`, {
         method: 'POST',
@@ -101,14 +107,34 @@ export const leadsApi = {
         body: JSON.stringify(payload)
       });
 
+      const responseHeaders = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+      console.log('Response status:', response.status);
+      console.log('Response headers:', responseHeaders);
+
       if (!response.ok) {
         let errorText = '';
+        let errorJson = null;
+
         try {
-          const errorResponse = await response.json();
-          errorText = JSON.stringify(errorResponse);
+          errorJson = await response.json();
+          errorText = JSON.stringify(errorJson, null, 2);
+          console.error('Error response JSON:', errorJson);
         } catch (parseError) {
-          errorText = await response.text();
+          try {
+            errorText = await response.text();
+            console.error('Error response text:', errorText);
+          } catch (textError) {
+            errorText = 'No se pudo leer la respuesta de error';
+            console.error('Error reading response:', textError);
+          }
         }
+
+        console.error('Response status:', response.status);
+        console.error('Response status text:', response.statusText);
+
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
@@ -116,7 +142,7 @@ export const leadsApi = {
       console.log('Lead created successfully:', data);
       return data;
     } catch (error) {
-      console.error('Error creating lead:', error);
+      console.error('Error completo al crear lead:', error);
       throw error;
     }
   },

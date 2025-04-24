@@ -37,7 +37,7 @@ export default function LeadList({
   // porque recibimos los leads ya paginados
   const currentLeads = leads;
   const currentLeadsCount = currentLeads.length; // Contar los leads de la página actual
-
+ console.log(leads)
   // Verificar si tenemos leads para mostrar (basado en el total real)
   if (loading) {
     return (

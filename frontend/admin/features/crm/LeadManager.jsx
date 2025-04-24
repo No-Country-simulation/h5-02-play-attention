@@ -25,8 +25,8 @@ export default function LeadManager() {
 
   // Estado local en lugar de Zustand store
   const [filters, setFiltersState] = useState({
-    status: 'todos',
-    userType: 'todos',
+    status: 'all',
+    userType: 'all',
     search: ''
   });
   const [pagination, setPaginationState] = useState({
@@ -58,7 +58,7 @@ export default function LeadManager() {
       status: lead.status ? lead.status.toLowerCase() : 'nuevo',
       createdAt: lead.createdAt,
       source: lead.origen,
-      message: lead.message,
+      notes: lead.notes,
       // Mantener las propiedades originales también por si acaso
       ...lead
     }));
@@ -69,12 +69,12 @@ export default function LeadManager() {
   // Aplicar filtros de forma local
   const filteredLeads = leads.filter(lead => {
     // Filtro por estado
-    if (filters.status !== 'todos' && lead.status !== filters.status) {
+    if (filters.status !== 'all' && lead.status !== filters.status) {
       return false;
     }
 
     // Filtro por tipo de usuario
-    if (filters.userType !== 'todos' && lead.userType !== filters.userType) {
+    if (filters.userType !== 'all' && lead.userType !== filters.userType) {
       return false;
     }
 
@@ -97,7 +97,7 @@ export default function LeadManager() {
   );
 
   // Diagnóstico para la paginación
-  console.log({
+  /*   console.log({
     totalLeads: filteredLeads.length,
     currentPage: pagination.page,
     pageSize: pagination.pageSize,
@@ -105,7 +105,7 @@ export default function LeadManager() {
     startIndex,
     endIndex: startIndex + pagination.pageSize,
     leadsEnEstaPagina: paginatedLeads.length
-  });
+  }); */
 
   // Actualizar total de páginas cuando cambian los filtros o leads
   useEffect(() => {

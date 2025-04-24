@@ -107,7 +107,7 @@ export default function LeadFilters({
         <div className='sm:col-span-6 md:col-span-2 flex items-end justify-center sm:justify-end mt-2 sm:mt-0'>
           <Button
             onClick={onCreateLead}
-            className='w-full sm:w-auto px-4 h-9 sm:h-10'
+            className='w-full sm:w-auto px-4 h-9 sm:h-10 cursor-pointer'
             variant='purple'
           >
             <Plus className='mr-2 h-4 w-4' />

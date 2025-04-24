@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Textarea } from '@/shared/ui/textarea';
@@ -22,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { leadSourceOptions } from '../../lib/config/ui-config';
 import { useLeadForm } from '../../lib/hooks/useLeadForm';
+import { useCreateLead } from '../../lib/hooks/useLeads';
 
 export default function NewLeadForm() {
   const {
@@ -32,6 +34,8 @@ export default function NewLeadForm() {
     onSubmit,
     handleCancel
   } = useLeadForm();
+
+  const createLeadMutation = useCreateLead();
 
   return (
     <div className='p-6 max-w-4xl mx-auto'>

@@ -180,7 +180,7 @@ export default function LeadDashboard({
               data={metrics.byType}
               hasData={metrics.byType.length > 0}
               hasSampleData={leads.length === 0 && metrics.byType.length > 0}
-              height='100%'
+              height='200px'
               className='h-full'
             />
           </div>
@@ -216,7 +216,7 @@ export default function LeadDashboard({
               data={metrics.byStatus}
               hasData={metrics.byStatus.length > 0}
               className='h-full'
-              height='100%'
+              height='200px'
             />
           </div>
         </div>
@@ -230,7 +230,7 @@ export default function LeadDashboard({
             data={metrics.byType}
             hasData={metrics.byType.length > 0}
             hasSampleData={leads.length === 0 && metrics.byType.length > 0}
-            height='250px'
+            height='200px'
           />
           <ChartCard
             title='Por Estado'
@@ -238,7 +238,7 @@ export default function LeadDashboard({
             chartRef={chartRefs.statusMobileChart}
             data={metrics.byStatus}
             hasData={metrics.byStatus.length > 0}
-            height='250px'
+            height='200px'
           />
         </div>
 

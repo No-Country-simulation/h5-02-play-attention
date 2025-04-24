@@ -710,16 +710,19 @@ export const useLeadCharts = (chartRefs, metrics, isLoading) => {
           }
         }
       } catch (error) {
-        console.error('Error al renderizar los gráficos:', error);
+        console.error('Error al renderizar gráficos:', error);
       }
     };
 
-    renderCharts();
+    // Solo renderizar si no está cargando
+    if (!isLoading) {
+      renderCharts();
+    }
 
-    // Cleanup cuando el componente se desmonta o el efecto se vuelve a ejecutar
+    // Limpieza al desmontar
     return () => {
       isMounted = false;
       cleanupCharts();
     };
-  }, [metrics, isLoading, chartRefs]); // Solo dependencias esenciales
+  }, [chartRefs, metrics, isLoading]);
 };
