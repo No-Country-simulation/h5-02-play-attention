@@ -14,12 +14,12 @@ export class Leads {
     })
     fullname: string;
 
-    // @Prop({
-    //     type: [mongoose.Schema.Types.ObjectId],
-    //     required: false,
-    //     ref: 'engegements'
-    // })
-    // contact_id: Types.ObjectId[];
+     @Prop({
+        type: [mongoose.Schema.Types.ObjectId],
+        required: false,
+        ref: 'engegements'
+    })
+    contact_id: Types.ObjectId[];
 
     @Prop({
         type: String,
@@ -42,7 +42,7 @@ export class Leads {
     @Prop({
         type: String,
         required: true,
-        enum: ['Profesional', 'Individuo', 'Empresa']
+        enum: ['Profesional', 'Persona individual', 'Empresa']
     })
     service: string;
 
@@ -63,7 +63,8 @@ export class Leads {
     @Prop({
         type: String,
         required: false,
-        enum: ['Referencia', 'Sitio web', 'Redes sociales', 'LinkedIn', 'Otro']
+        enum: ['Referencia', 'Sitio web', 'Redes sociales', 'LinkedIn', 'Otro'],
+        default: 'Sitio Web'
     })
     origen: string;
 
