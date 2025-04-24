@@ -13,7 +13,7 @@ export function HeroSection() {
     }
   };
   return (
-    <div className="relative overflow-hidden px-4 lg:px-20 py-12 md:py-16 lg:py-20">
+    <div className="relative overflow-hidden px-4 lg:px-20 m-0">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
@@ -52,7 +52,7 @@ export function HeroSection() {
         <div className="relative w-screen left-1/2 -translate-x-1/2 z-20 overflow-hidden -mt-8 pb-8">
           <div className="relative">
             <div
-              className="absolute inset-x-0 h-[36px] w-screen -rotate-[4deg] lg:-rotate-[1deg] md:-rotate-[2deg] sm:-rotate-[3deg]
+              className="absolute inset-x-0 h-[54px] w-screen -rotate-[4deg] lg:-rotate-[1deg] md:-rotate-[2deg] sm:-rotate-[3deg]
       bg-secondary-200 top-1/2 -translate-y-1/2 z-0"
               style={{ transformOrigin: "75% 50%" }}
             />
