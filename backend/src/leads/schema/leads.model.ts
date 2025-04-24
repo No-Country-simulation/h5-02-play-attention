@@ -24,7 +24,7 @@ export class Leads {
         type: String,
         required: false,
     })
-    company: string;
+    company?: string;
 
     @Prop({
         type: String,
@@ -47,9 +47,9 @@ export class Leads {
 
     @Prop({
         type: String,
-        required: true,
+        required: false,
     })
-    notes: string;
+    notes?: string;
 
     @Prop({
         type: String,
