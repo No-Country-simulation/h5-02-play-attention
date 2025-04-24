@@ -41,11 +41,7 @@ export class Leads {
     @Prop({
         type: String,
         required: true,
-<<<<<<< HEAD
-        enum: ['Profesional', 'Persona individual', 'Empresa']
-=======
         enum: LEAD_SERVICE_OPTIONS
->>>>>>> 4e1e11745836bf88f08835a00d93424b658466a2
     })
     service: string;
 
@@ -66,12 +62,7 @@ export class Leads {
     @Prop({
         type: String,
         required: false,
-<<<<<<< HEAD
-        enum: ['Referencia', 'Sitio web', 'Redes sociales', 'LinkedIn', 'Otro'],
-        default: 'Sitio Web'
-=======
         enum: LEAD_ORIGINS
->>>>>>> 4e1e11745836bf88f08835a00d93424b658466a2
     })
     origen: string;
 

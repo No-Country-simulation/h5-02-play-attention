@@ -2,6 +2,7 @@ type ConfirmEmailVars = { name: string; url: string };
 type EmailUpdatedVars = { name: string };
 type PasswordUpdatedVars = { name: string };
 type ResetPasswordVars = { name: string; url: string };
+type RegisterEmailVars = { email: string; password: string; url: string };
 type ExampleVars = { name: string; url: string };
 type WelcomeVars = {name: string};
 
@@ -13,6 +14,7 @@ enum EmailTemplatesEnum {
   RESET_PASSWORD = 'RESET_PASSWORD',
   EXAMPLE_TEMPLATE = 'EXAMPLE_TEMPLATE',
   WELCOME_TEMPLATE = 'WELCOME_TEMPLATE',
+  REGISTER_EMAIL = 'REGISTER_EMAIL',
 }
 
 type TemplateData<T> = {
@@ -34,6 +36,7 @@ export type TemplateContextVariables = {
   RESET_PASSWORD: ResetPasswordVars;
   EXAMPLE_TEMPLATE: ExampleVars;
   WELCOME_TEMPLATE: WelcomeVars;
+  REGISTER_EMAIL: RegisterEmailVars;
 };
 
 export type EmailTemplates = keyof typeof EmailTemplatesEnum;

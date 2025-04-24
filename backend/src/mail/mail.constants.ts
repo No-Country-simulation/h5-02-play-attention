@@ -30,6 +30,11 @@ export const EmailTemplatesDefault: EmailTemplateMap = {
     templateName: 'welcome',
     defaultSubject: 'Bienvenido a Play Attention',
     vars:['name']
+  },
+  REGISTER_EMAIL: {
+    templateName: 'registeredEmail',
+    defaultSubject: 'Registered Email',
+    vars: ['email', 'password', 'url'],
   }
 };
 
