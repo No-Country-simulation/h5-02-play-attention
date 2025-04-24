@@ -12,8 +12,6 @@ export const leadsApi = {
    */
   getLeads: async () => {
     try {
-      console.log(`Fetching leads from: ${API_URL}/leads`);
-
       const response = await fetch(`${API_URL}/leads`, {
         method: 'GET',
         headers: {
@@ -31,10 +29,8 @@ export const leadsApi = {
       }
 
       const data = await response.json();
-      console.log(`Fetched ${data.length || 0} leads`);
       return data;
     } catch (error) {
-      console.error('Error fetching leads:', error);
       throw error;
     }
   },
@@ -60,7 +56,6 @@ export const leadsApi = {
 
       return response.json();
     } catch (error) {
-      console.error(`Error fetching lead ${id}:`, error);
       throw error;
     }
   },
@@ -93,14 +88,6 @@ export const leadsApi = {
       // Asegurarnos que los campos coincidan exactamente con lo que espera el backend
       // Esto es crítico para evitar el error 500
 
-      console.log('========== CREATE LEAD API CALL ==========');
-      console.log('URL:', `${API_URL}/leads`);
-      console.log('Payload enviado:', JSON.stringify(payload, null, 2));
-      console.log('Campos formData originales:', Object.keys(formData));
-      console.log('Tipo de userType:', typeof formData.userType);
-      console.log('Notas enviadas:', formData.notes);
-      console.log('==========================================');
-
       const response = await fetch(`${API_URL}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,8 +98,6 @@ export const leadsApi = {
       response.headers.forEach((value, key) => {
         responseHeaders[key] = value;
       });
-      console.log('Response status:', response.status);
-      console.log('Response headers:', responseHeaders);
 
       if (!response.ok) {
         let errorText = '';
@@ -121,28 +106,20 @@ export const leadsApi = {
         try {
           errorJson = await response.json();
           errorText = JSON.stringify(errorJson, null, 2);
-          console.error('Error response JSON:', errorJson);
         } catch (parseError) {
           try {
             errorText = await response.text();
-            console.error('Error response text:', errorText);
           } catch (textError) {
             errorText = 'No se pudo leer la respuesta de error';
-            console.error('Error reading response:', textError);
           }
         }
-
-        console.error('Response status:', response.status);
-        console.error('Response status text:', response.statusText);
 
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('Lead created successfully:', data);
       return data;
     } catch (error) {
-      console.error('Error completo al crear lead:', error);
       throw error;
     }
   },
@@ -155,27 +132,36 @@ export const leadsApi = {
    */
   updateLead: async (id, formData) => {
     try {
-      // Transformación similar a createLead
+      // Validación estricta del ID
+      if (!id || typeof id !== 'string' || id.trim() === '') {
+        throw new Error(`ID del lead inválido: "${id}"`);
+      }
+
+      // Asegurarnos que todos los campos requeridos estén presentes
       const payload = {
-        fullname: formData.name?.trim() || '',
-        company: formData.userType === 'empresa' ? formData.company || '' : '',
-        phone: formData.phone || '',
-        email: formData.email || '',
+        fullname:
+          formData.name?.trim() || formData.fullname || 'Nombre temporal',
+        phone: formData.phone || '123456789', // Asegurar que phone no esté vacío
+        email: formData.email || 'correo@ejemplo.com', // Asegurar un email válido
+        company: formData.company || '',
         service:
-          formData.userType === 'persona'
+          formData.service ||
+          (formData.userType === 'persona'
             ? 'Individuo'
             : formData.userType === 'profesional'
             ? 'Profesional'
             : formData.userType === 'empresa'
             ? 'Empresa'
-            : 'Individuo',
-        message: formData.notes || '',
+            : 'Individuo'),
+        message: formData.notes || formData.message || '',
         status: formData.status || 'Nuevo',
-        origen: formData.source || 'Sitio web',
-        relation: formData.position || ''
+        origen: formData.source || formData.origen || 'Sitio web',
+        relation: formData.position || formData.relation || 'Usuario' // Asegurar que relation no esté vacío
       };
 
-      const response = await fetch(`${API_URL}/leads/${id}`, {
+      const url = `${API_URL}/leads/${id}`;
+
+      const response = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -192,9 +178,9 @@ export const leadsApi = {
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
-      return response.json();
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error(`Error updating lead ${id}:`, error);
       throw error;
     }
   },
@@ -224,7 +210,6 @@ export const leadsApi = {
 
       return response.json();
     } catch (error) {
-      console.error(`Error deleting lead ${id}:`, error);
       throw error;
     }
   }

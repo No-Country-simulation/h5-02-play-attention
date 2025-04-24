@@ -33,36 +33,37 @@ export default function LeadFilters({
 }) {
   return (
     <div className='bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6'>
-      <div className='flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4'>
-        {/* Buscador */}
-        <div className='sm:col-span-12 md:col-span-6'>
-          <Label htmlFor='searchTerm' className='mb-1 sm:mb-2 block text-sm'>
-            Buscar leads
-          </Label>
-          <div className='relative'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5' />
-            <Input
-              id='searchTerm'
-              type='text'
-              placeholder='Buscar por nombre, email, empresa...'
-              value={searchTerm}
-              onChange={e => onSearchChange(e.target.value)}
-              className='pl-10 h-9 sm:h-10 text-sm'
-            />
+      {/* Versión desktop - visible solo en pantallas grandes */}
+      <div className='hidden lg:flex lg:flex-col lg:gap-3'>
+        <div className='grid grid-cols-12 gap-4'>
+          {/* Buscador */}
+          <div className='col-span-6'>
+            <Label htmlFor='searchTerm-desktop' className='mb-2 block text-sm'>
+              Buscar leads
+            </Label>
+            <div className='relative'>
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5' />
+              <Input
+                id='searchTerm-desktop'
+                type='text'
+                placeholder='Buscar por nombre, email, empresa...'
+                value={searchTerm}
+                onChange={e => onSearchChange(e.target.value)}
+                className='pl-10 h-10 text-sm'
+              />
+            </div>
           </div>
-        </div>
 
-        <div className='flex gap-3 sm:contents'>
           {/* Filtro por estado */}
-          <div className='flex-1 sm:flex-none sm:col-span-3 md:col-span-2'>
+          <div className='col-span-2'>
             <Label
-              htmlFor='statusFilter'
-              className='mb-1 sm:mb-2 block text-sm'
+              htmlFor='statusFilter-desktop'
+              className='mb-2 block text-sm'
             >
               Estado
             </Label>
             <Select value={statusFilter} onValueChange={onStatusChange}>
-              <SelectTrigger id='statusFilter' className='h-9 sm:h-10 text-sm'>
+              <SelectTrigger id='statusFilter-desktop' className='h-10 text-sm'>
                 <SelectValue placeholder='Estado' />
               </SelectTrigger>
               <SelectContent>
@@ -77,16 +78,107 @@ export default function LeadFilters({
           </div>
 
           {/* Filtro por tipo de usuario */}
-          <div className='flex-1 sm:flex-none sm:col-span-3 md:col-span-2'>
+          <div className='col-span-2'>
             <Label
-              htmlFor='userTypeFilter'
-              className='mb-1 sm:mb-2 block text-sm'
+              htmlFor='userTypeFilter-desktop'
+              className='mb-2 block text-sm'
             >
               Tipo de usuario
             </Label>
             <Select value={userTypeFilter} onValueChange={onUserTypeChange}>
               <SelectTrigger
-                id='userTypeFilter'
+                id='userTypeFilter-desktop'
+                className='h-10 text-sm'
+              >
+                <SelectValue placeholder='Tipo' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>Todos los tipos</SelectItem>
+                {leadUserTypeOptions.map(type => (
+                  <SelectItem key={type} value={type}>
+                    {leadUserTypeConfig[type]?.label || type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Botón de nuevo lead */}
+          <div className='col-span-2 flex items-end justify-end'>
+            <Button
+              onClick={onCreateLead}
+              className='w-auto px-4 h-10 cursor-pointer'
+              variant='purple'
+            >
+              <Plus className='mr-2 h-4 w-4' />
+              <span className='whitespace-nowrap'>Nuevo Lead</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Versión mobile y tablet - visible en pantallas pequeñas y medianas */}
+      <div className='lg:hidden space-y-4'>
+        {/* Buscador */}
+        <div>
+          <Label
+            htmlFor='searchTerm-mobile'
+            className='mb-1 sm:mb-2 block text-sm'
+          >
+            Buscar leads
+          </Label>
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5' />
+            <Input
+              id='searchTerm-mobile'
+              type='text'
+              placeholder='Buscar por nombre, email, empresa...'
+              value={searchTerm}
+              onChange={e => onSearchChange(e.target.value)}
+              className='pl-10 h-9 sm:h-10 text-sm'
+            />
+          </div>
+        </div>
+
+        {/* Filtros y botón */}
+        <div className='grid grid-cols-2 gap-3'>
+          {/* Filtro por estado */}
+          <div>
+            <Label
+              htmlFor='statusFilter-mobile'
+              className='mb-1 sm:mb-2 block text-sm'
+            >
+              Estado
+            </Label>
+            <Select value={statusFilter} onValueChange={onStatusChange}>
+              <SelectTrigger
+                id='statusFilter-mobile'
+                className='h-9 sm:h-10 text-sm'
+              >
+                <SelectValue placeholder='Estado' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>Todos los estados</SelectItem>
+                {leadStatusOptions.map(status => (
+                  <SelectItem key={status} value={status}>
+                    {leadStatusConfig[status]?.label || status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filtro por tipo de usuario */}
+          <div>
+            <Label
+              htmlFor='userTypeFilter-mobile'
+              className='mb-1 sm:mb-2 block text-sm'
+            >
+              Tipo
+            </Label>
+            <Select value={userTypeFilter} onValueChange={onUserTypeChange}>
+              <SelectTrigger
+                id='userTypeFilter-mobile'
                 className='h-9 sm:h-10 text-sm'
               >
                 <SelectValue placeholder='Tipo' />
@@ -101,18 +193,18 @@ export default function LeadFilters({
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        {/* Botón de nuevo lead */}
-        <div className='sm:col-span-6 md:col-span-2 flex items-end justify-center sm:justify-end mt-2 sm:mt-0'>
-          <Button
-            onClick={onCreateLead}
-            className='w-full sm:w-auto px-4 h-9 sm:h-10 cursor-pointer'
-            variant='purple'
-          >
-            <Plus className='mr-2 h-4 w-4' />
-            <span className='whitespace-nowrap'>Nuevo Lead</span>
-          </Button>
+          {/* Botón de nuevo lead */}
+          <div className='col-span-2'>
+            <Button
+              onClick={onCreateLead}
+              className='w-full h-9 sm:h-10 cursor-pointer'
+              variant='purple'
+            >
+              <Plus className='mr-2 h-4 w-4' />
+              <span className='whitespace-nowrap'>Nuevo Lead</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

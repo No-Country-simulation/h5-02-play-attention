@@ -71,7 +71,7 @@ export default function LeadDetailPage() {
 
   // Navegar hacia atrás
   const handleBack = () => {
-    router.push('/leads');
+    router.push('/crm?tab=list');
   };
 
   // Abrir modal para registrar contacto
