@@ -14,6 +14,7 @@ import MeetingCalendarView from './components/meetings/MeetingCalendarView';
 import { useLeads, useUpdateLeadStatus } from './lib/hooks/useLeads';
 import { leadStatusConfig } from './lib/config/ui-config';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 /**
  * Componente principal para la gestión de leads
@@ -48,6 +49,7 @@ export default function LeadManager() {
 
   // Obtener leads con React Query desde la nueva ubicación
   const { data: leadsFromApi = [], isLoading, error } = useLeads();
+  console.log('📦 Leads desde la API (sin adaptar):', leadsFromApi);
 
   // Estado local para actualizaciones inmediatas
   const [localLeadUpdates, setLocalLeadUpdates] = useState({});
@@ -163,7 +165,7 @@ export default function LeadManager() {
   };
 
   // Función para cambiar el estado de un lead
-  const handleLeadStatusChange = async (leadId, newStatus) => {
+  const handleLeadStatusChange = async (leadId, backendStatus) => {
     try {
       // Verificar que el ID no sea undefined o vacío
       if (!leadId) {
@@ -173,24 +175,40 @@ export default function LeadManager() {
       }
 
       console.log(
-        `📝 LeadManager: Actualizando estado del lead con ID: "${leadId}" a estado: "${newStatus}"`
+        `📝 LeadManager: Enviando estado a backend: ${backendStatus}`
       );
 
-      // Actualizar localmente para feedback inmediato al usuario
+      // Actualizar localmente para feedback inmediato
+      // Nota: Para la UI local usamos el mismo formato que viene del componente
+      const uiStatusMap = {
+        Nuevo: 'nuevo',
+        Activo: 'proceso',
+        Cliente: 'cliente'
+      };
+      const uiStatus =
+        uiStatusMap[backendStatus] || backendStatus.toLowerCase();
+
       setLocalLeadUpdates(prev => ({
         ...prev,
-        [leadId]: { status: newStatus }
+        [leadId]: { status: uiStatus }
       }));
 
-      // Enviar la actualización al backend
+      // Enviar directamente el valor recibido (ya está en formato backend)
       await updateLeadStatusMutation.mutateAsync({
         leadId,
-        status: newStatus
+        status: backendStatus
       });
 
-      // Al completarse con éxito, la caché de React Query se invalida automáticamente
-      // y se recarga la lista de leads con el nuevo estado desde el servidor
-      console.log(`✅ Estado del lead ${leadId} actualizado a: ${newStatus}`);
+      console.log(`✅ Estado enviado correctamente: ${backendStatus}`);
+
+      // Limpiar el estado local después de una actualización exitosa
+      setTimeout(() => {
+        setLocalLeadUpdates(prev => {
+          const updated = { ...prev };
+          delete updated[leadId];
+          return updated;
+        });
+      }, 500);
     } catch (error) {
       console.error(
         `❌ Error al actualizar el estado del lead ${leadId}:`,
@@ -208,11 +226,20 @@ export default function LeadManager() {
   };
 
   if (isLoading)
-    return <div className='flex justify-center p-6'>Cargando leads...</div>;
+    return (
+      <div className='flex justify-center items-center p-12 min-h-[400px] bg-white/30 rounded-xl'>
+        <LoadingSpinner
+          text='Cargando módulo de gestión de leads...'
+          size={48}
+          spinnerColor='border-primary'
+        />
+      </div>
+    );
   if (error)
     return (
-      <div className='text-red-500 p-6'>
-        Error al cargar leads: {error.message}
+      <div className='text-red-500 p-6 text-center border border-red-200 rounded-lg bg-red-50 my-4'>
+        <p className='font-medium mb-2'>Error al cargar leads</p>
+        <p>{error.message || 'Ha ocurrido un error inesperado'}</p>
       </div>
     );
 

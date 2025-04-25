@@ -1,73 +1,37 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
-  Activity,
-  AlertTriangle,
+  ArrowLeft,
+  Info,
+  MessageSquare,
   Calendar,
-  Edit,
   Mail,
-  MapPin,
   Phone,
   User,
-  ClipboardList,
-  ArrowLeft,
-  CheckSquare,
-  UserPlus
+  Building,
+  MapPin
 } from 'lucide-react';
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Card, CardContent } from '@/shared/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { Button } from '@/shared/ui/button';
-import { Badge } from '@/shared/ui/badge';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 import LeadContactHistory from '../contacts/LeadContactHistory';
 import RegisterContactModal from '../contacts/RegisterContactModal';
-import { mockLeads } from '../../lib/config/mock-data';
-import PageHeader from '@/shared/ui/page-header';
 import LeadDetail from './LeadDetail';
-
-const statusMessages = {
-  nuevo: { label: 'Nuevo', color: 'blue' },
-  contactado: { label: 'Contactado', color: 'purple' },
-  interesado: { label: 'Interesado', color: 'green' },
-  no_interesado: { label: 'No interesado', color: 'red' },
-  cliente: { label: 'Cliente', color: 'yellow' },
-  inactivo: { label: 'Inactivo', color: 'gray' }
-};
+import { useLead } from '../../lib/hooks/useLeads';
 
 export default function LeadDetailPage() {
   const router = useRouter();
   const { id } = useParams();
-  const [lead, setLead] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  // Cargar datos del lead al montar el componente
-  useEffect(() => {
-    const fetchLeadData = async () => {
-      setIsLoading(true);
-      try {
-        // Simular carga de datos con una promesa
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Buscar el lead en los datos mock
-        const foundLead = mockLeads.find(lead => lead.id === id);
-        setLead(foundLead || null);
-      } catch (error) {
-        console.error('Error al cargar los datos del lead:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchLeadData();
-    }
-  }, [id]);
+  // Obtener datos del lead desde el backend usando React Query
+  const { data: lead, isLoading, isError, error } = useLead(id);
 
   // Navegar hacia atrás
   const handleBack = () => {
@@ -88,46 +52,112 @@ export default function LeadDetailPage() {
   const handleSaveContact = contactData => {
     console.log('Guardando nuevo contacto:', contactData);
     // Aquí se implementaría la lógica para guardar el contacto en la API
-    // Por ahora solo cerramos el modal
     setIsContactModalOpen(false);
   };
 
-  return (
-    <div className='container p-6 max-w-7xl mx-auto'>
-      {/* Encabezado */}
-      <div className='mb-6'>
+  // Formatear fecha
+  const formatDate = date => {
+    if (!date) return '';
+    try {
+      return format(new Date(date), 'dd/MM/yyyy', { locale: es });
+    } catch (e) {
+      return '';
+    }
+  };
+
+  // Mostrar error si no se pudo cargar el lead
+  if (isError) {
+    return (
+      <div className='container p-6 max-w-7xl mx-auto'>
         <Button variant='ghost' size='sm' onClick={handleBack} className='mb-4'>
           <ArrowLeft className='mr-2 h-4 w-4' />
           Volver a leads
         </Button>
 
-        <PageHeader
-          title={lead?.name || 'Detalle de lead'}
-          description='Información detallada del lead y su historial de contactos'
-        />
+        <Card className='p-6 bg-red-50 border-red-200'>
+          <div className='flex flex-col items-center text-center gap-4'>
+            <h2 className='text-xl font-semibold text-red-600'>
+              Error al cargar el lead
+            </h2>
+            <p className='text-red-500'>
+              {error?.message || 'No se pudo obtener la información del lead'}
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className='container py-4 px-2 md:p-6 max-w-7xl mx-auto'>
+      {/* Encabezado con nombre y botón de volver */}
+      <div className='flex flex-col mb-6'>
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={handleBack}
+          className='mb-2 w-fit'
+        >
+          <ArrowLeft className='mr-2 h-4 w-4' />
+          Volver a leads
+        </Button>
+
+        <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center'>
+          <div>
+            <h1 className='text-2xl font-semibold'>
+              {isLoading ? (
+                <LoadingSpinner
+                  text=''
+                  showText={false}
+                  size={16}
+                  spinnerColor='border-primary/50'
+                  className='inline mr-2'
+                />
+              ) : (
+                lead?.name || 'Detalle de lead'
+              )}
+            </h1>
+            {!isLoading && lead && (
+              <p className='text-muted-foreground text-sm mt-0.5'>
+                {formatDate(lead.createdAt)}
+                {lead.status && (
+                  <span className='ml-2 inline-flex'>
+                    • <span className='ml-1'>{lead.status}</span>
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Contenido principal */}
-      <div className='space-y-6'>
-        {/* Tabs para secciones de detalle */}
-        <Tabs defaultValue='info' className='w-full'>
-          <TabsList className='mb-6'>
-            <TabsTrigger value='info'>Información</TabsTrigger>
-            <TabsTrigger value='contacts'>Historial de contactos</TabsTrigger>
-          </TabsList>
+      {/* Tabs para secciones de detalle */}
+      <Tabs defaultValue='información' className='w-full'>
+        <TabsList className='mb-6'>
+          <TabsTrigger
+            value='información'
+            className='flex items-center gap-1.5'
+          >
+            <Info className='h-4 w-4' />
+            <span>Información</span>
+          </TabsTrigger>
+          <TabsTrigger value='contactos' className='flex items-center gap-1.5'>
+            <MessageSquare className='h-4 w-4' />
+            <span>Contactos</span>
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value='info' className='space-y-6'>
-            <LeadDetail lead={lead} onBack={handleBack} isLoading={isLoading} />
-          </TabsContent>
+        <TabsContent value='información' className='space-y-4 mt-2'>
+          <LeadDetail lead={lead} isLoading={isLoading} />
+        </TabsContent>
 
-          <TabsContent value='contacts' className='space-y-6'>
-            <LeadContactHistory
-              leadId={id}
-              onAddContact={handleOpenContactModal}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+        <TabsContent value='contactos' className='space-y-4 mt-2'>
+          <LeadContactHistory
+            leadId={id}
+            onAddContact={handleOpenContactModal}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Modal para registrar contacto */}
       {lead && (

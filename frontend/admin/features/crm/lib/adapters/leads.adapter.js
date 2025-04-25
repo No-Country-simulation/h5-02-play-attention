@@ -88,17 +88,21 @@ const mapServiceToUserType = service => {
 const normalizeStatus = status => {
   if (!status) return 'nuevo';
 
+  // Normalizar a minúsculas para comparación
   const statusLower = status.toLowerCase().trim();
 
-  const statusMap = {
-    nuevo: 'nuevo',
-    'en proceso': 'proceso',
-    proceso: 'proceso',
-    cliente: 'cliente',
-    convertido: 'cliente'
-  };
+  // Mapeo simple y directo
+  if (statusLower === 'activo') return 'proceso';
+  if (statusLower === 'nuevo') return 'nuevo';
+  if (statusLower === 'cliente') return 'cliente';
 
-  return statusMap[statusLower] || 'nuevo';
+  // Si el estado ya es uno de los valores de UI, devolverlo tal cual
+  if (['nuevo', 'proceso', 'cliente'].includes(statusLower)) {
+    return statusLower;
+  }
+
+  // Valor por defecto
+  return 'nuevo';
 };
 
 export default leadsAdapter;

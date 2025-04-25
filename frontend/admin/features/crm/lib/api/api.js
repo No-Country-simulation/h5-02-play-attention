@@ -4,7 +4,6 @@
  */
 
 const API_URL = 'https://play-attention.onrender.com/api';
-import { transformStatusToBackend } from '../constants/lead-status';
 
 export const leadsApi = {
   /**
@@ -138,10 +137,7 @@ export const leadsApi = {
         throw new Error(`ID del lead inválido: "${id}"`);
       }
 
-      // Transformar el estado al formato que espera el backend
-      const formattedStatus = transformStatusToBackend(formData.status);
-
-      // Asegurarnos que todos los campos requeridos estén presentes
+      // El estado ya viene en formato correcto desde los componentes
       const payload = {
         fullname:
           formData.name?.trim() || formData.fullname || 'Nombre temporal',
@@ -158,7 +154,7 @@ export const leadsApi = {
             ? 'Empresa'
             : 'Individuo'),
         message: formData.notes || formData.message || '',
-        status: formattedStatus,
+        status: formData.status, // El estado ya viene en formato correcto
         origen: formData.source || formData.origen || 'Sitio web',
         relation: formData.position || formData.relation || 'Usuario' // Asegurar que relation no esté vacío
       };

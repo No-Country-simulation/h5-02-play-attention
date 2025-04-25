@@ -8,61 +8,36 @@ import {
   Building,
   Calendar,
   User,
-  MapPin,
   ClipboardList,
-  ArrowLeft
+  MessageSquare
 } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/shared/ui/card';
-import { Separator } from '@/shared/ui/separator';
-import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { leadStatusConfig } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 /**
  * Componente para mostrar el detalle de un lead
  * Sigue SRP al encargarse solo de mostrar la información detallada de un lead
  */
-export default function LeadDetail({ lead, onBack, isLoading }) {
+export default function LeadDetail({ lead, isLoading }) {
   // Mostrar loading si estamos cargando el lead
   if (isLoading) {
-    return (
-      <Card className='w-full'>
-        <CardHeader className='pb-4'>
-          <CardTitle>Cargando información del lead...</CardTitle>
-        </CardHeader>
-      </Card>
-    );
+    return <LeadSkeleton />;
   }
 
   // Si no hay lead, mostrar mensaje
   if (!lead) {
     return (
       <Card className='w-full'>
-        <CardHeader className='pb-4'>
+        <CardHeader className='pb-3'>
           <CardTitle>Lead no encontrado</CardTitle>
-          <CardDescription>
-            No se pudo encontrar la información solicitada.
-          </CardDescription>
         </CardHeader>
-        <CardFooter>
-          <Button
-            onClick={onBack}
-            variant='outline'
-            className='w-full sm:w-auto'
-          >
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Volver a la lista
-          </Button>
-        </CardFooter>
+        <CardContent>
+          No se pudo encontrar la información solicitada.
+        </CardContent>
       </Card>
     );
   }
@@ -71,7 +46,7 @@ export default function LeadDetail({ lead, onBack, isLoading }) {
   const formatDate = date => {
     if (!date) return 'N/A';
     try {
-      return format(new Date(date), 'dd MMMM yyyy, HH:mm', { locale: es });
+      return format(new Date(date), 'dd MMM yyyy, HH:mm', { locale: es });
     } catch (e) {
       return 'Fecha inválida';
     }
@@ -96,126 +71,290 @@ export default function LeadDetail({ lead, onBack, isLoading }) {
   };
 
   return (
-    <Card className='w-full'>
-      <CardHeader className='pb-4'>
-        <div className='flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4'>
-          <div>
-            <CardTitle className='text-2xl'>{lead.name}</CardTitle>
-            <CardDescription className='mt-1'>
-              {lead.position} {lead.company ? `en ${lead.company}` : ''}
-            </CardDescription>
-          </div>
-          <div className='flex flex-col sm:items-end gap-2'>
-            <div className='pl-4 border-l'>
-              <p className='text-sm text-muted-foreground'>Estado</p>
-              <div className='mt-1'>{renderStatusBadge(lead.status)}</div>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className='space-y-6'>
+    <div className='space-y-0'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Información de contacto */}
-        <div className='space-y-4'>
-          <h3 className='text-lg font-medium'>Información de contacto</h3>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='flex items-center gap-2'>
-              <Mail className='h-4 w-4 text-muted-foreground' />
-              <span>{lead.email}</span>
+        <Card className='w-full h-full lg:col-span-2'>
+          <CardHeader className='pt-4 pb-4 px-6 flex justify-between items-center border-b'>
+            <CardTitle className='text-base'>Información de contacto</CardTitle>
+            <div>
+              <div className='text-xs text-muted-foreground'>Estado</div>
+              <div className='text-right'>{renderStatusBadge(lead.status)}</div>
             </div>
+          </CardHeader>
+          <CardContent className='p-0'>
+            {/* Email */}
+            <div className='border-b'>
+              <div className='flex py-4 px-6'>
+                <div className='w-1/4 text-muted-foreground text-sm'>Email</div>
+                <div className='w-3/4 flex'>
+                  <Mail className='h-4 w-4 mr-2 text-muted-foreground' />
+                  <span>{lead.email}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Teléfono */}
             {lead.phone && (
-              <div className='flex items-center gap-2'>
-                <Phone className='h-4 w-4 text-muted-foreground' />
-                <span>{lead.phone}</span>
+              <div className='border-b'>
+                <div className='flex py-4 px-6'>
+                  <div className='w-1/4 text-muted-foreground text-sm'>
+                    Teléfono
+                  </div>
+                  <div className='w-3/4 flex'>
+                    <Phone className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <span>{lead.phone}</span>
+                  </div>
+                </div>
               </div>
             )}
+
+            {/* Empresa */}
             {lead.company && (
-              <div className='flex items-center gap-2'>
-                <Building className='h-4 w-4 text-muted-foreground' />
-                <span>{lead.company}</span>
+              <div className='border-b'>
+                <div className='flex py-4 px-6'>
+                  <div className='w-1/4 text-muted-foreground text-sm'>
+                    Empresa
+                  </div>
+                  <div className='w-3/4 flex'>
+                    <Building className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <span>{lead.company}</span>
+                  </div>
+                </div>
               </div>
             )}
-            {lead.location && (
-              <div className='flex items-center gap-2'>
-                <MapPin className='h-4 w-4 text-muted-foreground' />
-                <span>{lead.location}</span>
-              </div>
-            )}
-          </div>
-        </div>
 
-        <Separator />
-
-        {/* Detalles adicionales */}
-        <div className='space-y-4'>
-          <h3 className='text-lg font-medium'>Detalles adicionales</h3>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='flex items-center gap-2'>
-              <Calendar className='h-4 w-4 text-muted-foreground' />
-              <span>Creado: {formatDate(lead.createdAt)}</span>
-            </div>
-            {lead.updatedAt && (
-              <div className='flex items-center gap-2'>
-                <Calendar className='h-4 w-4 text-muted-foreground' />
-                <span>Actualizado: {formatDate(lead.updatedAt)}</span>
+            {/* Cargo */}
+            {lead.position && (
+              <div className='border-b'>
+                <div className='flex py-4 px-6'>
+                  <div className='w-1/4 text-muted-foreground text-sm'>
+                    Cargo
+                  </div>
+                  <div className='w-3/4 flex'>
+                    <User className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <span>{lead.position}</span>
+                  </div>
+                </div>
               </div>
             )}
+
+            {/* Origen */}
             {lead.source && (
-              <div className='flex items-center gap-2'>
-                <User className='h-4 w-4 text-muted-foreground' />
-                <span>Origen: {lead.source}</span>
+              <div className='border-b'>
+                <div className='flex py-4 px-6'>
+                  <div className='w-1/4 text-muted-foreground text-sm'>
+                    Origen
+                  </div>
+                  <div className='w-3/4 flex'>
+                    <User className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <span>{lead.source}</span>
+                  </div>
+                </div>
               </div>
             )}
-            {lead.lastContact && (
-              <div className='flex items-center gap-2'>
-                <Calendar className='h-4 w-4 text-muted-foreground' />
-                <span>Último contacto: {formatDate(lead.lastContact)}</span>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Notas */}
-        {lead.notes && (
-          <>
-            <Separator />
-            <div className='space-y-4'>
-              <h3 className='text-lg font-medium flex items-center gap-2'>
-                <ClipboardList className='h-4 w-4' />
-                Notas
-              </h3>
-              <div className='bg-muted p-4 rounded-md whitespace-pre-line'>
-                {lead.notes}
+            {/* Fechas */}
+            <div className='px-6 pt-4 pb-4'>
+              <div className='font-medium text-sm mb-4'>Fechas</div>
+
+              {/* Creado */}
+              <div className='mb-4'>
+                <div className='flex'>
+                  <div className='w-1/4 text-muted-foreground text-sm'>
+                    Creado
+                  </div>
+                  <div className='w-3/4 flex'>
+                    <Calendar className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <span>{formatDate(lead.createdAt)}</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Actualizado */}
+              {lead.updatedAt && (
+                <div>
+                  <div className='flex'>
+                    <div className='w-1/4 text-muted-foreground text-sm'>
+                      Actualizado
+                    </div>
+                    <div className='w-3/4 flex'>
+                      <Calendar className='h-4 w-4 mr-2 text-muted-foreground' />
+                      <span>{formatDate(lead.updatedAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </>
-        )}
+          </CardContent>
+        </Card>
 
-        {/* Etiquetas */}
-        {lead.tags && lead.tags.length > 0 && (
-          <Alert className='mt-4'>
-            <AlertDescription>
-              <span className='font-medium'>Etiquetas: </span>
-              <div className='flex flex-wrap gap-2 mt-2'>
-                {lead.tags.map(tag => (
-                  <Badge key={tag} variant='outline' className='bg-muted'>
-                    {tag}
-                  </Badge>
-                ))}
+        {/* Panel lateral */}
+        <div className='space-y-6'>
+          {/* Notas */}
+          <Card className='w-full'>
+            <CardHeader className='pt-4 pb-4 px-6 border-b'>
+              <div className='flex items-center'>
+                <ClipboardList className='h-4 w-4 mr-2 text-muted-foreground' />
+                <CardTitle className='text-base'>Notas</CardTitle>
               </div>
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
+            </CardHeader>
+            <CardContent className='p-6'>
+              {lead.notes ? (
+                <div>{lead.notes}</div>
+              ) : (
+                <p className='text-muted-foreground'>
+                  No hay notas disponibles para este lead.
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-      <CardFooter className='pt-6 flex flex-wrap gap-4'>
-        <Button onClick={onBack} variant='outline'>
-          <ArrowLeft className='mr-2 h-4 w-4' />
-          Volver a la lista
-        </Button>
+          {/* Acciones rápidas */}
+          <Card className='w-full'>
+            <CardHeader className='pt-4 pb-4 px-6 border-b'>
+              <CardTitle className='text-base'>Acciones rápidas</CardTitle>
+            </CardHeader>
+            <CardContent className='p-6'>
+              <div className='space-y-3'>
+                <Button
+                  className='w-full justify-start bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 border border-gray-200'
+                  variant='outline'
+                  onClick={() => {
+                    if (lead.email) {
+                      const subject = `Seguimiento - ${lead.name}`;
+                      const body = `Hola ${
+                        lead.name
+                      },\n\nGracias por tu interés en nuestros servicios.\n\nSaludos cordiales,\n${
+                        window.localStorage.getItem('userName') ||
+                        'Equipo de ventas'
+                      }`;
+                      window.location.href = `mailto:${
+                        lead.email
+                      }?subject=${encodeURIComponent(
+                        subject
+                      )}&body=${encodeURIComponent(body)}`;
+                    }
+                  }}
+                  disabled={!lead.email}
+                >
+                  <Mail className='h-4 w-4 mr-2' />
+                  Enviar email
+                </Button>
+                <Button
+                  className='w-full justify-start bg-white text-green-600 hover:bg-green-50 hover:text-green-700 border border-gray-200'
+                  variant='outline'
+                  onClick={() => {
+                    if (lead.phone) {
+                      const formattedPhone = lead.phone
+                        .replace(/\s+/g, '')
+                        .replace(/[()-]/g, '');
+                      window.open(`https://wa.me/${formattedPhone}`, '_blank');
+                    }
+                  }}
+                  disabled={!lead.phone}
+                >
+                  <MessageSquare className='h-4 w-4 mr-2' />
+                  WhatsApp
+                </Button>
+                <Button
+                  className='w-full justify-start bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 border border-gray-200'
+                  variant='outline'
+                >
+                  <Calendar className='h-4 w-4 mr-2' />
+                  Agendar reunión
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Aquí pueden ir más botones de acciones */}
-      </CardFooter>
-    </Card>
+// Skeleton para carga
+function LeadSkeleton() {
+  return (
+    <div className='space-y-0'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        {/* Skeleton para información principal */}
+        <Card className='w-full h-full lg:col-span-2'>
+          <CardHeader className='pt-4 pb-4 px-6 border-b'>
+            <div className='flex justify-between'>
+              <Skeleton className='h-5 w-48' />
+              <Skeleton className='h-6 w-20' />
+            </div>
+          </CardHeader>
+          <CardContent className='p-0'>
+            {/* Campos principales */}
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className='border-b'>
+                  <div className='flex py-4 px-6'>
+                    <Skeleton className='h-4 w-24 mr-6' />
+                    <div className='flex'>
+                      <Skeleton className='h-4 w-4 rounded-full mr-2' />
+                      <Skeleton className='h-4 w-36' />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+            {/* Fechas */}
+            <div className='px-6 pt-4 pb-4'>
+              <Skeleton className='h-5 w-16 mb-4' />
+
+              {Array(2)
+                .fill(0)
+                .map((_, i) => (
+                  <div key={i} className='mb-4'>
+                    <div className='flex'>
+                      <Skeleton className='h-4 w-24 mr-6' />
+                      <div className='flex'>
+                        <Skeleton className='h-4 w-4 rounded-full mr-2' />
+                        <Skeleton className='h-4 w-36' />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Skeleton para panel lateral */}
+        <div className='space-y-6'>
+          {/* Skeleton para notas */}
+          <Card>
+            <CardHeader className='pt-4 pb-4 px-6 border-b'>
+              <div className='flex items-center'>
+                <Skeleton className='h-4 w-4 rounded-full mr-2' />
+                <Skeleton className='h-5 w-24' />
+              </div>
+            </CardHeader>
+            <CardContent className='p-6'>
+              <Skeleton className='h-4 w-full mb-2' />
+              <Skeleton className='h-4 w-5/6 mb-2' />
+              <Skeleton className='h-4 w-4/6' />
+            </CardContent>
+          </Card>
+
+          {/* Skeleton para acciones rápidas */}
+          <Card>
+            <CardHeader className='pt-4 pb-4 px-6 border-b'>
+              <Skeleton className='h-5 w-32' />
+            </CardHeader>
+            <CardContent className='p-6'>
+              <div className='space-y-3'>
+                <Skeleton className='h-10 w-full' />
+                <Skeleton className='h-10 w-full' />
+                <Skeleton className='h-10 w-full' />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
