@@ -16,7 +16,7 @@ export class Leads {
      @Prop({
         type: [mongoose.Schema.Types.ObjectId],
         required: false,
-        ref: 'engegements'
+        ref: 'engagements'
     })
     contact_id: Types.ObjectId[];
 
@@ -71,6 +71,12 @@ export class Leads {
         required: true
     })
     relation: string;
+
+    @Prop({
+        type: String,
+        required: true
+    })
+    message: string;
 }
 
 export const LeadsSchema = SchemaFactory.createForClass(Leads);
