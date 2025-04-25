@@ -2,6 +2,8 @@
 
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   Mail,
   Phone,
@@ -9,11 +11,15 @@ import {
   Calendar,
   User,
   ClipboardList,
-  MessageSquare
+  MessageSquare,
+  Edit,
+  Save,
+  X
 } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
+import { Textarea } from '@/shared/ui/textarea';
 import { leadStatusConfig } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -22,7 +28,71 @@ import { Skeleton } from '@/shared/ui/skeleton';
  * Componente para mostrar el detalle de un lead
  * Sigue SRP al encargarse solo de mostrar la información detallada de un lead
  */
-export default function LeadDetail({ lead, isLoading }) {
+export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Iniciar edición de notas
+  const handleEditNotes = () => {
+    setNotesValue(lead.notes || '');
+    setEditingNotes(true);
+  };
+
+  // Cancelar edición
+  const handleCancelEdit = () => {
+    setEditingNotes(false);
+  };
+
+  // Guardar notas
+  const handleSaveNotes = async () => {
+    setIsSaving(true);
+
+    // Mostrar toast de carga
+    const toastId = toast.loading('Guardando notas...');
+
+    try {
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...lead,
+          notes: notesValue
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al guardar las notas');
+      }
+
+      const updatedLead = await response.json();
+
+      // Actualizar el lead en el componente padre si existe la función
+      if (onLeadUpdate) {
+        onLeadUpdate(updatedLead);
+      }
+
+      setEditingNotes(false);
+
+      // Actualizar toast a éxito
+      toast.success('Notas actualizadas correctamente', {
+        id: toastId,
+        description: 'Los cambios se han guardado en el sistema'
+      });
+    } catch (error) {
+      // Actualizar toast a error
+      toast.error('Error al guardar las notas', {
+        id: toastId,
+        description:
+          error.message || 'Ha ocurrido un error al procesar la solicitud'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Mostrar loading si estamos cargando el lead
   if (isLoading) {
     return <LeadSkeleton />;
@@ -194,13 +264,57 @@ export default function LeadDetail({ lead, isLoading }) {
           {/* Notas */}
           <Card className='w-full'>
             <CardHeader className='pt-4 pb-4 px-6 border-b'>
-              <div className='flex items-center'>
-                <ClipboardList className='h-4 w-4 mr-2 text-muted-foreground' />
-                <CardTitle className='text-base'>Notas</CardTitle>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center'>
+                  <ClipboardList className='h-4 w-4 mr-2 text-muted-foreground' />
+                  <CardTitle className='text-base'>Notas</CardTitle>
+                </div>
+                {!editingNotes ? (
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-8 w-8 text-muted-foreground hover:text-primary'
+                    onClick={handleEditNotes}
+                  >
+                    <Edit className='h-4 w-4' />
+                    <span className='sr-only'>Editar notas</span>
+                  </Button>
+                ) : (
+                  <div className='flex gap-1'>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-muted-foreground hover:text-destructive'
+                      onClick={handleCancelEdit}
+                      disabled={isSaving}
+                    >
+                      <X className='h-4 w-4' />
+                      <span className='sr-only'>Cancelar</span>
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-muted-foreground hover:text-primary'
+                      onClick={handleSaveNotes}
+                      disabled={isSaving}
+                    >
+                      <Save className='h-4 w-4' />
+                      <span className='sr-only'>Guardar</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent className='p-6'>
-              {lead.notes ? (
+              {editingNotes ? (
+                <Textarea
+                  value={notesValue}
+                  onChange={e => setNotesValue(e.target.value)}
+                  placeholder='Añade notas sobre este lead...'
+                  className='min-h-[100px] resize-none'
+                  disabled={isSaving}
+                />
+              ) : lead.notes ? (
                 <div>{lead.notes}</div>
               ) : (
                 <p className='text-muted-foreground'>
@@ -328,9 +442,12 @@ function LeadSkeleton() {
           {/* Skeleton para notas */}
           <Card>
             <CardHeader className='pt-4 pb-4 px-6 border-b'>
-              <div className='flex items-center'>
-                <Skeleton className='h-4 w-4 rounded-full mr-2' />
-                <Skeleton className='h-5 w-24' />
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center'>
+                  <Skeleton className='h-4 w-4 rounded-full mr-2' />
+                  <Skeleton className='h-5 w-24' />
+                </div>
+                <Skeleton className='h-8 w-8 rounded-full' />
               </div>
             </CardHeader>
             <CardContent className='p-6'>
