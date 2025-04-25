@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schema/user.schema';
+import { User, UserRoleType } from './schema/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
@@ -21,11 +25,12 @@ export class UsersService {
     const user = await this.userModel.findOne({ email });
     return user;
   }
-  async findByRole(role:string){
-    const users=await this.userModel.find({role})
-    if(!users) throw new NotFoundException('No existen usuarios con ese rol')
-    return users
+  async findByRole(role: UserRoleType) {
+    const users = await this.userModel.find({ role, isActive: true });
+    if (!users) throw new NotFoundException('No existen usuarios con ese rol');
+    return users;
   }
+
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
 
@@ -33,7 +38,9 @@ export class UsersService {
       this.userModel.find().limit(limit).skip(skip).exec(),
       this.userModel.countDocuments().exec(),
     ]);
+
     if (!users.length) throw new NotFoundException('No existen usuarios');
+
     return {
       data: users,
       total,
@@ -43,13 +50,17 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+    const user = await this.userModel
+      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .exec();
     if (!user) {
       throw new BadRequestException(`Usuario con ID ${id} no encontrado`);
     }
 
     if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingUser = await this.userModel.findOne({ email: updateUserDto.email }).exec();
+      const existingUser = await this.userModel
+        .findOne({ email: updateUserDto.email })
+        .exec();
       if (existingUser) {
         throw new BadRequestException('El email ya está en uso');
       }
@@ -58,7 +69,7 @@ export class UsersService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    Object.keys(updateUserDto).forEach(key => {
+    Object.keys(updateUserDto).forEach((key) => {
       if (updateUserDto[key] !== undefined) {
         user[key] = updateUserDto[key];
       }

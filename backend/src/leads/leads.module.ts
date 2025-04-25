@@ -7,6 +7,7 @@ import { EngagementsModule } from 'src/engagements/engagements.module';
 import { MailModule } from 'src/mail/mail.module';
 import { LeadCreatedListener } from 'src/system-listeners/lead-created.listener';
 import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { AuthModule } from '../auth/auth.module';
       },
     ]),
     MailModule,
-    AuthModule
+    AuthModule,
+    UsersModule,
   ],
   controllers: [LeadsController],
   providers: [LeadsService, LeadCreatedListener],
