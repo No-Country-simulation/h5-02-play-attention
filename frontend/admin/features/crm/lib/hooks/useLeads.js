@@ -7,7 +7,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { leadsApi } from '../api/api';
 import { leadsAdapter } from '../adapters';
 import { toast } from 'sonner';
-import { transformStatusToBackend } from '../constants/lead-status';
 
 /**
  * Hook para obtener todos los leads
@@ -76,7 +75,9 @@ export function useUpdateLeadStatus() {
         throw new Error(`ID del lead inválido: "${leadId}"`);
       }
 
-      // Obtener el lead completo primero para preservar todos los datos
+      console.log(`🔄 Actualizando lead ${leadId} a estado: ${status}`);
+
+      // Obtener el lead actual para preservar sus datos
       const currentLead = await leadsApi.getLeadById(leadId);
 
       if (!currentLead) {
@@ -86,14 +87,12 @@ export function useUpdateLeadStatus() {
       // Adaptar el lead al formato del frontend
       const adaptedLead = leadsAdapter(currentLead);
 
-      // Transformar el estado al formato que espera el backend
-      const backendStatus = transformStatusToBackend(status);
-
-      // Crear payload con todos los campos existentes y solo actualizar el estado
+      // Crear payload manteniendo los datos del lead y actualizando el estado
+      // Nota: Ahora el status ya viene en formato backend desde el componente LeadList
       const payload = {
         fullname: adaptedLead.name || 'Nombre temporal',
-        email: adaptedLead.email || 'correo@ejemplo.com', // Proporcionar un email válido por defecto
-        phone: adaptedLead.phone || '123456789', // Proporcionar un teléfono por defecto
+        email: adaptedLead.email || 'correo@ejemplo.com',
+        phone: adaptedLead.phone || '123456789',
         company: adaptedLead.company || '',
         service:
           adaptedLead.userType === 'persona'
@@ -102,20 +101,18 @@ export function useUpdateLeadStatus() {
             ? 'Empresa'
             : 'Profesional',
         message: adaptedLead.notes || '',
-        status: backendStatus, // Enviar el estado transformado al formato del backend
+        status: status, // El estado ya viene en formato correcto
         origen: adaptedLead.source || 'Sitio web',
-        relation: adaptedLead.position || 'Usuario' // Proporcionar una relación por defecto
+        relation: adaptedLead.position || 'Usuario'
       };
 
       return leadsApi.updateLead(leadId, payload);
     },
-    onSuccess: (data, variables) => {
-      const { leadId, status } = variables;
+    onSuccess: () => {
       toast.success('Estado del lead actualizado');
       queryClient.invalidateQueries({ queryKey: ['leads'] });
     },
-    onError: (error, variables) => {
-      const { leadId, status } = variables;
+    onError: error => {
       toast.error(`Error al actualizar estado: ${error.message}`);
     }
   });

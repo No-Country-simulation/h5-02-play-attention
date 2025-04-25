@@ -23,36 +23,36 @@ import {
 } from '@/shared/ui/select';
 import {
   leadStatusConfig,
-  leadUserTypeConfig,
-  leadStatusOptions
+  leadUserTypeConfig
 } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
 import { toast } from 'sonner';
+
+// Mapeo simple y directo entre estados UI y backend
+const ESTADOS_LEAD = [
+  { value: 'nuevo', label: 'Nuevo', backend: 'Nuevo' },
+  { value: 'proceso', label: 'Proceso', backend: 'Activo' },
+  { value: 'cliente', label: 'Cliente', backend: 'Cliente' }
+];
 
 /**
  * Componente para listar leads
  * Realiza la paginación en el cliente
  */
 export default function LeadList({
-  leads = [], // Recibe leads ya paginados desde LeadManager
+  leads = [],
   loading = false,
   onViewLead,
   currentPage = 1,
-  pageSize = 10, // Cambiar a 10 para coincidir con LeadManager
-  totalPages = 1, // Recibe totalPages calculado en el store
+  pageSize = 10,
+  totalPages = 1,
   totalLeads = 0,
   onPageChange,
-  onStatusChange = () => {} // Nueva prop para manejar cambios de estado
+  onStatusChange = () => {}
 }) {
-  // Estado local para mantener los estados actualizados visualmente
   const [leadStatuses, setLeadStatuses] = useState({});
 
-  // Ya no necesitamos calcular los leads de la página actual aquí
-  // porque recibimos los leads ya paginados
-  const currentLeads = leads;
-  const currentLeadsCount = currentLeads.length; // Contar los leads de la página actual
-
-  // Verificar si tenemos leads para mostrar (basado en el total real)
+  // Verificar estado de carga y mostrar mensajes apropiados
   if (loading) {
     return (
       <div className='bg-white border rounded-lg p-8 text-center'>
@@ -61,7 +61,6 @@ export default function LeadList({
     );
   }
 
-  // Si no hay leads después de cargar, mostrar mensaje
   if (!loading && totalLeads === 0) {
     return (
       <div className='bg-white border rounded-lg p-8 text-center'>
@@ -70,7 +69,7 @@ export default function LeadList({
     );
   }
 
-  // Formatear fecha
+  // Función para formatear la fecha
   const formatDate = date => {
     if (!date) return 'N/A';
     try {
@@ -80,51 +79,34 @@ export default function LeadList({
     }
   };
 
-  // Función para normalizar el estado del lead
-  const normalizeStatus = (leadId, status) => {
-    // Si tenemos un estado actualizado en el estado local, usamos ese
+  // Función simplificada para obtener el estado UI de un lead
+  const getLeadStatus = (leadId, apiStatus) => {
+    // Si hay un cambio pendiente, usarlo primero
     if (leadStatuses[leadId]) {
       return leadStatuses[leadId];
     }
 
-    if (!status) return 'nuevo';
+    // Normalizar el estado que viene de la API
+    const statusLower = apiStatus?.toLowerCase() || '';
 
-    const normalizedStatus = status.toLowerCase().trim();
+    // Mapeo simple y directo
+    if (statusLower === 'activo') return 'proceso';
+    if (statusLower === 'nuevo') return 'nuevo';
+    if (statusLower === 'cliente') return 'cliente';
 
-    // Mapeo de posibles valores del backend a las claves de configuración
-    const statusMapping = {
-      nuevo: 'nuevo',
-      'en proceso': 'proceso',
-      proceso: 'proceso',
-      cliente: 'cliente',
-      convertido: 'cliente'
-    };
+    // Si el estado ya es uno de los valores de UI, devolverlo tal cual
+    if (['nuevo', 'proceso', 'cliente'].includes(statusLower)) {
+      return statusLower;
+    }
 
-    return statusMapping[normalizedStatus] || normalizedStatus;
+    // Valor por defecto
+    return 'nuevo';
   };
 
-  // Renderizar el badge de estado según la configuración
+  // Función para renderizar el badge de estado
   const renderStatusBadge = status => {
-    // Normalizar status a minúsculas y quitar espacios
-    const normalizedStatus = (status || '').toLowerCase().trim();
-
-    // Mapeo de posibles valores del backend a las claves de configuración
-    const statusMapping = {
-      nuevo: 'nuevo',
-      'en proceso': 'proceso',
-      proceso: 'proceso',
-      cliente: 'cliente',
-      convertido: 'cliente'
-    };
-
-    // Usar el mapeo o el status normalizado directamente
-    const configKey = statusMapping[normalizedStatus] || normalizedStatus;
-
-    const config = leadStatusConfig[configKey] || {
-      variant: 'outline',
-      className: 'bg-neutral-light text-neutral border-neutral',
-      label: status || 'Desconocido'
-    };
+    const uiStatus = getLeadStatus(null, status);
+    const config = leadStatusConfig[uiStatus] || leadStatusConfig.nuevo;
 
     return (
       <Badge
@@ -136,15 +118,13 @@ export default function LeadList({
     );
   };
 
-  // Función para obtener el color del borde del select basado en el estado
+  // Función para obtener clases del select de estado
   const getStatusSelectClass = (leadId, status) => {
-    // Usamos el estado normalizado (con prioridad al estado local)
-    const normalizedStatus = normalizeStatus(leadId, status);
-    const config = leadStatusConfig[normalizedStatus];
+    const uiStatus = getLeadStatus(leadId, status);
+    const config = leadStatusConfig[uiStatus];
 
     if (!config) return '';
 
-    // Extraer el color del borde y texto de la clase
     const borderColorClass = config.className
       .split(' ')
       .find(cls => cls.startsWith('border-'));
@@ -158,7 +138,7 @@ export default function LeadList({
     return `${borderColorClass} ${textColorClass} ${bgColorClass || ''}`;
   };
 
-  // Renderizar el badge de tipo de usuario según la configuración
+  // Función para renderizar el badge de tipo de usuario
   const renderUserTypeBadge = userType => {
     const config = leadUserTypeConfig[userType] || {
       variant: 'outline',
@@ -176,7 +156,7 @@ export default function LeadList({
     );
   };
 
-  // Manejar navegación entre páginas
+  // Navegación de paginación
   const goToPreviousPage = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
@@ -189,27 +169,40 @@ export default function LeadList({
     }
   };
 
-  // Manejar cambio de estado
-  const handleStatusChange = (leadId, newStatus) => {
-    // Asegurarnos de que leadId no sea undefined o vacío
+  // Convertir estado UI a formato backend para enviar a la API
+  const getBackendStatus = uiStatus => {
+    const estado = ESTADOS_LEAD.find(e => e.value === uiStatus);
+    return estado ? estado.backend : 'Nuevo';
+  };
+
+  // Manejo simplificado de cambio de estado
+  const handleStatusChange = (leadId, uiStatus) => {
     if (!leadId) {
-      toast.error('No se pudo identificar el lead para actualizar');
+      toast.error('No se pudo identificar el lead');
       return;
     }
 
-    // Actualizamos el estado local para reflejar el cambio inmediatamente
+    // Guardar localmente para UI inmediata
     setLeadStatuses(prev => ({
       ...prev,
-      [leadId]: newStatus
+      [leadId]: uiStatus
     }));
 
-    try {
-      // Llamamos al callback para actualizar el estado en el backend
-      onStatusChange(leadId, newStatus);
-    } catch (error) {
-      console.error(`❌ Error al llamar onStatusChange: ${error.message}`);
+    // Para depuración
+    console.log(
+      `📊 Cambiando lead ${leadId} de UI:${uiStatus} a Backend:${getBackendStatus(
+        uiStatus
+      )}`
+    );
 
-      // Revertir el cambio local en caso de error
+    try {
+      // Convertir y enviar al backend
+      const backendStatus = getBackendStatus(uiStatus);
+      onStatusChange(leadId, backendStatus);
+    } catch (error) {
+      console.error(`❌ Error: ${error.message}`);
+
+      // Revertir cambio local si hay error
       setLeadStatuses(prev => {
         const updated = { ...prev };
         delete updated[leadId];
@@ -218,19 +211,9 @@ export default function LeadList({
     }
   };
 
-  // Función reutilizable para manejar el cambio de estado desde el Select
-  const handleSelectChange = (leadId, value) => {
-    // Verificar que el ID exista
-    if (!leadId) {
-      toast.error('No se pudo identificar el lead para actualizar');
-      return;
-    }
-    handleStatusChange(leadId, value);
-  };
-
   return (
     <div className='space-y-4'>
-      {/* Vista de tabla - Visible en desktop y tablets */}
+      {/* Vista de tabla - Desktop y tablets */}
       <div className='hidden md:block bg-white border rounded-lg overflow-x-auto'>
         <Table>
           <TableHeader>
@@ -251,7 +234,7 @@ export default function LeadList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentLeads.map(lead => (
+            {leads.map(lead => (
               <TableRow key={lead.id} className='hover:bg-gray-50'>
                 <TableCell>
                   <div className='font-medium truncate max-w-[120px] sm:max-w-none'>
@@ -285,8 +268,8 @@ export default function LeadList({
                 <TableCell>{renderUserTypeBadge(lead.userType)}</TableCell>
                 <TableCell>
                   <Select
-                    value={normalizeStatus(lead.id, lead.status)}
-                    onValueChange={value => handleSelectChange(lead.id, value)}
+                    value={getLeadStatus(lead.id, lead.status)}
+                    onValueChange={value => handleStatusChange(lead.id, value)}
                   >
                     <SelectTrigger
                       className={cn(
@@ -298,16 +281,16 @@ export default function LeadList({
                       <SelectValue placeholder='Cambiar estado' />
                     </SelectTrigger>
                     <SelectContent>
-                      {leadStatusOptions.map(status => (
+                      {ESTADOS_LEAD.map(estado => (
                         <SelectItem
-                          key={status}
-                          value={status}
+                          key={estado.value}
+                          value={estado.value}
                           className={cn(
                             'capitalize',
-                            getStatusSelectClass('select-item', status)
+                            leadStatusConfig[estado.value]?.className
                           )}
                         >
-                          {leadStatusConfig[status]?.label || status}
+                          {estado.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -332,7 +315,7 @@ export default function LeadList({
                 </TableCell>
               </TableRow>
             ))}
-            {!loading && totalLeads > 0 && currentLeadsCount === 0 && (
+            {!loading && totalLeads > 0 && leads.length === 0 && (
               <TableRow>
                 <TableCell
                   colSpan={7}
@@ -348,7 +331,7 @@ export default function LeadList({
 
       {/* Vista de tarjetas para móvil */}
       <div className='md:hidden space-y-3'>
-        {currentLeads.map(lead => (
+        {leads.map(lead => (
           <div
             key={lead.id}
             className='bg-white border rounded-lg p-3 shadow-sm'
@@ -364,117 +347,74 @@ export default function LeadList({
               </div>
               <div className='flex flex-shrink-0'>
                 <Select
-                  value={normalizeStatus(lead.id, lead.status)}
-                  onValueChange={value => handleSelectChange(lead.id, value)}
+                  value={getLeadStatus(lead.id, lead.status)}
+                  onValueChange={value => handleStatusChange(lead.id, value)}
                 >
                   <SelectTrigger
                     className={cn(
-                      'h-7 px-2 text-xs border capitalize min-w-[90px]',
+                      'h-8 px-2 text-xs sm:text-sm border capitalize',
                       getStatusSelectClass(lead.id, lead.status)
                     )}
                     aria-label='Cambiar estado'
                   >
-                    <SelectValue placeholder='Estado' />
+                    <SelectValue placeholder='Cambiar estado' />
                   </SelectTrigger>
                   <SelectContent>
-                    {leadStatusOptions.map(status => (
+                    {ESTADOS_LEAD.map(estado => (
                       <SelectItem
-                        key={status}
-                        value={status}
+                        key={estado.value}
+                        value={estado.value}
                         className={cn(
-                          'capitalize text-xs',
-                          getStatusSelectClass('select-item', status)
+                          'capitalize',
+                          leadStatusConfig[estado.value]?.className
                         )}
                       >
-                        {leadStatusConfig[status]?.label || status}
+                        {estado.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
-            <div className='grid grid-cols-2 gap-x-2 gap-y-1 mb-2'>
-              <div className='flex items-center text-xs'>
-                <Mail className='h-3 w-3 mr-1 text-muted-foreground' />
-                <span className='truncate'>{lead.email}</span>
-              </div>
-              {lead.phone && (
-                <div className='flex items-center text-xs'>
-                  <Phone className='h-3 w-3 mr-1 text-muted-foreground' />
-                  <span className='truncate'>{lead.phone}</span>
+            <div className='text-xs text-muted-foreground'>
+              {lead.email ? (
+                <div className='flex items-center'>
+                  <Mail className='h-4 w-4 mr-1 text-muted-foreground' />
+                  <span>{lead.email}</span>
+                </div>
+              ) : (
+                <div className='flex items-center'>
+                  <Phone className='h-4 w-4 mr-1 text-muted-foreground' />
+                  <span>{lead.phone}</span>
                 </div>
               )}
-              {lead.company && (
-                <div className='flex items-center text-xs'>
-                  <span className='text-muted-foreground mr-1'>Empresa:</span>
-                  <span className='truncate'>{lead.company}</span>
-                </div>
-              )}
-              <div className='flex items-center text-xs'>
-                <Calendar className='h-3 w-3 mr-1 text-muted-foreground' />
-                <span className='truncate'>{formatDate(lead.createdAt)}</span>
-              </div>
-            </div>
-
-            <div className='flex justify-between items-center mt-3 pt-2 border-t border-gray-100'>
-              <div className='text-xs'>
-                {renderUserTypeBadge(lead.userType)}
-              </div>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => onViewLead(lead.id)}
-                className='h-7 px-2 text-xs'
-              >
-                Ver
-              </Button>
             </div>
           </div>
         ))}
-
-        {/* Mensaje cuando no hay leads */}
-        {!loading && totalLeads > 0 && currentLeadsCount === 0 && (
-          <div className='bg-white border rounded-lg p-4 text-center'>
-            <p className='text-gray-500 text-sm'>
-              No hay leads en esta página.
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className='flex flex-col sm:flex-row sm:items-center justify-between px-2 gap-2'>
-          <div className='text-xs sm:text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-left'>
-            Mostrando {(currentPage - 1) * pageSize + 1} a{' '}
-            {Math.min(currentPage * pageSize, totalLeads)} de {totalLeads} leads
-          </div>
-          <div className='flex space-x-2 justify-center sm:justify-end order-1 sm:order-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-              className='h-8 w-8 p-0'
-            >
-              <ChevronLeft className='h-4 w-4' />
-            </Button>
-            <div className='flex items-center text-xs sm:text-sm px-2 font-medium'>
-              {currentPage} de {totalPages}
-            </div>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-              className='h-8 w-8 p-0'
-            >
-              <ChevronRight className='h-4 w-4' />
-            </Button>
-          </div>
-        </div>
-      )}
+      <div className='flex justify-between'>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={goToPreviousPage}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft className='h-4 w-4' />
+        </Button>
+        <p className='text-sm text-muted-foreground'>
+          Página {currentPage} de {totalPages}
+        </p>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={goToNextPage}
+          disabled={currentPage === totalPages}
+        >
+          <ChevronRight className='h-4 w-4' />
+        </Button>
+      </div>
     </div>
   );
 }
