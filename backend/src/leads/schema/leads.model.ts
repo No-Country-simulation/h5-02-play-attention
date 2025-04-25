@@ -74,7 +74,7 @@ export class Leads {
 
     @Prop({
         type: String,
-        required: true
+        required: false
     })
     message: string;
 }
