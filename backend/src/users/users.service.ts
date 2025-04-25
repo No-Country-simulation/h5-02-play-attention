@@ -21,7 +21,11 @@ export class UsersService {
     const user = await this.userModel.findOne({ email });
     return user;
   }
-
+  async findByRole(role:string){
+    const users=await this.userModel.find({role})
+    if(!users) throw new NotFoundException('No existen usuarios con ese rol')
+    return users
+  }
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
 

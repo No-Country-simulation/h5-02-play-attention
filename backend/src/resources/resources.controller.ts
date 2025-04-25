@@ -1,14 +1,36 @@
-import { Controller, Get, Post, Param, Delete, UploadedFile, UseInterceptors, ParseUUIDPipe, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, UploadedFile, UseInterceptors, ParseUUIDPipe, Body, NotFoundException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcesService } from './resources.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { MongoIdValidationPipe } from 'src/common/pipes/isMongoIdValidation.pipe';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags("resources")
 @Controller('api/resources')
 export class ResourcesController {
   constructor(private readonly resourcesService: ResourcesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Subir un recurso' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        createResourceDto: { type: 'object', properties: {
+          title: { type: 'string' },
+          description: { type: 'string' },
+          type: { type: 'string' },
+          published: { type: 'boolean' },
+          category: { type: 'string' },
+        }},
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Recurso subido correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
@@ -20,24 +42,36 @@ export class ResourcesController {
       resource
     };
   }
-
+  
   @Get()
+  @ApiOperation({ summary: 'Obtener todos los recursos' })
+  @ApiResponse({ status: 200, description: 'Recursos obtenidos correctamente' })
+  @ApiResponse({ status: 404, description: 'Recursos no encontrados' })
   async findAll() {
     const resources = await this.resourcesService.findAll();
+    if(!resources) {
+      throw new NotFoundException('No se encontraron recursos');
+    }
     return {
       resources
     };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obtener un recurso por ID' })
+  @ApiResponse({ status: 200, description: 'Recurso obtenido correctamente' })
+  @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
   async findOne(@Param('id', MongoIdValidationPipe) id: string) {
     const resource = await this.resourcesService.findOne(id);
     return {
       resource
     };
   }
-
+  
   @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar un recurso por ID' })
+  @ApiResponse({ status: 200, description: 'Recurso eliminado correctamente' })
+  @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
   async remove(@Param('id', MongoIdValidationPipe) id: string) {
      await this.resourcesService.remove(id);
     return {

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { Leads } from '../../leads/schema/leads.model';
-import { PaginationResponseDto } from 'src/common/dtos/pagination.dto';
+import { PaginationResponseDto } from '../../common/dtos/pagination.dto';
 
 export class EngagementResponseDto {
   @ApiProperty()

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,15 +10,55 @@ import { RegisterDto } from './dto/register-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { MailService } from '../mail/mail.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserRegisteredEvent } from 'src/system-events/user.event';
+import { USER_EVENTS } from 'src/system-events/event-names';
+import * as generatePassword from 'generate-password';
+import { Services, UserRole } from './auth.enum';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly mailService: MailService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  async registerFromLead(email: string, role: UserRole, service: Services) {
+    const userExists = await this.userService.findByEmail(email);
+    if (userExists) {
+      return new BadRequestException('Email ya registrado');
+    }
+
+    const password = generatePassword.generate({
+      length: 8,
+      numbers: false,
+      symbols: false,
+      uppercase: false,
+      lowercase: true,
+      excludeSimilarCharacters: false,
+      strict: false
+    });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const [user] = await Promise.all([
+      this.userService.create({
+        email,
+        password: hashedPassword,
+        role,
+        service
+      }),
+      this.eventEmitter.emit(
+        USER_EVENTS.USER_CREATED,
+        new UserRegisteredEvent(email, password)
+      )
+    ]);
+
+    return { message: 'Cuenta registrada con éxito', user };
+  }
 
   async register(registerDto: RegisterDto) {
     const userExists = await this.userService.findByEmail(registerDto.email);
@@ -26,20 +67,24 @@ export class AuthService {
     }
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    const url = "https://play-attention.vercel.app/";
-    const [user, ]=await Promise.all([
-      this.userService.create({
-      ...registerDto,
-      password: hashedPassword,
-    }),
-    this.mailService.sendTemplateEmail("REGISTER_EMAIL",registerDto.email,{
-      email: registerDto.email,
-      password: registerDto.password,
-      url,
-    })
-    ])
-  
-    return { message: 'Cuenta registrada con éxito', user };
+    try {
+      const [user] = await Promise.all([
+        this.userService.create({
+          ...registerDto,
+          password: hashedPassword,
+        }),
+        this.eventEmitter.emit(
+          USER_EVENTS.USER_CREATED,
+          new UserRegisteredEvent(registerDto.email, registerDto.password)
+        )
+      ]);
+      
+      this.logger.log(`Usuario registrado y evento emitido para ${registerDto.email}`);
+      return { message: 'Cuenta registrada con éxito', user };
+    } catch (error) {
+      this.logger.error(`Error en el registro: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   async getProfile(id: string) {
