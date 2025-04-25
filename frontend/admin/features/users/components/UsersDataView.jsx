@@ -5,6 +5,7 @@ import { UserTable } from './UserTable';
 import { UserCards } from './UserCards';
 import { Pagination } from '@/shared/ui/pagination';
 import { Skeleton } from '@/shared/ui/skeleton';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 export default function UsersDataView({
   users = [],
@@ -21,25 +22,15 @@ export default function UsersDataView({
   // Calcular número total de páginas
   const totalPages = Math.ceil(totalUsers / pageSize);
 
-  // Renderizar skeleton loader si está cargando
+  // Renderizar spinner loader si está cargando
   if (isLoading) {
     return (
-      <div className='space-y-4'>
-        <div className='rounded-md border'>
-          <div className='p-4'>
-            {Array(5)
-              .fill(0)
-              .map((_, index) => (
-                <div key={index} className='flex items-center space-x-4 py-4'>
-                  <Skeleton className='h-12 w-12 rounded-full' />
-                  <div className='space-y-2'>
-                    <Skeleton className='h-4 w-[250px]' />
-                    <Skeleton className='h-4 w-[200px]' />
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
+      <div className='bg-white border rounded-lg p-10 flex justify-center min-h-[300px]'>
+        <LoadingSpinner
+          text='Cargando información de usuarios...'
+          size={40}
+          spinnerColor='border-primary'
+        />
       </div>
     );
   }
@@ -90,14 +81,18 @@ export default function UsersDataView({
         />
       )}
 
+      {/* Paginación */}
       {totalPages > 1 && (
-        <div className='flex items-center justify-end py-4'>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={onPageChange}
-          />
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          totalItems={totalUsers}
+          itemsPerPage={pageSize}
+          showSummary={true}
+          itemName='usuario'
+          itemNamePlural='usuarios'
+        />
       )}
     </div>
   );

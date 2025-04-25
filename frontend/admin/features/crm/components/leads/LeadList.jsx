@@ -27,6 +27,8 @@ import {
 } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
+import Image from 'next/image';
 
 // Mapeo simple y directo entre estados UI y backend
 const ESTADOS_LEAD = [
@@ -55,8 +57,12 @@ export default function LeadList({
   // Verificar estado de carga y mostrar mensajes apropiados
   if (loading) {
     return (
-      <div className='bg-white border rounded-lg p-8 text-center'>
-        <p className='text-gray-500'>Cargando leads...</p>
+      <div className='bg-white border rounded-lg p-10 flex flex-col items-center justify-center min-h-[300px]'>
+        <LoadingSpinner
+          text='Cargando información de leads...'
+          size={40}
+          spinnerColor='border-primary'
+        />
       </div>
     );
   }
@@ -394,27 +400,37 @@ export default function LeadList({
       </div>
 
       {/* Paginación */}
-      <div className='flex justify-between'>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={goToPreviousPage}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className='h-4 w-4' />
-        </Button>
-        <p className='text-sm text-muted-foreground'>
-          Página {currentPage} de {totalPages}
-        </p>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={goToNextPage}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight className='h-4 w-4' />
-        </Button>
-      </div>
+      {totalPages > 1 && (
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between mt-6 px-2 gap-2'>
+          <div className='text-xs sm:text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-left'>
+            Mostrando {(currentPage - 1) * pageSize + 1} a{' '}
+            {Math.min(currentPage * pageSize, totalLeads)} de {totalLeads} leads
+          </div>
+          <div className='flex space-x-2 justify-center sm:justify-end order-1 sm:order-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className='h-8 w-8 p-0'
+            >
+              <ChevronLeft className='h-4 w-4' />
+            </Button>
+            <div className='flex items-center text-xs sm:text-sm px-2 font-medium'>
+              {currentPage} de {totalPages}
+            </div>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className='h-8 w-8 p-0'
+            >
+              <ChevronRight className='h-4 w-4' />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

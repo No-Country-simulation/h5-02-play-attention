@@ -2,12 +2,23 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Info, MessageSquare } from 'lucide-react';
-import { Card } from '@/shared/ui/card';
+import {
+  ArrowLeft,
+  Info,
+  MessageSquare,
+  Calendar,
+  Mail,
+  Phone,
+  User,
+  Building,
+  MapPin
+} from 'lucide-react';
+import { Card, CardContent } from '@/shared/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { Button } from '@/shared/ui/button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 import LeadContactHistory from '../contacts/LeadContactHistory';
 import RegisterContactModal from '../contacts/RegisterContactModal';
@@ -94,7 +105,17 @@ export default function LeadDetailPage() {
         <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center'>
           <div>
             <h1 className='text-2xl font-semibold'>
-              {isLoading ? 'Cargando...' : lead?.name || 'Detalle de lead'}
+              {isLoading ? (
+                <LoadingSpinner
+                  text=''
+                  showText={false}
+                  size={16}
+                  spinnerColor='border-primary/50'
+                  className='inline mr-2'
+                />
+              ) : (
+                lead?.name || 'Detalle de lead'
+              )}
             </h1>
             {!isLoading && lead && (
               <p className='text-muted-foreground text-sm mt-0.5'>

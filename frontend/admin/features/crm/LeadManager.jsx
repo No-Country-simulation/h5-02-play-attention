@@ -14,6 +14,7 @@ import MeetingCalendarView from './components/meetings/MeetingCalendarView';
 import { useLeads, useUpdateLeadStatus } from './lib/hooks/useLeads';
 import { leadStatusConfig } from './lib/config/ui-config';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 /**
  * Componente principal para la gestión de leads
@@ -225,11 +226,20 @@ export default function LeadManager() {
   };
 
   if (isLoading)
-    return <div className='flex justify-center p-6'>Cargando leads...</div>;
+    return (
+      <div className='flex justify-center items-center p-12 min-h-[400px] bg-white/30 rounded-xl'>
+        <LoadingSpinner
+          text='Cargando módulo de gestión de leads...'
+          size={48}
+          spinnerColor='border-primary'
+        />
+      </div>
+    );
   if (error)
     return (
-      <div className='text-red-500 p-6'>
-        Error al cargar leads: {error.message}
+      <div className='text-red-500 p-6 text-center border border-red-200 rounded-lg bg-red-50 my-4'>
+        <p className='font-medium mb-2'>Error al cargar leads</p>
+        <p>{error.message || 'Ha ocurrido un error inesperado'}</p>
       </div>
     );
 
