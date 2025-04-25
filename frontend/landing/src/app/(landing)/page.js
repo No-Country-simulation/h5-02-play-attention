@@ -18,7 +18,7 @@ export default function Home() {
       <section id="demo-videos" className="min-h-screen">
         <DemoVideosSection />
       </section>
-     
+
       {/* Contact */}
       <section id="contact" className="min-h-screen">
         <ContactSection />
