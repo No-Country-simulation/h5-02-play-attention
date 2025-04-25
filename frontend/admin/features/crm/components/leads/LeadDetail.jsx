@@ -218,7 +218,7 @@ export default function LeadDetail({ lead, isLoading }) {
             <CardContent className='p-6'>
               <div className='space-y-3'>
                 <Button
-                  className='w-full justify-start bg-white text-blue-600 hover:bg-blue-50 border border-gray-200'
+                  className='w-full justify-start bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 border border-gray-200'
                   variant='outline'
                   onClick={() => {
                     if (lead.email) {
@@ -242,7 +242,7 @@ export default function LeadDetail({ lead, isLoading }) {
                   Enviar email
                 </Button>
                 <Button
-                  className='w-full justify-start bg-white text-green-600 hover:bg-green-50 border border-gray-200'
+                  className='w-full justify-start bg-white text-green-600 hover:bg-green-50 hover:text-green-700 border border-gray-200'
                   variant='outline'
                   onClick={() => {
                     if (lead.phone) {
@@ -258,7 +258,7 @@ export default function LeadDetail({ lead, isLoading }) {
                   WhatsApp
                 </Button>
                 <Button
-                  className='w-full justify-start bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  className='w-full justify-start bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 border border-gray-200'
                   variant='outline'
                 >
                   <Calendar className='h-4 w-4 mr-2' />
