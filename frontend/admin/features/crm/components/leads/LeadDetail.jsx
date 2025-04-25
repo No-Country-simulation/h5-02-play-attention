@@ -322,7 +322,7 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
                   <Button
                     variant='ghost'
                     size='icon'
-                    className='h-8 w-8 text-muted-foreground hover:text-primary'
+                    className='h-8 w-8 text-muted-foreground hover:text-white'
                     onClick={handleEditNotes}
                   >
                     <Edit className='h-4 w-4' />
