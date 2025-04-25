@@ -14,6 +14,7 @@ import { EngagementsModule } from './engagements/engagements.module';
 import { CategoriesModule } from './categories/categories.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevToolsModule } from './dev-tools/dev-tools.module';
+import { ListenersModule } from './system-listeners/listeners.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { DevToolsModule } from './dev-tools/dev-tools.module';
     CloudinaryModule,
     CategoriesModule,
     EngagementsModule,
+    ListenersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

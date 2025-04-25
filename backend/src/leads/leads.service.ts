@@ -7,6 +7,8 @@ import { Leads } from './schema/leads.model';
 import { EngagementService } from '../engagements/engagements.service';
 import { LeadCreatedEvent } from '../system-events/lead-created.event';
 import { LEAD_EVENTS } from '../system-events/event-names';
+import { AuthService } from '../auth/auth.service';
+import { Services, UserRole } from '../auth/auth.enum';
 
 @Injectable()
 export class LeadsService {
@@ -17,6 +19,7 @@ export class LeadsService {
         @Inject(forwardRef(() => EngagementService))
         private readonly _engagementService: EngagementService,
         private readonly eventEmitter: EventEmitter2,
+        private readonly authService:AuthService
     ) {}
 
     async createLead(createLeadDto: CreateLeadDto) {
@@ -49,10 +52,18 @@ export class LeadsService {
     }
 
     async updateLead(id: string, updateLeadDto: UpdateLeadDto) {
-        const leadUpdated = await this.leadsModel.findByIdAndUpdate(id, updateLeadDto).exec();
+        const leadUpdated = await this.leadsModel.findByIdAndUpdate(id, updateLeadDto, {new: true}).exec();
         if(!leadUpdated) {
             throw new NotFoundException(`No se encontró lead con id: ${id}`)
         }
+        if(updateLeadDto.status === 'Cliente'){
+            await this.authService.registerFromLead(
+                leadUpdated.email,
+                UserRole.USER,
+                leadUpdated.service as Services
+            )
+        }
+       
         return leadUpdated;
     }
 

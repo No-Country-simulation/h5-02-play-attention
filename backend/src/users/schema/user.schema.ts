@@ -4,14 +4,14 @@ import { Document } from 'mongoose';
 export type UserDocument = User & Document;
 
 export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  COMERCIAL = 'comercial',
+  USER = 'User',
+  ADMIN = 'Admin',
+  COMERCIAL = 'Comercial',
 }
 export enum Services {
-  PROFESIONAL = 'profesional',
-  EMPRESA = 'empresa',
-  INDIVIDUAL = 'individual',
+  PROFESIONAL = 'Profesional',
+  EMPRESA = 'Empresa',
+  INDIVIDUAL = 'Individuo',
 }
 
 @Schema({ timestamps: true })
