@@ -32,4 +32,34 @@ export class DevToolsService {
       throw new InternalServerErrorException('Canot clean at least one table');
     }
   }
+
+  async deleteEngagements() {
+    try {
+      await this.engagementsModel.deleteMany({});
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Canot clean at least one table');
+    }
+  }
+
+  async deleteUsers() {
+    try {
+      await this.usersModel.deleteMany({});
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Canot clean at least one table');
+    }
+  }
+
+  async deleteLeads() {
+    try {
+      await this.leadsModel.deleteMany({});
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Canot clean at least one table');
+    }
+  }
 }

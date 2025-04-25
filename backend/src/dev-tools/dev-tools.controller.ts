@@ -15,4 +15,28 @@ export class DevToolsController {
   cleanTables() {
     return this._devService.cleanAll();
   }
+
+  @Get('clean-eng')
+  @ApiOperation({
+    summary: 'Deletes all data into Engagements.',
+  })
+  cleanEngagements() {
+    return this._devService.deleteEngagements();
+  }
+
+  @Get('clean-users')
+  @ApiOperation({
+    summary: 'Deletes all data into, Users.',
+  })
+  cleanUsers() {
+    return this._devService.deleteUsers();
+  }
+
+  @Get('clean-leads')
+  @ApiOperation({
+    summary: 'Deletes all data into Leads tables.',
+  })
+  cleanLeads() {
+    return this._devService.deleteLeads();
+  }
 }
