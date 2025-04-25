@@ -75,7 +75,7 @@ export const leadsApi = {
         email: formData.email || '',
         service:
           formData.userType === 'persona'
-            ? 'Individuo'
+            ? 'Persona Individual'
             : formData.userType === 'profesional'
             ? 'Profesional'
             : 'Empresa',
@@ -147,13 +147,13 @@ export const leadsApi = {
         service:
           formData.service ||
           (formData.userType === 'persona'
-            ? 'Individuo'
+            ? 'Persona Individual'
             : formData.userType === 'profesional'
             ? 'Profesional'
             : formData.userType === 'empresa'
             ? 'Empresa'
-            : 'Individuo'),
-        message: formData.notes || formData.message || '',
+            : 'Persona Individual'),
+        notes: formData.notes || formData.message || '',
         status: formData.status, // El estado ya viene en formato correcto
         origen: formData.source || formData.origen || 'Sitio web',
         relation: formData.position || formData.relation || 'Usuario' // Asegurar que relation no esté vacío

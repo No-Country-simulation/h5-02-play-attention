@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   Mail,
@@ -32,10 +32,18 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [localNotes, setLocalNotes] = useState('');
+
+  // Inicializar notas locales cuando el lead cambia
+  useEffect(() => {
+    if (lead) {
+      setLocalNotes(lead.notes || '');
+    }
+  }, [lead?.notes]);
 
   // Iniciar edición de notas
   const handleEditNotes = () => {
-    setNotesValue(lead.notes || '');
+    setNotesValue(localNotes || lead?.notes || '');
     setEditingNotes(true);
   };
 
@@ -52,22 +60,61 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
     const toastId = toast.loading('Guardando notas...');
 
     try {
-      const response = await fetch(`/api/leads/${lead.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...lead,
-          notes: notesValue
-        })
-      });
+      // Mapear el estado del frontend al formato del backend
+      const statusMap = {
+        nuevo: 'Nuevo',
+        proceso: 'Activo',
+        cliente: 'Cliente'
+      };
+
+      // Asegurar que el estado sea uno de los valores aceptados por el backend
+      const backendStatus = statusMap[lead.status] || 'Nuevo';
+
+      // Preparar el payload con los campos necesarios para el backend
+      const updateData = {
+        fullname: lead.name || '',
+        email: lead.email || '',
+        phone: lead.phone || '',
+        company: lead.company || '',
+        service:
+          lead.userType === 'persona'
+            ? 'Persona Individual'
+            : lead.userType === 'profesional'
+            ? 'Profesional'
+            : 'Empresa',
+        notes: notesValue, // El backend usa "notes" y no "message"
+        status: backendStatus, // Debe ser Nuevo, Activo o Cliente
+        origen: lead.source || '',
+        relation: lead.position || ''
+      };
+
+      // Conectar directamente con el endpoint del backend
+      const response = await fetch(
+        `https://play-attention.onrender.com/api/leads/${lead.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Error al guardar las notas');
+        let errorText = '';
+        try {
+          const errorResponse = await response.json();
+          errorText = JSON.stringify(errorResponse);
+        } catch (parseError) {
+          errorText = await response.text();
+        }
+        throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
       const updatedLead = await response.json();
+
+      // Actualizar notas localmente
+      setLocalNotes(notesValue);
 
       // Actualizar el lead en el componente padre si existe la función
       if (onLeadUpdate) {
@@ -82,6 +129,7 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
         description: 'Los cambios se han guardado en el sistema'
       });
     } catch (error) {
+      console.error('Error al actualizar notas:', error);
       // Actualizar toast a error
       toast.error('Error al guardar las notas', {
         id: toastId,
@@ -298,7 +346,11 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
                       onClick={handleSaveNotes}
                       disabled={isSaving}
                     >
-                      <Save className='h-4 w-4' />
+                      {isSaving ? (
+                        <span className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                      ) : (
+                        <Save className='h-4 w-4' />
+                      )}
                       <span className='sr-only'>Guardar</span>
                     </Button>
                   </div>
@@ -314,8 +366,8 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
                   className='min-h-[100px] resize-none'
                   disabled={isSaving}
                 />
-              ) : lead.notes ? (
-                <div>{lead.notes}</div>
+              ) : localNotes ? (
+                <div>{localNotes}</div>
               ) : (
                 <p className='text-muted-foreground'>
                   No hay notas disponibles para este lead.
