@@ -13,9 +13,11 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EngagementsModule } from './engagements/engagements.module';
 import { CategoriesModule } from './categories/categories.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { DevToolsModule } from './dev-tools/dev-tools.module';
 
 @Module({
   imports: [
+    DevToolsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
