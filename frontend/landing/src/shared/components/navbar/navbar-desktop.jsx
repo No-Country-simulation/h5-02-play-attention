@@ -34,7 +34,7 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="link"
             className={cn(
               "flex items-center gap-1",
               activeSection === "audience-segmentation"
