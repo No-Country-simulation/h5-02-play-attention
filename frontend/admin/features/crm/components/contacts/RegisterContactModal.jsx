@@ -28,15 +28,22 @@ import {
   Phone,
   Users,
   MessageCircle,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react';
 import { Calendar } from '@/shared/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { cn } from '@/shared/lib/utils';
+import { useCreateEngagement } from '../../lib/hooks/useEngagements';
+import { FaWhatsapp } from 'react-icons/fa';
 
 const contactTypes = [
   { value: 'email', label: 'Email', icon: <Mail className='h-4 w-4 mr-2' /> },
-  { value: 'call', label: 'Llamada', icon: <Phone className='h-4 w-4 mr-2' /> },
+  {
+    value: 'call',
+    label: 'WhatsApp',
+    icon: <FaWhatsapp className='h-4 w-4 mr-2' />
+  },
   {
     value: 'meeting',
     label: 'Reunión',
@@ -46,8 +53,7 @@ const contactTypes = [
     value: 'message',
     label: 'Mensaje',
     icon: <MessageCircle className='h-4 w-4 mr-2' />
-  },
-  { value: 'note', label: 'Nota', icon: <FileText className='h-4 w-4 mr-2' /> }
+  }
 ];
 
 /**
@@ -56,7 +62,6 @@ const contactTypes = [
 export default function RegisterContactModal({
   isOpen,
   onClose,
-  onSave,
   leadName,
   leadId
 }) {
@@ -65,9 +70,11 @@ export default function RegisterContactModal({
     date: new Date(),
     subject: '',
     content: '',
-    outcome: '',
-    user: 'Usuario Actual' // En producción vendría de la sesión de usuario
+    outcome: ''
   });
+
+  // Usar React Query para crear un nuevo engagement
+  const createEngagementMutation = useCreateEngagement();
 
   // Formatear fecha para mostrar en el selector
   const formatDate = date => {
@@ -83,33 +90,43 @@ export default function RegisterContactModal({
   };
 
   // Manejar envío del formulario
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
+
+    if (!formData.subject.trim()) {
+      // Validación básica: el asunto es requerido
+      return;
+    }
 
     // Crear objeto de contacto con el formato esperado
     const newContact = {
-      id: `contact-${Date.now()}`, // ID temporal
       leadId,
       type: formData.type,
       date: formData.date.toISOString(),
-      user: formData.user,
+      user: 'Usuario Actual', // En un sistema real, esto vendría del contexto de autenticación
       subject: formData.subject,
       content: formData.content,
       outcome: formData.outcome
     };
 
-    // Enviar datos al componente padre
-    onSave(newContact);
+    try {
+      // Usar el mutation para guardar en la API
+      await createEngagementMutation.mutateAsync(newContact);
 
-    // Resetear formulario
-    setFormData({
-      type: 'call',
-      date: new Date(),
-      subject: '',
-      content: '',
-      outcome: '',
-      user: 'Usuario Actual'
-    });
+      // Cerrar modal
+      onClose();
+
+      // Resetear formulario
+      setFormData({
+        type: 'call',
+        date: new Date(),
+        subject: '',
+        content: '',
+        outcome: ''
+      });
+    } catch (error) {
+      console.error('Error al guardar el contacto:', error);
+    }
   };
 
   // Renderizar icono de tipo de contacto
@@ -145,10 +162,7 @@ export default function RegisterContactModal({
               <SelectContent>
                 {contactTypes.map(type => (
                   <SelectItem key={type.value} value={type.value}>
-                    <div className='flex items-center'>
-                      {type.icon}
-                      {type.label}
-                    </div>
+                    <div className='flex items-center'>{type.label}</div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -192,6 +206,7 @@ export default function RegisterContactModal({
               value={formData.subject}
               onChange={e => handleChange('subject', e.target.value)}
               placeholder='Ej. Llamada de seguimiento'
+              required
             />
           </div>
 
@@ -220,11 +235,26 @@ export default function RegisterContactModal({
         </form>
 
         <DialogFooter>
-          <Button variant='outline' onClick={onClose}>
+          <Button
+            variant='outline'
+            onClick={onClose}
+            disabled={createEngagementMutation.isPending}
+          >
             Cancelar
           </Button>
-          <Button type='submit' onClick={handleSubmit}>
-            Guardar contacto
+          <Button
+            type='submit'
+            onClick={handleSubmit}
+            disabled={createEngagementMutation.isPending}
+          >
+            {createEngagementMutation.isPending ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Guardando...
+              </>
+            ) : (
+              'Guardar contacto'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

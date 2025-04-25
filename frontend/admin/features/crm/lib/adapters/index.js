@@ -10,3 +10,10 @@ export {
   getContactTypeIcon as contactsAdapter
 } from './contacts.adapter';
 export { default as leadsAdapter } from './leads.adapter';
+
+// Adaptadores de engagements (contactos con leads)
+export {
+  engagementToApiAdapter,
+  apiToEngagementAdapter,
+  apiEngagementsListAdapter
+} from './engagements.adapter';

@@ -50,9 +50,24 @@ export default function LeadList({
   totalPages = 1,
   totalLeads = 0,
   onPageChange,
-  onStatusChange = () => {}
+  onStatusChange = () => {},
+  sortOrder = 'recent'
 }) {
   const [leadStatuses, setLeadStatuses] = useState({});
+
+  // Ordenar los leads según el criterio seleccionado
+  const sortedLeads = [...leads].sort((a, b) => {
+    if (sortOrder === 'alphabetical') {
+      // Ordenar alfabéticamente por nombre
+      return a.name.localeCompare(b.name);
+    } else if (sortOrder === 'oldest') {
+      // Ordenar por fecha de creación (más antiguo primero)
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    } else {
+      // Por defecto, ordenar por fecha de creación (más reciente primero)
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+  });
 
   // Verificar estado de carga y mostrar mensajes apropiados
   if (loading) {
@@ -240,7 +255,7 @@ export default function LeadList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leads.map(lead => (
+            {sortedLeads.map(lead => (
               <TableRow key={lead.id} className='hover:bg-gray-50'>
                 <TableCell>
                   <div className='font-medium truncate max-w-[120px] sm:max-w-none'>
@@ -321,7 +336,7 @@ export default function LeadList({
                 </TableCell>
               </TableRow>
             ))}
-            {!loading && totalLeads > 0 && leads.length === 0 && (
+            {!loading && totalLeads > 0 && sortedLeads.length === 0 && (
               <TableRow>
                 <TableCell
                   colSpan={7}
@@ -337,7 +352,7 @@ export default function LeadList({
 
       {/* Vista de tarjetas para móvil */}
       <div className='md:hidden space-y-3'>
-        {leads.map(lead => (
+        {sortedLeads.map(lead => (
           <div
             key={lead.id}
             className='bg-white border rounded-lg p-3 shadow-sm'

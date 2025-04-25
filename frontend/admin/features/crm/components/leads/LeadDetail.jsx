@@ -23,6 +23,7 @@ import { Textarea } from '@/shared/ui/textarea';
 import { leadStatusConfig } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
 import { Skeleton } from '@/shared/ui/skeleton';
+import { FaWhatsapp } from 'react-icons/fa';
 
 /**
  * Componente para mostrar el detalle de un lead
@@ -420,7 +421,7 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
                   }}
                   disabled={!lead.phone}
                 >
-                  <MessageSquare className='h-4 w-4 mr-2' />
+                  <FaWhatsapp className='h-4 w-4 mr-2' />
                   WhatsApp
                 </Button>
                 <Button
