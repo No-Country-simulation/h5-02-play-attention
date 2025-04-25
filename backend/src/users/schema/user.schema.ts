@@ -12,7 +12,11 @@ export enum Services {
   PROFESIONAL = 'Profesional',
   EMPRESA = 'Empresa',
   INDIVIDUAL = 'Individuo',
+  SYSTEM = 'System',
 }
+
+export type ServiceType = `${Services}`;
+export type UserRoleType = `${UserRole}`;
 
 @Schema({ timestamps: true })
 export class User {
