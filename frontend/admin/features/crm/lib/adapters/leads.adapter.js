@@ -73,7 +73,8 @@ const mapServiceToUserType = service => {
 
   const serviceMap = {
     Profesional: 'profesional',
-    Individuo: 'persona',
+    'Persona Individual': 'persona',
+    Individuo: 'persona', // Mantener compatibilidad con datos antiguos
     Empresa: 'empresa'
   };
 

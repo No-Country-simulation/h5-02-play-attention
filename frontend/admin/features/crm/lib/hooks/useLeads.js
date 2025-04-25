@@ -96,11 +96,11 @@ export function useUpdateLeadStatus() {
         company: adaptedLead.company || '',
         service:
           adaptedLead.userType === 'persona'
-            ? 'Individuo'
+            ? 'Persona Individual'
             : adaptedLead.userType === 'empresa'
             ? 'Empresa'
             : 'Profesional',
-        message: adaptedLead.notes || '',
+        notes: adaptedLead.notes || '',
         status: status, // El estado ya viene en formato correcto
         origen: adaptedLead.source || 'Sitio web',
         relation: adaptedLead.position || 'Usuario'

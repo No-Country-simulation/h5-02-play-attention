@@ -197,7 +197,7 @@ export default function Dashboard() {
         {/* Tab: Vista General */}
         <TabsContent value='overview' className='mt-0'>
           {/* Métricas principales */}
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-5 mb-6'>
+          <div className='grid grid-cols-1 lg:grid-cols-4 gap-5 mb-6'>
             <MetricCard
               title='Leads Nuevos'
               value='32'
@@ -284,7 +284,7 @@ export default function Dashboard() {
 
             {alertViewMode === 'grid' ? (
               <div className='mb-4'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-5 mb-2'>
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-5 mb-2'>
                   {displayedAlerts.map(alert => (
                     <AlertCard
                       key={alert.id}
@@ -385,7 +385,7 @@ export default function Dashboard() {
             <h2 className='text-xl font-semibold'>Acciones Rápidas</h2>
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-5 mb-6'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6'>
             <ActionCard
               title='Crear Lead'
               description='Registra un nuevo lead de ventas'
@@ -415,7 +415,7 @@ export default function Dashboard() {
       {activeTab !== 'overview' && (
         <div className='bg-gray-50 rounded-lg p-4 mb-6'>
           <h3 className='text-sm font-medium mb-3'>Resumen rápido</h3>
-          <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6'>
             <div className='bg-white p-3 rounded border text-center'>
               <p className='text-xs text-gray-500'>Leads</p>
               <p className='text-xl font-bold text-green-600'>32</p>

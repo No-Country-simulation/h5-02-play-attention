@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, ArrowDown10, ArrowUp10, SortAsc } from 'lucide-react';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import {
@@ -29,7 +29,9 @@ export default function LeadFilters({
   onUserTypeChange,
   searchTerm,
   onSearchChange,
-  onCreateLead
+  onCreateLead,
+  sortOrder = 'recent',
+  onSortChange
 }) {
   return (
     <div className='bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6'>
@@ -37,7 +39,7 @@ export default function LeadFilters({
       <div className='hidden lg:flex lg:flex-col lg:gap-3'>
         <div className='grid grid-cols-12 gap-4'>
           {/* Buscador */}
-          <div className='col-span-6'>
+          <div className='col-span-4'>
             <Label htmlFor='searchTerm-desktop' className='mb-2 block text-sm'>
               Buscar leads
             </Label>
@@ -99,6 +101,38 @@ export default function LeadFilters({
                     {leadUserTypeConfig[type]?.label || type}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filtro de ordenamiento */}
+          <div className='col-span-2'>
+            <Label htmlFor='sortOrder-desktop' className='mb-2 block text-sm'>
+              Ordenar por
+            </Label>
+            <Select value={sortOrder} onValueChange={onSortChange}>
+              <SelectTrigger id='sortOrder-desktop' className='h-10 text-sm'>
+                <SelectValue placeholder='Ordenar' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='recent'>
+                  <div className='flex items-center'>
+                    <ArrowDown10 className='h-4 w-4 mr-2' />
+                    <span>Más recientes</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value='oldest'>
+                  <div className='flex items-center'>
+                    <ArrowUp10 className='h-4 w-4 mr-2' />
+                    <span>Más antiguos</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value='alphabetical'>
+                  <div className='flex items-center'>
+                    <SortAsc className='h-4 w-4 mr-2' />
+                    <span>Alfabético</span>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -190,6 +224,44 @@ export default function LeadFilters({
                     {leadUserTypeConfig[type]?.label || type}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filtro de ordenamiento en móvil */}
+          <div>
+            <Label
+              htmlFor='sortOrder-mobile'
+              className='mb-1 sm:mb-2 block text-sm'
+            >
+              Orden
+            </Label>
+            <Select value={sortOrder} onValueChange={onSortChange}>
+              <SelectTrigger
+                id='sortOrder-mobile'
+                className='h-9 sm:h-10 text-sm'
+              >
+                <SelectValue placeholder='Ordenar' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='recent'>
+                  <div className='flex items-center'>
+                    <ArrowDown10 className='h-4 w-4 mr-2' />
+                    <span>Más recientes</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value='oldest'>
+                  <div className='flex items-center'>
+                    <ArrowUp10 className='h-4 w-4 mr-2' />
+                    <span>Más antiguos</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value='alphabetical'>
+                  <div className='flex items-center'>
+                    <SortAsc className='h-4 w-4 mr-2' />
+                    <span>Alfabético</span>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

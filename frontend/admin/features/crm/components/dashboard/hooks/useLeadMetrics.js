@@ -35,9 +35,9 @@ export const useLeadMetrics = (leads, timeRange, isLoading) => {
     } else {
       // Para otros rangos, filtrar SOLO por fecha de creación, sin importar el estado
       const cutoffDate = new Date();
-      if (timeRange === '5min') {
-        // Últimos 5 minutos para pruebas de desarrollo
-        cutoffDate.setMinutes(cutoffDate.getMinutes() - 5);
+      if (timeRange === '12h') {
+        // Últimas 12 horas
+        cutoffDate.setHours(cutoffDate.getHours() - 12);
       } else if (timeRange === '7days') {
         cutoffDate.setDate(cutoffDate.getDate() - 7);
       } else if (timeRange === '90days') {

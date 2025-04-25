@@ -4,6 +4,7 @@
  */
 
 const API_URL = 'https://play-attention.onrender.com/api';
+import { engagementToApiAdapter } from '../adapters/engagements.adapter';
 
 export const leadsApi = {
   /**
@@ -75,7 +76,7 @@ export const leadsApi = {
         email: formData.email || '',
         service:
           formData.userType === 'persona'
-            ? 'Individuo'
+            ? 'Persona Individual'
             : formData.userType === 'profesional'
             ? 'Profesional'
             : 'Empresa',
@@ -147,13 +148,13 @@ export const leadsApi = {
         service:
           formData.service ||
           (formData.userType === 'persona'
-            ? 'Individuo'
+            ? 'Persona Individual'
             : formData.userType === 'profesional'
             ? 'Profesional'
             : formData.userType === 'empresa'
             ? 'Empresa'
-            : 'Individuo'),
-        message: formData.notes || formData.message || '',
+            : 'Persona Individual'),
+        notes: formData.notes || formData.message || '',
         status: formData.status, // El estado ya viene en formato correcto
         origen: formData.source || formData.origen || 'Sitio web',
         relation: formData.position || formData.relation || 'Usuario' // Asegurar que relation no esté vacío
@@ -214,3 +215,96 @@ export const leadsApi = {
     }
   }
 };
+
+/**
+ * API para engagements (contactos con leads)
+ * Centraliza todas las llamadas a la API relacionadas con contactos
+ */
+export const engagementsApi = {
+  /**
+   * Obtiene los contactos de un lead específico
+   * @param {string} leadId ID del lead
+   * @returns {Promise<Array>} Lista de contactos
+   */
+  getLeadEngagements: async leadId => {
+    try {
+      console.log(`Fetching engagements for lead: ${leadId}`);
+      const url = `${API_URL}/engagements/lead/${leadId}`;
+      console.log(`Request URL: ${url}`);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'No error details');
+        console.error(
+          `Error fetching engagements: ${response.status}`,
+          errorText
+        );
+        throw new Error(`Error ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Engagements API response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in getLeadEngagements:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Crea un nuevo contacto para un lead
+   * @param {Object} contactData Datos del contacto
+   * @returns {Promise<Object>} Contacto creado
+   */
+  createEngagement: async contactData => {
+    try {
+      // Adaptar los campos al formato esperado por la API usando el adaptador
+      const payload = engagementToApiAdapter(contactData);
+
+      const response = await fetch(`${API_URL}/engagements`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let errorText = '';
+        try {
+          const errorResponse = await response.json();
+          errorText = JSON.stringify(errorResponse);
+        } catch (parseError) {
+          errorText = await response.text();
+        }
+        throw new Error(`Error ${response.status}: ${errorText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+/**
+ * Mapea el tipo de contacto del frontend al formato de la API
+ * @param {string} type Tipo de contacto en el frontend
+ * @returns {string} Tipo de contacto para la API
+ */
+function mapContactTypeToApi(type) {
+  const typeMap = {
+    email: 'email',
+    call: 'phonecall',
+    meeting: 'meeting',
+    message: 'whatsapp',
+    note: 'other'
+  };
+
+  return typeMap[type] || 'other';
+}

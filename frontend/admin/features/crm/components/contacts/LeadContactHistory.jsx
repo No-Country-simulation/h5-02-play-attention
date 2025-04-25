@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -11,6 +11,7 @@ import {
   FileText,
   CalendarClock
 } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { Badge } from '@/shared/ui/badge';
 import {
   Card,
@@ -23,41 +24,27 @@ import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { contactTypeConfig } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
-import { mockContactHistory } from '../../lib/config/mock-data';
+import { apiEngagementsListAdapter } from '../../lib/adapters/engagements.adapter';
+import { useLeadEngagements } from '../../lib/hooks/useEngagements';
 
 /**
  * Componente para mostrar el historial de contactos de un lead
  * Sigue el principio de responsabilidad única (SRP) centrándose solo en mostrar contactos
  */
 export default function LeadContactHistory({ leadId, onAddContact }) {
-  const [contactHistory, setContactHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Usar React Query para obtener los contactos
+  const {
+    data: engagements = [],
+    isLoading,
+    isError,
+    error
+  } = useLeadEngagements(leadId);
 
-  // Cargar el historial de contactos al montar el componente
-  useEffect(() => {
-    const loadContactHistory = async () => {
-      setIsLoading(true);
-      try {
-        // Simular carga con un retraso
-        await new Promise(resolve => setTimeout(resolve, 500));
+  // Adaptamos los datos de la API al formato esperado por el componente
+  const contactHistory = apiEngagementsListAdapter(engagements);
 
-        // Filtrar contactos por leadId
-        const filteredContacts = mockContactHistory.filter(
-          contact => contact.leadId === leadId
-        );
-
-        setContactHistory(filteredContacts);
-      } catch (error) {
-        console.error('Error al cargar el historial de contactos:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (leadId) {
-      loadContactHistory();
-    }
-  }, [leadId]);
+  console.log('API Response - Engagements:', engagements);
+  console.log('Formatted Contact History:', contactHistory);
 
   // Formatear la fecha
   const formatDate = date => {
@@ -73,7 +60,7 @@ export default function LeadContactHistory({ leadId, onAddContact }) {
   const renderContactIcon = type => {
     const iconMap = {
       email: Mail,
-      call: Phone,
+      call: FaWhatsapp,
       meeting: Users,
       message: MessageCircle,
       note: FileText
@@ -106,9 +93,14 @@ export default function LeadContactHistory({ leadId, onAddContact }) {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Historial de contactos</CardTitle>
-          <CardDescription>Cargando historial...</CardDescription>
+        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+          <div>
+            <CardTitle>Historial de contactos</CardTitle>
+            <CardDescription>Cargando historial...</CardDescription>
+          </div>
+          <Button onClick={onAddContact} size='sm'>
+            Registrar contacto
+          </Button>
         </CardHeader>
         <CardContent>
           <div className='space-y-4'>
@@ -119,6 +111,29 @@ export default function LeadContactHistory({ leadId, onAddContact }) {
                 <Skeleton className='h-4 w-3/4' />
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Si hay error, mostrar mensaje
+  if (isError) {
+    console.error('Error cargando contactos:', error);
+    return (
+      <Card>
+        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+          <div>
+            <CardTitle>Historial de contactos</CardTitle>
+            <CardDescription>Error al cargar contactos</CardDescription>
+          </div>
+          <Button onClick={onAddContact} size='sm'>
+            Registrar contacto
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className='py-4 text-center text-gray-500'>
+            {error?.message || 'Error al cargar el historial de contactos'}
           </div>
         </CardContent>
       </Card>

@@ -40,8 +40,8 @@ export const contactTypeConfig = {
   call: {
     variant: 'outline',
     className: 'bg-leads-light text-leads border-leads',
-    icon: 'phone',
-    label: 'Llamada'
+    icon: 'message-circle',
+    label: 'WhatsApp'
   },
   meeting: {
     variant: 'outline',
@@ -114,8 +114,8 @@ export const leadContactTypeConfig = {
     className: 'text-blue-600'
   },
   llamada: {
-    label: 'Llamada',
-    icon: 'phone',
+    label: 'WhatsApp',
+    icon: 'message-circle',
     className: 'text-green-600'
   },
   reunión: {

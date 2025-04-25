@@ -19,6 +19,7 @@ import { Button } from '@/shared/ui/button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
+import { toast } from 'sonner';
 
 import LeadContactHistory from '../contacts/LeadContactHistory';
 import RegisterContactModal from '../contacts/RegisterContactModal';
@@ -45,13 +46,6 @@ export default function LeadDetailPage() {
 
   // Cerrar modal
   const handleCloseContactModal = () => {
-    setIsContactModalOpen(false);
-  };
-
-  // Funcionalidad para guardar el contacto
-  const handleSaveContact = contactData => {
-    console.log('Guardando nuevo contacto:', contactData);
-    // Aquí se implementaría la lógica para guardar el contacto en la API
     setIsContactModalOpen(false);
   };
 
@@ -164,7 +158,6 @@ export default function LeadDetailPage() {
         <RegisterContactModal
           isOpen={isContactModalOpen}
           onClose={handleCloseContactModal}
-          onSave={handleSaveContact}
           leadName={lead.name}
           leadId={lead.id}
         />

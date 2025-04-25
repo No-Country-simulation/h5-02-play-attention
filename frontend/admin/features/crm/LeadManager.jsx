@@ -39,7 +39,8 @@ export default function LeadManager() {
   const [filters, setFiltersState] = useState({
     status: 'all',
     userType: 'all',
-    search: ''
+    search: '',
+    sortOrder: 'recent' // Ordenar por defecto por fecha de creación (más reciente primero)
   });
   const [pagination, setPaginationState] = useState({
     page: 1,
@@ -49,7 +50,6 @@ export default function LeadManager() {
 
   // Obtener leads con React Query desde la nueva ubicación
   const { data: leadsFromApi = [], isLoading, error } = useLeads();
-  console.log('📦 Leads desde la API (sin adaptar):', leadsFromApi);
 
   // Estado local para actualizaciones inmediatas
   const [localLeadUpdates, setLocalLeadUpdates] = useState({});
@@ -156,6 +156,11 @@ export default function LeadManager() {
   // Función para cambiar término de búsqueda
   const handleSearchChange = search => {
     setFilters({ search });
+  };
+
+  // Función para cambiar el orden de los leads
+  const handleSortChange = sortOrder => {
+    setFilters({ sortOrder });
   };
 
   // Función para actualizar la URL cuando cambia la pestaña
@@ -300,6 +305,8 @@ export default function LeadManager() {
             searchTerm={filters.search}
             onSearchChange={handleSearchChange}
             onCreateLead={handleCreateLead}
+            sortOrder={filters.sortOrder}
+            onSortChange={handleSortChange}
           />
 
           <LeadList
@@ -312,6 +319,7 @@ export default function LeadManager() {
             totalLeads={filteredLeads.length}
             onPageChange={handlePageChange}
             onStatusChange={handleLeadStatusChange}
+            sortOrder={filters.sortOrder}
           />
         </TabsContent>
 

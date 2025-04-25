@@ -133,9 +133,9 @@ export default function LeadDashboard({
       </div>
 
       {/* Layout con métricas, gráficos y calendario */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
         {/* Sección de tarjetas métricas - Visibles juntas en móvil primero */}
-        <div className='grid grid-cols-2 gap-4 md:hidden'>
+        <div className='grid grid-cols-2 gap-4 lg:hidden'>
           <MetricCard
             title='Total Leads'
             value={metrics.totalLeads}
@@ -150,8 +150,8 @@ export default function LeadDashboard({
               timeRange === 'all'
                 ? 'Con estado "nuevo"'
                 : `Creados en los últimos ${
-                    timeRange === '5min'
-                      ? '5 minutos'
+                    timeRange === '12h'
+                      ? '12 horas'
                       : timeRange === '7days'
                       ? '7'
                       : timeRange === '90days'
@@ -159,13 +159,13 @@ export default function LeadDashboard({
                       : timeRange === 'year'
                       ? '365'
                       : '30'
-                  } ${timeRange === '5min' ? '' : 'días'}`
+                  } ${timeRange === '12h' ? '' : 'días'}`
             }
           />
         </div>
 
         {/* Columna 1: Total Leads y Tipos de Usuario */}
-        <div className='flex flex-col h-full hidden md:flex'>
+        <div className='flex flex-col h-full hidden lg:flex'>
           <MetricCard
             title='Total Leads'
             value={metrics.totalLeads}
@@ -187,7 +187,7 @@ export default function LeadDashboard({
         </div>
 
         {/* Columna 2: Leads Nuevos y Por Estado */}
-        <div className='flex flex-col h-full hidden md:flex'>
+        <div className='flex flex-col h-full hidden lg:flex'>
           <MetricCard
             title='Leads Nuevos'
             value={metrics.newLeads}
@@ -196,8 +196,8 @@ export default function LeadDashboard({
               timeRange === 'all'
                 ? 'Con estado "nuevo"'
                 : `Creados en los últimos ${
-                    timeRange === '5min'
-                      ? '5 minutos'
+                    timeRange === '12h'
+                      ? '12 horas'
                       : timeRange === '7days'
                       ? '7'
                       : timeRange === '90days'
@@ -205,7 +205,7 @@ export default function LeadDashboard({
                       : timeRange === 'year'
                       ? '365'
                       : '30'
-                  } ${timeRange === '5min' ? '' : 'días'}`
+                  } ${timeRange === '12h' ? '' : 'días'}`
             }
           />
           <div className='mt-4 flex-grow'>
@@ -222,7 +222,7 @@ export default function LeadDashboard({
         </div>
 
         {/* Sección de gráficos - Visibles juntos en móvil después de las métricas */}
-        <div className='space-y-4 md:hidden'>
+        <div className='space-y-4 lg:hidden'>
           <ChartCard
             title='Tipos de Usuario'
             description='Segmentación por tipo'
@@ -243,7 +243,7 @@ export default function LeadDashboard({
         </div>
 
         {/* Columna 3: Calendario ocupando toda la altura */}
-        <div className='h-auto md:h-full mt-4 md:mt-0'>
+        <div className='h-auto lg:h-full mt-4 lg:mt-0'>
           <Card className='h-full min-h-[300px]'>
             <CardHeader className='pb-1 pt-3'>
               <CardTitle className='text-sm font-medium flex items-center'>
