@@ -41,9 +41,9 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Por favor ingresa un correo válido.",
   }),
-  phone: z.string().min(6, {
-    message: "El teléfono debe tener al menos 6 caracteres.",
-  }),
+  // phone: z.string().min(6, {
+  //   message: "El teléfono debe tener al menos 6 caracteres.",
+  // }),
   company: z
     .string()
     .min(2, {
@@ -76,7 +76,7 @@ export const ContactSection = () => {
     defaultValues: {
       fullname: "",
       email: "",
-      phone: "",
+      // phone: "",
       company: "",
       service: "",
       message: "",
@@ -95,7 +95,7 @@ export const ContactSection = () => {
       message: data.message,
       fullname: data.fullname,
       company: data.company || "",
-      phone: data.phone,
+      // phone: data.phone,
       email: data.email,
       service: data.service,
       relation: data.relation,
@@ -133,165 +133,189 @@ export const ContactSection = () => {
   };
 
   return (
-    <section className="border border-black w-screen h-auto ">
-      <h1>Contactanos</h1>
-      <p>¿Tienes preguntas sobre Play Attention? Estamos aquí para ayudarte</p>
-      <div className="bg-[#e9e9f1] w-screen h-[60%]">
-        <div>datos</div>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-[75.23vw] h-[50.37%] bg-white md:p-6"
-          >
-            <FormField
-              control={form.control}
-              name="fullname"
-              render={({ field }) => (
-                <div>
-                  <FormLabel className={"py-3"}>Nombre Completo*</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-black rounded-none md:w-[32.86vw]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <div>
-                  <FormLabel className={"py-3"}>Correo electrónico*</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-black rounded-none md:w-[32.86vw]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <div>
-                  <FormLabel className={"py-3"}>Teléfono*</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-black rounded-none md:w-[32.86vw]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="company"
-              render={({ field }) => (
-                <div>
-                  <FormLabel className={"py-3"}>Empresa/Institución</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-black rounded-none md:w-[32.86vw]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="service"
-              render={({ field }) => (
-                <div className="m-0">
-                  <FormLabel className={"py-4"}>Servicio de interés*</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="border border-black rounded-none">
-                        <SelectValue placeholder="Selecciona una opción" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Profesional">Profesional</SelectItem>
-                      <SelectItem value="Individuo">Individuo</SelectItem>
-                      <SelectItem value="Empresa">Empresa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="relation"
-              render={({ field }) => (
-                <div className="m-0">
-                  <FormLabel className={"py-4"}>Tu relación*</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="border border-black rounded-none">
-                        <SelectValue placeholder="Selecciona una opción" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Director">Director</SelectItem>
-                      <SelectItem value="Profesor">Profesor</SelectItem>
-                      <SelectItem value="Padre/Madre">Padre/Madre</SelectItem>
-                      <SelectItem value="Terapeuta">Terapeuta</SelectItem>
-                      <SelectItem value="Otro">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <div className="m-0">
-                  <FormLabel className={"py-4"}>Mensaje*</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Hola, necesito ayuda con..."
-                      className="min-h-[100px] border border-black rounded-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </div>
-              )}
-            />
-
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="mx-auto w-[62.73vw] h-[3.31%] rounded-none block"
+    <section className=" w-screen min-h-[max-content] h-auto flex flex-col">
+      <h1 className="text-center pt-4 ">Contactanos</h1>
+      <small className="text-center pt-4">
+        ¿Tienes preguntas sobre Play Attention? Estamos aquí para ayudarte
+      </small>
+      <div className="box-border h-[min-content] py-20">
+        <div className="bg-[#e9e9f1] w-screen h-[60vh] flex items-center justify-evenly ">
+          <div>datos 1</div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="min-h-[127.1137%]  max-h-[127.1137%] w-[36.02%] bg-white border-2 border-[#C0B2CF] shadow-[0_0_3px_#C0B2CF] rounded-sm p-5 relative left-4 flex flex-col justify-evenly"
             >
-              {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
-            </Button>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="fullname"
+                render={({ field }) => (
+                  <div>
+                    <FormLabel className={"text-[0.9rem] text-[#15032A] "}>
+                      Nombre*
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className={
+                          "h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]"
+                        }
+                        {...field}
+                        placeholder="Tu nombre completo"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <div>
+                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                      Correo electrónico*
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className={
+                          "h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF] "
+                        }
+                        {...field}
+                        placeholder="tu@email.com"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="company"
+                render={({ field }) => (
+                  <div>
+                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                      Institución
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className={
+                          "h-[4.62%]  border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF] "
+                        }
+                        {...field}
+                        placeholder="Nombre de institución o empresa"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="service"
+                render={({ field }) => (
+                  <div className="m-0">
+                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                      ¿Quién lo va a usar?
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl
+                        className={
+                          "h-[4.62%] border-1 border-[#C0B2CF] text-[0.9rem] py-1"
+                        }
+                      >
+                        <SelectTrigger className="text-[#C0B2CF]">
+                          <SelectValue placeholder="Selecciona una opción" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem
+                          value="Profesional"
+                          className="text-[#A592B5]"
+                        >
+                          Profesional
+                        </SelectItem>
+                        <SelectItem
+                          value="Individuo"
+                          className="text-[#A592B5]"
+                        >
+                          Individuo
+                        </SelectItem>
+                        <SelectItem value="Empresa" className="text-[#B0A2C0]">
+                          Empresa
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <div className="m-0">
+                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                      Contexto de uso
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Texto"
+                        className={
+                          "h-[18.01%]  border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]"
+                        }
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="terms"
+                render={({ field }) => (
+                  <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md ">
+                    {" "}
+                    {/* Eliminé border */}
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="border-none" // Asegura que el checkbox no tenga borde
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-[0.7rem] text-[#929292] py-1">
+                        {" "}
+                        {/* Cambié a morado */}
+                        Quiero recibir novedades, actualizaciones y ofertas
+                        especiales de Play Attention
+                      </FormLabel>
+                    </div>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className=" w-full h-[5.31%]"
+              >
+                {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
+              </Button>
+              <small className="text-center text-[0.7rem] py-1">
+                Al enviar este formulario, aceptas nuestra Política de
+                Privacidad y el tratamiento de tus datos.
+              </small>
+            </form>
+          </Form>
+        </div>
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
