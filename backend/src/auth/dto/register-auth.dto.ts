@@ -1,5 +1,5 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
-import { UserRole, Services } from '../../users/schema/user.schema';
+import { IsEmail, IsEnum, IsIn, IsNotEmpty, MinLength } from 'class-validator';
+import { UserRole, Services, UserRoleType } from '../../users/schema/user.schema';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -11,11 +11,13 @@ export class RegisterDto {
   @MinLength(6, { message: 'El Password debe contener 6 caracteres' })
   password: string;
 
-  @ApiProperty({ example: 'Profesional', description: 'Tipo de servicio del usuario' })
+  @ApiProperty({ example: 'Profesional', description: 'Tipo de servicio del usuario', enum: Object.values(Services) })
   @IsNotEmpty({ message: 'Debes elegir el tipo de servicio' })
+  @IsEnum(Object.values(Services))
   service: Services;
 
-  @ApiProperty({example:"Profesional",description:"Rol del usuario"})
+  @ApiProperty({example:"Profesional",description:"Rol del usuario", enum: Object.values(UserRole)},)
   @IsNotEmpty({ message: 'Debes elegir el rol del usuario' })
+  @IsIn(Object.values(UserRole))
   role: UserRole;
 }

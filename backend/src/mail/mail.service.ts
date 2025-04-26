@@ -24,6 +24,7 @@ export class MailService {
     emailAddress: string,
     contextVariables: TemplateContextVariables[T],
     from?: string,
+    bcc: string[] = [],
   ) {
     const { templateName, defaultSubject } =
       EmailTemplatesDefault[emailTemplate];
@@ -42,7 +43,29 @@ export class MailService {
         subject: defaultSubject,
         template: templateName,
         context: contextVariables,
+        bcc,
         ...(from ? { from } : {}),
+      });
+    } catch (error) {
+      this.handleEmailError(error);
+    }
+  }
+
+  async sendPlainTextEmail(
+    to: string | string[],
+    subject: string,
+    text: string,
+    cc: string | string[] = [],
+    bcc: string | string[] = [],
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject,
+        text,
+        cc,
+        bcc,
+        html: `<pre>${text}</pre>`,
       });
     } catch (error) {
       this.handleEmailError(error);

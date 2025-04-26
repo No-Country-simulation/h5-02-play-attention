@@ -1,6 +1,6 @@
 export const LEAD_SERVICE_OPTIONS = [
   'Profesional',
-  'Individuo',
+  'Persona individual',
   'Empresa',
 ] as const;
 export const LEAD_STATUS = ['Nuevo', 'Activo', 'Cliente'] as const;
@@ -10,4 +10,5 @@ export const LEAD_ORIGINS = [
   'Redes sociales',
   'LinkedIn',
   'Otro',
+  'Whatsapp'
 ] as const;

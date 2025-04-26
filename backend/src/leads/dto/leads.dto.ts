@@ -31,7 +31,7 @@ export class CreateLeadDto {
     @IsIn(LEAD_SERVICE_OPTIONS)
     service: string;
 
-    @ApiProperty({ example: 'Buen día, me comunico por...', description: 'Notas escritas por el usuario'})
+    @ApiProperty({ example: 'El usuario desea el producto...', description: 'Notas escritas admin en el CRM'})
     @IsString()
     @IsOptional()
     notes?: string;
