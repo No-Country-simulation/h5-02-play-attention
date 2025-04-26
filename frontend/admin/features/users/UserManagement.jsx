@@ -28,7 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/shared/ui/tooltip';
-import { mockUsers, userStats } from './lib/config/mock-data';
+import { useUsers, useCreateUser } from './lib/hooks';
 
 /**
  * Componente principal de gestión de usuarios
@@ -36,7 +36,8 @@ import { mockUsers, userStats } from './lib/config/mock-data';
  * dejando la gestión de roles y permisos para su sección correspondiente
  */
 export default function UserManagement() {
-  const [users, setUsers] = useState(mockUsers);
+  const { data: usersData, isLoading, error } = useUsers();
+  const createUserMutation = useCreateUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -54,6 +55,62 @@ export default function UserManagement() {
   // Estado para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 4; // Mismo tamaño que en CRM
+
+  // Transformar datos del API al formato esperado por el componente
+  const users = usersData?.data
+    ? usersData.data.map(user => ({
+        id: user._id,
+        name: user.email.split('@')[0], // Usamos parte del email como nombre por ahora
+        email: user.email,
+        role: user.role || 'Usuario',
+        status: user.isActive ? 'active' : 'inactive',
+        lastLogin: null, // El API no proporciona esta info
+        createdAt: user.createdAt
+      }))
+    : [];
+
+  // Calcular estadísticas reales de usuarios
+  const calculateUserStats = () => {
+    if (!users.length) {
+      return {
+        total: 0,
+        active: 0,
+        inactive: 0,
+        pending: 0,
+        newThisMonth: 0
+      };
+    }
+
+    // Obtener el mes actual y año
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const total = users.length;
+    const active = users.filter(user => user.status === 'active').length;
+    const inactive = users.filter(user => user.status === 'inactive').length;
+    const pending = users.filter(user => user.status === 'pending').length;
+
+    // Contar usuarios creados este mes
+    const newThisMonth = users.filter(user => {
+      const createdDate = new Date(user.createdAt);
+      return (
+        createdDate.getMonth() === currentMonth &&
+        createdDate.getFullYear() === currentYear
+      );
+    }).length;
+
+    return {
+      total,
+      active,
+      inactive,
+      pending,
+      newThisMonth
+    };
+  };
+
+  // Estadísticas reales de usuarios
+  const userStats = calculateUserStats();
 
   // Filtrar usuarios por término de búsqueda y estado
   const filteredUsers = users.filter(user => {
@@ -83,17 +140,24 @@ export default function UserManagement() {
 
   // Manejar la creación de un nuevo usuario
   const handleCreateUser = userData => {
-    // En una implementación real, aquí se haría una llamada API
-    const newUser = {
-      id: users.length + 1,
-      ...userData,
-      status: 'pending',
-      lastLogin: null,
-      createdAt: new Date().toISOString()
-    };
+    console.log('Datos del formulario:', userData);
 
-    setUsers([...users, newUser]);
-    setIsCreateModalOpen(false);
+    // Eliminar campos que no debe recibir el backend
+    const { confirmPassword, name, ...userDataForApi } = userData;
+
+    console.log('Datos a enviar a la API:', userDataForApi);
+
+    // Llamar a la mutación para crear el usuario
+    createUserMutation.mutate(userDataForApi, {
+      onSuccess: data => {
+        console.log('Usuario creado exitosamente:', data);
+        setIsCreateModalOpen(false);
+      },
+      onError: error => {
+        console.error('Error al crear usuario desde el componente:', error);
+        // No cerramos el modal para permitir al usuario corregir los datos
+      }
+    });
   };
 
   // Abrir modal de edición con los datos del usuario
@@ -118,22 +182,22 @@ export default function UserManagement() {
   // Guardar los cambios del usuario
   const handleSaveEditUser = () => {
     // En una implementación real, aquí se haría una llamada API
-    setUsers(
-      users.map(user =>
-        user.id === currentUser.id ? { ...user, ...editFormData } : user
-      )
-    );
+    // setUsers(
+    //   users.map(user =>
+    //     user.id === currentUser.id ? { ...user, ...editFormData } : user
+    //   )
+    // );
     setIsEditModalOpen(false);
   };
 
   // Manejar cambio de estado de un usuario
   const handleStatusChange = (userId, newStatus) => {
     // En una implementación real, aquí se haría una llamada API
-    setUsers(
-      users.map(user =>
-        user.id === userId ? { ...user, status: newStatus } : user
-      )
-    );
+    // setUsers(
+    //   users.map(user =>
+    //     user.id === userId ? { ...user, status: newStatus } : user
+    //   )
+    // );
   };
 
   // Función para exportar la lista de usuarios a PDF
@@ -165,6 +229,30 @@ export default function UserManagement() {
     }
   };
 
+  // Estado de carga
+  if (isLoading) {
+    return (
+      <div className='p-6 max-w-7xl mx-auto'>
+        <PageHeader title={title} description={description} />
+        <div className='flex justify-center items-center mt-10'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary'></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Estado de error
+  if (error) {
+    return (
+      <div className='p-6 max-w-7xl mx-auto'>
+        <PageHeader title={title} description={description} />
+        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-6'>
+          <p>Error al cargar los usuarios: {error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='p-6 max-w-7xl mx-auto'>
       <PageHeader title={title} description={description} />
@@ -189,19 +277,19 @@ export default function UserManagement() {
         {/* Botones de acción */}
         <div className='flex gap-2 w-full md:w-auto'>
           <button
-            className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50'
+            className='flex items-center gap-1.5 px-3 py-1.5 bg-purple-700 text-white text-sm rounded-lg hover:bg-purple-800 transition-colors'
             onClick={() => setIsCreateModalOpen(true)}
           >
-            <PlusCircle className='h-5 w-5' />
-            <span className='hidden md:inline'>Nuevo Usuario</span>
+            <PlusCircle className='h-4 w-4' />
+            <span>Nuevo Usuario</span>
           </button>
 
           <button
-            className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50'
+            className='flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 text-sm rounded-lg bg-white hover:bg-gray-50 transition-colors'
             onClick={handleExportUsers}
           >
-            <Download className='h-5 w-5' />
-            <span className='hidden md:inline'>Exportar</span>
+            <Download className='h-4 w-4' />
+            <span>Exportar</span>
           </button>
         </div>
       </div>
@@ -255,313 +343,225 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* Tabla de usuarios - Oculta en dispositivos móviles */}
-      <div className='hidden sm:block bg-white rounded-lg shadow overflow-hidden'>
-        <table className='min-w-full divide-y divide-gray-200'>
+      {/* Tabla de usuarios */}
+      <div className='overflow-x-auto mb-6'>
+        <table className='min-w-full bg-white shadow-md rounded-lg'>
           <thead className='bg-gray-50'>
             <tr>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+              <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Usuario
               </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Correo
+              <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Email
               </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Rol Asignado
+              <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Rol
               </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+              <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Estado
               </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Último Acceso
+              <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Creado
               </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Fecha Registro
-              </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+              <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className='bg-white divide-y divide-gray-200'>
-            {currentPageUsers.map(user => (
-              <tr key={user.id} className='hover:bg-gray-50'>
-                <td className='px-6 py-4 whitespace-nowrap'>
-                  <div className='font-medium text-gray-900'>{user.name}</div>
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  {user.email}
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  {user.role}
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap'>
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                    ${
-                      user.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : user.status === 'inactive'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-orange-100 text-orange-800'
-                    }`}
-                  >
-                    {user.status === 'active'
-                      ? 'Activo'
-                      : user.status === 'inactive'
-                      ? 'Inactivo'
-                      : 'Pendiente'}
-                  </span>
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  {user.lastLogin
-                    ? new Date(user.lastLogin).toLocaleString()
-                    : 'Nunca'}
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  <div className='flex gap-3 items-center'>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            className='text-indigo-600 hover:text-indigo-900'
-                            onClick={() => handleOpenEditModal(user)}
-                          >
-                            <Pencil className='h-4 w-4' />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Editar usuario</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+          <tbody className='divide-y divide-gray-200'>
+            {currentPageUsers.length > 0 ? (
+              currentPageUsers.map(user => (
+                <tr key={user.id} className='hover:bg-gray-50'>
+                  <td className='py-4 px-4 whitespace-nowrap'>
+                    <div className='flex items-center'>
+                      <div className='ml-2'>
+                        <div className='text-sm font-medium text-gray-900'>
+                          {user.name}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className='py-4 px-4 whitespace-nowrap'>
+                    <div className='text-sm text-gray-500'>{user.email}</div>
+                  </td>
+                  <td className='py-4 px-4 whitespace-nowrap'>
+                    <div className='text-sm text-gray-500'>{user.role}</div>
+                  </td>
+                  <td className='py-4 px-4 whitespace-nowrap'>
+                    <div className='flex items-center'>
+                      {user.status === 'active' && (
+                        <span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800'>
+                          <CheckCircle className='h-4 w-4 mr-1' />
+                          Activo
+                        </span>
+                      )}
+                      {user.status === 'inactive' && (
+                        <span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800'>
+                          <XCircle className='h-4 w-4 mr-1' />
+                          Inactivo
+                        </span>
+                      )}
+                      {user.status === 'pending' && (
+                        <span className='px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800'>
+                          <Clock className='h-4 w-4 mr-1' />
+                          Pendiente
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className='py-4 px-4 whitespace-nowrap'>
+                    <div className='text-sm text-gray-500'>
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className='py-4 px-4 whitespace-nowrap text-right text-sm font-medium'>
+                    <div className='flex space-x-2'>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => handleOpenEditModal(user)}
+                              className='text-indigo-600 hover:text-indigo-900'
+                            >
+                              <Pencil className='h-5 w-5' />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Editar usuario</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
 
-                    {user.status === 'active' ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              className='text-red-600 hover:text-red-900'
-                              onClick={() =>
-                                handleStatusChange(user.id, 'inactive')
-                              }
-                            >
-                              <Ban className='h-4 w-4' />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Desactivar usuario</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              className='text-green-600 hover:text-green-900'
-                              onClick={() =>
-                                handleStatusChange(user.id, 'active')
-                              }
-                            >
-                              <Check className='h-4 w-4' />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Activar usuario</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
+                      {user.status === 'active' && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() =>
+                                  handleStatusChange(user.id, 'inactive')
+                                }
+                                className='text-red-600 hover:text-red-900'
+                              >
+                                <Ban className='h-5 w-5' />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Desactivar usuario</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+
+                      {user.status === 'inactive' && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() =>
+                                  handleStatusChange(user.id, 'active')
+                                }
+                                className='text-green-600 hover:text-green-900'
+                              >
+                                <Check className='h-5 w-5' />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Activar usuario</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+
+                      {user.status === 'pending' && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() =>
+                                  handleStatusChange(user.id, 'active')
+                                }
+                                className='text-green-600 hover:text-green-900'
+                              >
+                                <Check className='h-5 w-5' />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Aprobar usuario</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan='6' className='py-4 px-4 text-center text-gray-500'>
+                  No se encontraron usuarios
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredUsers.length === 0 && (
-          <div className='text-center py-10'>
-            <p className='text-gray-500'>
-              No se encontraron usuarios con los criterios de búsqueda
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Vista de tarjetas para móvil */}
-      <div className='sm:hidden space-y-3'>
-        {currentPageUsers.map(user => (
-          <div
-            key={user.id}
-            className='bg-white border rounded-lg p-3 shadow-sm'
-          >
-            <div className='flex justify-between items-start mb-2'>
-              <div>
-                <h3 className='font-medium text-sm'>{user.name}</h3>
-                <p className='text-xs text-muted-foreground'>{user.email}</p>
-              </div>
-              <div className='flex flex-shrink-0'>
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                  ${
-                    user.status === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : user.status === 'inactive'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-orange-100 text-orange-800'
-                  }`}
-                >
-                  {user.status === 'active'
-                    ? 'Activo'
-                    : user.status === 'inactive'
-                    ? 'Inactivo'
-                    : 'Pendiente'}
-                </span>
-              </div>
-            </div>
-
-            <div className='grid grid-cols-1 gap-y-1 mb-2'>
-              <div className='flex items-center text-xs'>
-                <span className='text-muted-foreground mr-1'>Rol:</span>
-                <span className='truncate'>{user.role}</span>
-              </div>
-              <div className='flex items-center text-xs'>
-                <span className='text-muted-foreground mr-1'>
-                  Último acceso:
-                </span>
-                <span className='truncate'>
-                  {user.lastLogin
-                    ? new Date(user.lastLogin).toLocaleString()
-                    : 'Nunca'}
-                </span>
-              </div>
-              <div className='flex items-center text-xs'>
-                <span className='text-muted-foreground mr-1'>Registro:</span>
-                <span className='truncate'>
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-
-            <div className='flex justify-end items-center mt-3 pt-2 border-t border-gray-100'>
-              <div className='flex gap-3'>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        className='text-indigo-600 hover:text-indigo-900'
-                        onClick={() => handleOpenEditModal(user)}
-                      >
-                        <Pencil className='h-4 w-4' />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Editar usuario</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                {user.status === 'active' ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          className='text-red-600 hover:text-red-900'
-                          onClick={() =>
-                            handleStatusChange(user.id, 'inactive')
-                          }
-                        >
-                          <Ban className='h-4 w-4' />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Desactivar usuario</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          className='text-green-600 hover:text-green-900'
-                          onClick={() => handleStatusChange(user.id, 'active')}
-                        >
-                          <Check className='h-4 w-4' />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Activar usuario</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {/* Mensaje cuando no hay usuarios */}
-        {filteredUsers.length === 0 && (
-          <div className='bg-white border rounded-lg p-4 text-center'>
-            <p className='text-gray-500 text-sm'>No se encontraron usuarios</p>
-          </div>
-        )}
       </div>
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className='flex flex-col sm:flex-row sm:items-center justify-between mt-6 px-2 gap-2'>
-          <div className='text-xs sm:text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-left'>
-            Mostrando {(currentPage - 1) * pageSize + 1} a{' '}
-            {Math.min(currentPage * pageSize, totalUsers)} de {totalUsers}{' '}
-            usuarios
-          </div>
-          <div className='flex space-x-2 justify-center sm:justify-end order-1 sm:order-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-              className='h-8 w-8 p-0'
-            >
-              <ChevronLeft className='h-4 w-4' />
-            </Button>
-            <div className='flex items-center text-xs sm:text-sm px-2 font-medium'>
-              {currentPage} de {totalPages}
-            </div>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-              className='h-8 w-8 p-0'
-            >
-              <ChevronRight className='h-4 w-4' />
-            </Button>
-          </div>
+      <div className='flex justify-between items-center mb-8'>
+        <div className='text-sm text-gray-700'>
+          Mostrando{' '}
+          <span className='font-medium'>
+            {currentPageUsers.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}
+          </span>{' '}
+          a{' '}
+          <span className='font-medium'>
+            {(currentPage - 1) * pageSize + currentUsersCount}
+          </span>{' '}
+          de <span className='font-medium'>{totalUsers}</span> resultados
         </div>
-      )}
+        <div className='flex space-x-2'>
+          <button
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-md ${
+              currentPage === 1
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            <ChevronLeft className='h-5 w-5' />
+          </button>
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-md ${
+              currentPage === totalPages
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            <ChevronRight className='h-5 w-5' />
+          </button>
+        </div>
+      </div>
 
-      {/* Modal para crear usuario */}
+      {/* Modal de creación de usuario */}
       <UserCreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreate={handleCreateUser}
+        onSubmit={handleCreateUser}
       />
 
-      {/* Modal para editar usuario */}
-      <UserEditModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        user={currentUser}
-        formData={editFormData}
-        onChange={handleEditFormChange}
-        onSave={handleSaveEditUser}
-      />
+      {/* Modal de edición de usuario */}
+      {currentUser && (
+        <UserEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleSaveEditUser}
+          formData={editFormData}
+          onChange={handleEditFormChange}
+        />
+      )}
     </div>
   );
 }

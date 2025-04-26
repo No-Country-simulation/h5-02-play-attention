@@ -148,10 +148,10 @@ export const leadContactTypeConfig = {
 // Fuentes de leads
 export const leadSourceOptions = [
   'Sitio web',
-  'Formulario Landing',
-  'WhatsApp',
+  'Referencia',
   'Redes sociales',
-  'Recomendación',
+  'LinkedIn',
+  'Whatsapp',
   'Otro'
 ];
 
