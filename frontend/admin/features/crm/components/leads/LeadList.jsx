@@ -3,7 +3,14 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useState } from 'react';
-import { Mail, Phone, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  ChevronRight as ArrowRight
+} from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -355,7 +362,8 @@ export default function LeadList({
         {sortedLeads.map(lead => (
           <div
             key={lead.id}
-            className='bg-white border rounded-lg p-3 shadow-sm'
+            className='bg-white border rounded-lg p-3 shadow-sm relative cursor-pointer hover:bg-gray-50 transition-colors duration-150'
+            onClick={() => onViewLead(lead.id)}
           >
             <div className='flex justify-between items-start mb-2'>
               <div>
@@ -366,7 +374,10 @@ export default function LeadList({
                   </p>
                 )}
               </div>
-              <div className='flex flex-shrink-0'>
+              <div
+                className='flex flex-shrink-0'
+                onClick={e => e.stopPropagation()} // Evitar que el click en el select propague al padre
+              >
                 <Select
                   value={getLeadStatus(lead.id, lead.status)}
                   onValueChange={value => handleStatusChange(lead.id, value)}
@@ -397,7 +408,7 @@ export default function LeadList({
                 </Select>
               </div>
             </div>
-            <div className='text-xs text-muted-foreground'>
+            <div className='text-xs text-muted-foreground mb-6'>
               {lead.email ? (
                 <div className='flex items-center'>
                   <Mail className='h-4 w-4 mr-1 text-muted-foreground' />
@@ -409,6 +420,10 @@ export default function LeadList({
                   <span>{lead.phone}</span>
                 </div>
               )}
+            </div>
+            <div className='absolute bottom-2 right-2 text-xs text-primary flex items-center opacity-70'>
+              <span className='mr-1'>Ver detalle</span>
+              <ArrowRight className='h-3 w-3' />
             </div>
           </div>
         ))}
