@@ -19,6 +19,7 @@ export class UserListener {
     
     try {
       await this.mailService.sendTemplateEmail('REGISTER_EMAIL', event.email, {
+        fullname: event.fullname,
         password: event.password,
         email: event.email,
         url

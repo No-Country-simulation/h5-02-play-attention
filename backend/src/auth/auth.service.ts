@@ -17,6 +17,10 @@ import * as generatePassword from 'generate-password';
 import { Services, UserRole } from './auth.enum';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { TokenService } from '../token/token.service';
+import { ConfirmTokenDto } from './dto/confirmToken.dto';
+import { ChangePasswordDto} from './dto/changePassword';
+
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +32,45 @@ export class AuthService {
     private readonly eventEmitter: EventEmitter2,
     private readonly tokenService:TokenService
   ) {}
+
+  async changePassword(token:string,changePasswordDto:ChangePasswordDto){
+    const tokenExist=await this.tokenService.findByToken(token)
+    if(!tokenExist){
+      throw new NotFoundException('Token incorrecto')
+    }
+    const user = await this.userService.findById(tokenExist.user.toString());
+    if(!user){
+      throw new NotFoundException('Usuario no encontrado')
+    }
+    try {
+      await Promise.all([ 
+        this.tokenService.delete(tokenExist._id.toString()),
+        this.userService.update(user.id, {password:changePasswordDto.password})
+      ])
+    return {message:'Contraseña cambiada con éxito'}
+    } catch (error) {
+      throw new BadRequestException('Error al cambiar la contraseña')
+    }
+ 
+  }
+
+  async confirmToken(confirmTokenDto:ConfirmTokenDto){
+    const token=await this.tokenService.findByToken(confirmTokenDto.token)
+    if(!token){
+      throw new NotFoundException('Token incorrecto')
+    }
+    const user = await this.userService.findById(token.user.toString());
+    if(!user){
+      throw new NotFoundException('Usuario no encontrado')
+    }
+    const tokenExpired=new Date(token.expiresAt) < new Date()
+    if(tokenExpired){
+      throw new BadRequestException('Token expirado')
+    }
+
+    return {message:'Token correcto,ya puedes cambiar tu contraseña'}
+    
+  }
 
   async forgotPassword(forgotPasswordDto:ForgotPasswordDto){
     const user= await this.userService.findByEmail(forgotPasswordDto.email)
@@ -58,7 +101,7 @@ export class AuthService {
 
   }
 
-  async registerFromLead(email: string, role: UserRole, service: Services) {
+  async registerFromLead(fullname: string, email: string, role: UserRole, service: Services) {
     const userExists = await this.userService.findByEmail(email);
     if (userExists) {
       return new BadRequestException('Email ya registrado');
@@ -78,6 +121,7 @@ export class AuthService {
 
     const [user] = await Promise.all([
       this.userService.create({
+        fullname,
         email,
         password: hashedPassword,
         role,
@@ -85,7 +129,7 @@ export class AuthService {
       }),
       this.eventEmitter.emit(
         USER_EVENTS.USER_CREATED,
-        new UserRegisteredEvent(email, password)
+        new UserRegisteredEvent(fullname, email, password)
       )
     ]);
 
@@ -104,10 +148,10 @@ export class AuthService {
         this.userService.create({
           ...registerDto,
           password: hashedPassword,
-        }),
+        }), 
         this.eventEmitter.emit(
           USER_EVENTS.USER_CREATED,
-          new UserRegisteredEvent(registerDto.email, registerDto.password)
+          new UserRegisteredEvent(registerDto.fullname, registerDto.email, registerDto.password)
         )
       ]);
       

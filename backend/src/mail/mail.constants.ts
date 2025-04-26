@@ -33,7 +33,7 @@ export const EmailTemplatesDefault: EmailTemplateMap = {
   },
   REGISTER_EMAIL: {
     templateName: 'registeredEmail',
-    defaultSubject: 'Registered Email',
+    defaultSubject: 'Cuenta creada con éxito',
     vars: ['email', 'password', 'url'],
   },
   FORGOT_PASSWORD: {

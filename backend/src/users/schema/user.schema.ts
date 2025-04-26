@@ -20,6 +20,9 @@ export type UserRoleType = `${UserRole}`;
 
 @Schema({ timestamps: true })
 export class User {
+  @Prop({ required: true, trim: true, type: String })
+  fullname: string;
+
   @Prop({ required: true, unique: true, trim: true, type: String })
   email: string;
 

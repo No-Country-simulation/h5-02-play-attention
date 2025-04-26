@@ -3,6 +3,10 @@ import { UserRole, Services, UserRoleType } from '../../users/schema/user.schema
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
+  @ApiProperty({ example: 'Juan Perez', description: 'Nombre del usuario' })
+  @IsNotEmpty({ message: 'El nombre es requerido' })
+  fullname: string;
+
   @ApiProperty({ example: 'juan@mail.com', description: 'Correo electrónico del usuario' })
   @IsEmail({}, { message: 'El email no es válido' })
   email: string;

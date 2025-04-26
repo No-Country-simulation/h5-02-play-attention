@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserRoleType } from './schema/user.schema';
+import { User, UserDocument, UserRoleType } from './schema/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
@@ -16,7 +16,7 @@ export class UsersService {
     const user = new this.userModel(data);
     return user.save();
   }
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<UserDocument> {
     const user = await this.userModel.findById(id).select('-password');
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return user;

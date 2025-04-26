@@ -58,10 +58,11 @@ export class LeadsService {
         }
         if(updateLeadDto.status === 'Cliente'){
             await this.authService.registerFromLead(
+                leadUpdated.fullname,
                 leadUpdated.email,
                 UserRole.USER,
                 leadUpdated.service as Services
-            )
+            );
         }
        
         return leadUpdated;

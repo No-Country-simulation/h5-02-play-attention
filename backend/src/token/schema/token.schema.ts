@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
+export type TokenDocument = Token & Document;
 
 @Schema({timestamps:true})
 export class Token {

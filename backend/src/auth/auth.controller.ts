@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -10,8 +12,11 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register-auth.dto';
 import { LoginDto } from './dto/login-auth.dto';
 import { AuthGuard } from './auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
+import { ConfirmTokenDto } from './dto/confirmToken.dto';
+import { ChangePasswordDto, TokenDto } from './dto/changePassword';
+import { Token } from '../token/schema/token.schema';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -36,6 +41,27 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post("change-password/:token")
+  @ApiOperation({ summary: 'Cambiar contraseña' })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiResponse({ status: 200, description: 'Contraseña cambiada exitosamente' })
+  @ApiResponse({ status: 401, description: 'Contraseña inválida' })
+  @ApiParam({ name: 'token', type: String })
+  changePassword(
+    @Param('token') token: string,
+    @Body() changePasswordDto: ChangePasswordDto) {
+    return this.authService.changePassword(token, changePasswordDto);
+  }
+
+
+  @Post("confirm-token")
+  @ApiOperation({ summary: 'Confirmar token' })
+  @ApiBody({ type: ConfirmTokenDto })
+  @ApiResponse({ status: 200, description: 'Token confirmado exitosamente' })
+  @ApiResponse({ status: 401, description: 'Token inválido' })
+  confirmToken(@Body() confirmTokenDto: ConfirmTokenDto) {
+    return this.authService.confirmToken(confirmTokenDto);
+  }
   @Post("forgot-password")
   @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
   @ApiBody({ type: ForgotPasswordDto })
