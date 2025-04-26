@@ -35,6 +35,11 @@ export const EmailTemplatesDefault: EmailTemplateMap = {
     templateName: 'registeredEmail',
     defaultSubject: 'Registered Email',
     vars: ['email', 'password', 'url'],
+  },
+  FORGOT_PASSWORD: {
+    templateName: 'sendToken',
+    defaultSubject: 'Recuperación de contraseña',
+    vars: ['token', 'url'],
   }
 };
 

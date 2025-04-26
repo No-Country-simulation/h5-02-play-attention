@@ -1,7 +1,7 @@
 import { OnEvent } from '@nestjs/event-emitter';
 import { Injectable, Logger } from '@nestjs/common';
 import { MailService } from '../mail/mail.service';
-import { UserRegisteredEvent } from 'src/system-events/user.event';
+import { UserForgotPasswordEvent, UserRegisteredEvent } from 'src/system-events/user.event';
 import { USER_EVENTS} from 'src/system-events/event-names';
 import { ConfigService } from '@nestjs/config';
 
@@ -26,6 +26,21 @@ export class UserListener {
       this.logger.log(`Email de registro enviado a ${event.email}`);
     } catch (error) {
       this.logger.error(`Error al enviar email de registro a ${event.email}:`, error);
+    }
+  }
+
+   @OnEvent(USER_EVENTS.FORGOT_PASSWORD)
+  async handleSendToken(event: UserForgotPasswordEvent) {
+    const url = `${this.configService.get('FRONTEND_URL')}/validate-token`|| "https://playatenttion-platform.vercel.app/validate-token";
+    
+    try {
+      await this.mailService.sendTemplateEmail('FORGOT_PASSWORD', event.email, {
+      token: event.token,
+        url
+      })
+      this.logger.log(`Email con token enviado a ${event.email}`);
+    } catch (error) {
+      this.logger.error(`Error al enviar email con el token a ${event.email}:`, error);
     }
   }
 }

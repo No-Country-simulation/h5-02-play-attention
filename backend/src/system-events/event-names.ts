@@ -4,4 +4,5 @@ export const LEAD_EVENTS = {
 
 export const USER_EVENTS={
   USER_CREATED: 'user.created',
+  FORGOT_PASSWORD: 'user.forgotPassword'
 } as const;

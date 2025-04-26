@@ -11,6 +11,7 @@ import { RegisterDto } from './dto/register-auth.dto';
 import { LoginDto } from './dto/login-auth.dto';
 import { AuthGuard } from './auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -34,6 +35,16 @@ export class AuthController {
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
+
+  @Post("forgot-password")
+  @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 200, description: 'Correo electrónico de recuperación enviado' })
+  @ApiResponse({ status: 404, description: 'Correo electrónico no encontrado' })
+  forgotPassword(@Body() forgotPasswordDto:ForgotPasswordDto){
+    return this.authService.forgotPassword(forgotPasswordDto)
+  }
+
 
   @UseGuards(AuthGuard)
   @Get('profile')

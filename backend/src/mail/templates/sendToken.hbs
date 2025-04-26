@@ -1,0 +1,18 @@
+{{#> base }}
+    <!-- Contenido dinámico -->
+    <div class="content">
+      <h1 style="color: #765997;">Reestablecer contraseña</h1>
+      <p>Ingresa el siguiente token para reestablecer tu contraseña</p> 
+      <p style="text-align: center; margin: 30px 0;">
+         <p style="font-size: x-large;"><strong style="color: #765997;">{{token}}</strong></p>
+        <a href="{{url}}" class="button" style="color: #ffffff;">
+          Restablecer contraseña
+        </a>
+      </p>
+      <p>Este token expirará en 1 hora.</p>
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
+        <h3 style="margin-top: 0;">¿Necesitas ayuda?</h3>
+        <p>Consulta nuestra <a href="/" style="color: #765997;">guía de inicio</a>.</p>
+      </div>
+    </div>
+{{/base}}

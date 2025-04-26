@@ -11,10 +11,12 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { UserRegisteredEvent } from 'src/system-events/user.event';
+import { UserForgotPasswordEvent, UserRegisteredEvent } from 'src/system-events/user.event';
 import { USER_EVENTS } from 'src/system-events/event-names';
 import * as generatePassword from 'generate-password';
 import { Services, UserRole } from './auth.enum';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
+import { TokenService } from '../token/token.service';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +26,37 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly tokenService:TokenService
   ) {}
+
+  async forgotPassword(forgotPasswordDto:ForgotPasswordDto){
+    const user= await this.userService.findByEmail(forgotPasswordDto.email)
+    if(!user){
+      throw new NotFoundException('No se encontró el correo electrónico')
+    }
+
+    const generatedToken=generatePassword.generate({
+      length: 6,
+      numbers: true,
+      uppercase: false,
+      lowercase: false,
+      symbols: false,
+      excludeSimilarCharacters: false,
+      strict: false
+    })
+    await Promise.all([
+       this.tokenService.create({
+      user:user._id,
+      token:generatedToken
+    }),this.eventEmitter.emit(
+      USER_EVENTS.FORGOT_PASSWORD,
+      new UserForgotPasswordEvent(user.email,generatedToken)
+    )
+    ])
+     
+    return {message:'Token enviado con éxito'}
+
+  }
 
   async registerFromLead(email: string, role: UserRole, service: Services) {
     const userExists = await this.userService.findByEmail(email);
