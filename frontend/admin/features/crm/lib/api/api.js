@@ -76,15 +76,29 @@ export const leadsApi = {
         email: formData.email || '',
         service:
           formData.userType === 'persona'
-            ? 'Persona Individual'
+            ? 'Persona individual'
             : formData.userType === 'profesional'
             ? 'Profesional'
             : 'Empresa',
         notes: formData.notes || '',
         status: 'Nuevo',
-        origen: formData.source || 'Otro',
+        origen: mapSourceToBackend(formData.source) || 'Sitio web',
         relation: formData.position || 'Cantante'
       };
+
+      // Función auxiliar para mapear el origen a los valores exactos que espera el backend
+      function mapSourceToBackend(source) {
+        const sourceMap = {
+          'Sitio web': 'Sitio web',
+          'Formulario Landing': 'Sitio web',
+          WhatsApp: 'Whatsapp',
+          'Redes sociales': 'Redes sociales',
+          Recomendación: 'Referencia',
+          Otro: 'Otro',
+          LinkedIn: 'LinkedIn'
+        };
+        return sourceMap[source] || 'Sitio web';
+      }
 
       // Asegurarnos que los campos coincidan exactamente con lo que espera el backend
       // Esto es crítico para evitar el error 500
@@ -138,6 +152,30 @@ export const leadsApi = {
         throw new Error(`ID del lead inválido: "${id}"`);
       }
 
+      // Función auxiliar para mapear el origen a los valores exactos que espera el backend
+      function mapSourceToBackend(source) {
+        const sourceMap = {
+          'Sitio web': 'Sitio web',
+          'Formulario Landing': 'Sitio web',
+          WhatsApp: 'Whatsapp',
+          'Redes sociales': 'Redes sociales',
+          Recomendación: 'Referencia',
+          Otro: 'Otro',
+          LinkedIn: 'LinkedIn'
+        };
+        return sourceMap[source] || 'Sitio web';
+      }
+
+      // Función auxiliar para mapear el tipo de usuario al servicio que espera el backend
+      function mapUserTypeToService(userType) {
+        const serviceMap = {
+          persona: 'Persona individual',
+          profesional: 'Profesional',
+          empresa: 'Empresa'
+        };
+        return serviceMap[userType] || 'Persona individual';
+      }
+
       // El estado ya viene en formato correcto desde los componentes
       const payload = {
         fullname:
@@ -147,16 +185,13 @@ export const leadsApi = {
         company: formData.company || '',
         service:
           formData.service ||
-          (formData.userType === 'persona'
-            ? 'Persona Individual'
-            : formData.userType === 'profesional'
-            ? 'Profesional'
-            : formData.userType === 'empresa'
-            ? 'Empresa'
-            : 'Persona Individual'),
+          (formData.userType
+            ? mapUserTypeToService(formData.userType)
+            : 'Persona individual'),
         notes: formData.notes || formData.message || '',
         status: formData.status, // El estado ya viene en formato correcto
-        origen: formData.source || formData.origen || 'Sitio web',
+        origen:
+          mapSourceToBackend(formData.source || formData.origen) || 'Sitio web',
         relation: formData.position || formData.relation || 'Usuario' // Asegurar que relation no esté vacío
       };
 

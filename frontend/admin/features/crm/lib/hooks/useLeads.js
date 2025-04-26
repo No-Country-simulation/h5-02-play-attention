@@ -87,6 +87,30 @@ export function useUpdateLeadStatus() {
       // Adaptar el lead al formato del frontend
       const adaptedLead = leadsAdapter(currentLead);
 
+      // Función auxiliar para mapear el origen a los valores exactos que espera el backend
+      function mapSourceToBackend(source) {
+        const sourceMap = {
+          'Sitio web': 'Sitio web',
+          'Formulario Landing': 'Sitio web',
+          WhatsApp: 'Whatsapp',
+          'Redes sociales': 'Redes sociales',
+          Recomendación: 'Referencia',
+          Otro: 'Otro',
+          LinkedIn: 'LinkedIn'
+        };
+        return sourceMap[source] || 'Sitio web';
+      }
+
+      // Función auxiliar para mapear el tipo de usuario al servicio que espera el backend
+      function mapUserTypeToService(userType) {
+        const serviceMap = {
+          persona: 'Persona individual',
+          profesional: 'Profesional',
+          empresa: 'Empresa'
+        };
+        return serviceMap[userType] || 'Persona individual';
+      }
+
       // Crear payload manteniendo los datos del lead y actualizando el estado
       // Nota: Ahora el status ya viene en formato backend desde el componente LeadList
       const payload = {
@@ -94,15 +118,10 @@ export function useUpdateLeadStatus() {
         email: adaptedLead.email || 'correo@ejemplo.com',
         phone: adaptedLead.phone || '123456789',
         company: adaptedLead.company || '',
-        service:
-          adaptedLead.userType === 'persona'
-            ? 'Persona Individual'
-            : adaptedLead.userType === 'empresa'
-            ? 'Empresa'
-            : 'Profesional',
+        service: mapUserTypeToService(adaptedLead.userType),
         notes: adaptedLead.notes || '',
         status: status, // El estado ya viene en formato correcto
-        origen: adaptedLead.source || 'Sitio web',
+        origen: mapSourceToBackend(adaptedLead.source) || 'Sitio web',
         relation: adaptedLead.position || 'Usuario'
       };
 

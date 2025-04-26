@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Label } from '@/shared/ui/label';
 import { Input } from '@/shared/ui/input';
+import { Eye, EyeOff } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -30,6 +31,8 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -256,17 +259,30 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                         >
                           Contraseña
                         </Label>
-                        <Input
-                          id='password'
-                          type='password'
-                          className={`mt-1 ${
-                            errors.password ? 'border-red-500' : ''
-                          }`}
-                          value={formData.password}
-                          onChange={e =>
-                            handleChange('password', e.target.value)
-                          }
-                        />
+                        <div className='relative'>
+                          <Input
+                            id='password'
+                            type={showPassword ? 'text' : 'password'}
+                            className={`mt-1 pr-10 ${
+                              errors.password ? 'border-red-500' : ''
+                            }`}
+                            value={formData.password}
+                            onChange={e =>
+                              handleChange('password', e.target.value)
+                            }
+                          />
+                          <button
+                            type='button'
+                            className='absolute inset-y-0 right-0 mt-1 pr-3 flex items-center text-gray-400 hover:text-gray-500'
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className='h-5 w-5' />
+                            ) : (
+                              <Eye className='h-5 w-5' />
+                            )}
+                          </button>
+                        </div>
                         {errors.password && (
                           <p className='mt-1 text-xs text-red-500'>
                             {errors.password}
@@ -280,17 +296,32 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                         >
                           Confirmar contraseña
                         </Label>
-                        <Input
-                          id='confirmPassword'
-                          type='password'
-                          className={`mt-1 ${
-                            errors.confirmPassword ? 'border-red-500' : ''
-                          }`}
-                          value={formData.confirmPassword}
-                          onChange={e =>
-                            handleChange('confirmPassword', e.target.value)
-                          }
-                        />
+                        <div className='relative'>
+                          <Input
+                            id='confirmPassword'
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            className={`mt-1 pr-10 ${
+                              errors.confirmPassword ? 'border-red-500' : ''
+                            }`}
+                            value={formData.confirmPassword}
+                            onChange={e =>
+                              handleChange('confirmPassword', e.target.value)
+                            }
+                          />
+                          <button
+                            type='button'
+                            className='absolute inset-y-0 right-0 mt-1 pr-3 flex items-center text-gray-400 hover:text-gray-500'
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className='h-5 w-5' />
+                            ) : (
+                              <Eye className='h-5 w-5' />
+                            )}
+                          </button>
+                        </div>
                         {errors.confirmPassword && (
                           <p className='mt-1 text-xs text-red-500'>
                             {errors.confirmPassword}
