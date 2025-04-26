@@ -15,6 +15,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevToolsModule } from './dev-tools/dev-tools.module';
 import { ListenersModule } from './system-listeners/listeners.module';
+import { SupportMessagesModule } from './support-messages/support-messages.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ListenersModule } from './system-listeners/listeners.module';
     CategoriesModule,
     EngagementsModule,
     ListenersModule,
+    SupportMessagesModule
   ],
   controllers: [AppController],
   providers: [AppService],
