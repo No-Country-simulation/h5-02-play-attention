@@ -28,7 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/shared/ui/tooltip';
-import { useUsers } from './lib/hooks';
+import { useUsers, useCreateUser } from './lib/hooks';
 
 /**
  * Componente principal de gestión de usuarios
@@ -37,6 +37,7 @@ import { useUsers } from './lib/hooks';
  */
 export default function UserManagement() {
   const { data: usersData, isLoading, error } = useUsers();
+  const createUserMutation = useCreateUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -139,17 +140,24 @@ export default function UserManagement() {
 
   // Manejar la creación de un nuevo usuario
   const handleCreateUser = userData => {
-    // En una implementación real, aquí se haría una llamada API
-    const newUser = {
-      id: users.length + 1,
-      ...userData,
-      status: 'pending',
-      lastLogin: null,
-      createdAt: new Date().toISOString()
-    };
+    console.log('Datos del formulario:', userData);
 
-    // setUsers([...users, newUser]);
-    setIsCreateModalOpen(false);
+    // Eliminar campos que no debe recibir el backend
+    const { confirmPassword, name, ...userDataForApi } = userData;
+
+    console.log('Datos a enviar a la API:', userDataForApi);
+
+    // Llamar a la mutación para crear el usuario
+    createUserMutation.mutate(userDataForApi, {
+      onSuccess: data => {
+        console.log('Usuario creado exitosamente:', data);
+        setIsCreateModalOpen(false);
+      },
+      onError: error => {
+        console.error('Error al crear usuario desde el componente:', error);
+        // No cerramos el modal para permitir al usuario corregir los datos
+      }
+    });
   };
 
   // Abrir modal de edición con los datos del usuario

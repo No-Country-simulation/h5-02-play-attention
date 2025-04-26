@@ -17,16 +17,19 @@ import {
  * Este es un componente placeholder para una futura implementación
  * Actualmente la funcionalidad está integrada directamente en UserManagement
  */
-export default function UserCreateModal({ isOpen, onClose, onCreate }) {
+export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     role: 'Usuario',
+    service: 'Individuo',
     password: '',
     confirmPassword: ''
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -40,6 +43,11 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
         ...prev,
         [field]: ''
       }));
+    }
+
+    // Si el usuario está cambiando el email, quitamos el indicador de email ya existente
+    if (field === 'email') {
+      setEmailAlreadyExists(false);
     }
   };
 
@@ -70,20 +78,35 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (validateForm()) {
-      onCreate(formData);
-      // Resetear formulario
-      setFormData({
-        name: '',
-        email: '',
-        role: 'Usuario',
-        password: '',
-        confirmPassword: ''
-      });
-      onClose();
+      setIsSubmitting(true);
+      try {
+        await onSubmit(formData);
+        // Resetear formulario
+        setFormData({
+          name: '',
+          email: '',
+          role: 'Usuario',
+          service: 'Individuo',
+          password: '',
+          confirmPassword: ''
+        });
+      } catch (error) {
+        console.error('Error al crear usuario:', error);
+        // Si el error es que el email ya existe, mostramos un indicador visual
+        if (error.message && error.message.includes('Email ya registrado')) {
+          setEmailAlreadyExists(true);
+          setErrors({
+            ...errors,
+            email: 'Este email ya está registrado en el sistema'
+          });
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -92,6 +115,7 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
       name: '',
       email: '',
       role: 'Usuario',
+      service: 'Individuo',
       password: '',
       confirmPassword: ''
     });
@@ -156,7 +180,9 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
                           id='email'
                           type='email'
                           className={`mt-1 ${
-                            errors.email ? 'border-red-500' : ''
+                            errors.email || emailAlreadyExists
+                              ? 'border-red-500'
+                              : ''
                           }`}
                           value={formData.email}
                           onChange={e => handleChange('email', e.target.value)}
@@ -164,6 +190,11 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
                         {errors.email && (
                           <p className='mt-1 text-xs text-red-500'>
                             {errors.email}
+                          </p>
+                        )}
+                        {emailAlreadyExists && !errors.email && (
+                          <p className='mt-1 text-xs text-red-500'>
+                            Este email ya está registrado en el sistema
                           </p>
                         )}
                       </div>
@@ -192,6 +223,31 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
                           usuario. Los permisos específicos se configuran en la
                           sección "Permisos y Roles".
                         </p>
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor='service'
+                          className='block text-sm font-medium text-gray-700'
+                        >
+                          Tipo de Servicio
+                        </Label>
+                        <Select
+                          value={formData.service}
+                          onValueChange={value =>
+                            handleChange('service', value)
+                          }
+                        >
+                          <SelectTrigger id='service' className='w-full'>
+                            <SelectValue placeholder='Seleccionar servicio' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='Individuo'>Individuo</SelectItem>
+                            <SelectItem value='Empresa'>Empresa</SelectItem>
+                            <SelectItem value='Profesional'>
+                              Profesional
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label
@@ -250,14 +306,15 @@ export default function UserCreateModal({ isOpen, onClose, onCreate }) {
               <Button
                 type='submit'
                 className='w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm'
+                disabled={isSubmitting}
               >
-                Crear
+                {isSubmitting ? 'Creando...' : 'Crear'}
               </Button>
               <Button
                 type='button'
-                variant='outline'
                 className='mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'
                 onClick={resetForm}
+                disabled={isSubmitting}
               >
                 Cancelar
               </Button>
