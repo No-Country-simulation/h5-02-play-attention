@@ -8,7 +8,7 @@ import { toast } from 'sonner';
  *
  * @returns {Object} - Objeto de mutación de React Query
  */
-export const useUpdateUserStatus = () => {
+const useUpdateUserStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -25,3 +25,5 @@ export const useUpdateUserStatus = () => {
     }
   });
 };
+
+export default useUpdateUserStatus;
