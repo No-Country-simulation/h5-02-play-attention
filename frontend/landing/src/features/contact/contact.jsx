@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 
 import { Button } from "@/shared/ui/button";
 import {
@@ -24,7 +24,6 @@ import { Textarea } from "@/shared/ui/textarea";
 import { Checkbox } from "@/shared/ui/checkbox";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -34,35 +33,31 @@ import {
 const formSchema = z.object({
   fullname: z
     .string()
-    .min(2, {
-      message: "El nombre debe tener al menos 2 caracteres.",
-    })
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
     .max(50, { message: "El nombre debe tener máximo 50 caracteres." }),
-  email: z.string().email({
-    message: "Por favor ingresa un correo válido.",
-  }),
-  // phone: z.string().min(6, {
-  //   message: "El teléfono debe tener al menos 6 caracteres.",
-  // }),
+  email: z.string().email({ message: "Por favor ingresa un correo válido." }),
   company: z
     .string()
-    .min(2, {
-      message: "La institución debe tener al menos 2 caracteres.",
-    })
+    .min(2, { message: "La institución debe tener al menos 2 caracteres." })
     .max(50, { message: "La institución debe tener máximo 50 caracteres" }),
   service: z.string({
     required_error: "Por favor selecciona un área de interés",
   }),
   message: z
     .string()
-    .min(10, {
-      message: "El mensaje debe tener al menos 10 caracteres.",
-    })
+    .min(10, { message: "El mensaje debe tener al menos 10 caracteres." })
     .max(1100, { message: "El mensaje debe tener máximo 1100 carácteres" }),
-  relation: z.string({
-    required_error: "Por favor selecciona tu relación",
-  }),
+  relation: z.string({ required_error: "Por favor selecciona tu relación" }),
 });
+
+const initialFormValues = {
+  fullname: "",
+  email: "",
+  company: "",
+  service: "",
+  message: "",
+  relation: "",
+};
 
 export const ContactSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,92 +68,96 @@ export const ContactSection = () => {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullname: "",
-      email: "",
-      // phone: "",
-      company: "",
-      service: "",
-      message: "",
-      relation: "",
-    },
+    defaultValues: initialFormValues,
   });
 
   const { reset } = form;
 
-  const onSubmit = async (data) => {
-    console.log(data);
-    setIsSubmitting(true);
-    setSubmitError(null);
+  const onSubmit = useCallback(
+    async (data) => {
+      setIsSubmitting(true);
+      setSubmitError(null);
 
-    const apiData = {
-      message: data.message,
-      fullname: data.fullname,
-      company: data.company || "",
-      // phone: data.phone,
-      email: data.email,
-      service: data.service,
-      relation: data.relation,
-    };
+      const apiData = {
+        message: data.message,
+        fullname: data.fullname,
+        company: data.company || "",
+        email: data.email,
+        service: data.service,
+        relation: data.relation,
+      };
 
-    // obtenemos primer nombre
-    const firstName = data.fullname.split(" ")[0];
-    setContactUser(firstName);
+      setContactUser(data.fullname.split(" ")[0]);
 
-    try {
-      const response = await fetch(
-        "https://play-attention.onrender.com/api/leads/form-website",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiData),
+      try {
+        const response = await fetch(
+          "https://play-attention.onrender.com/api/leads/form-website",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(apiData),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Error en el registro");
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error en el registro");
+        setSubmitSuccess(true);
+        reset();
+        setIsModalOpen(true);
+      } catch (error) {
+        setSubmitError(error.message || "Error desconocido");
+      } finally {
+        setIsSubmitting(false);
       }
+    },
+    [reset]
+  );
 
-      setSubmitSuccess(true);
-      reset();
-      setIsModalOpen(true);
-    } catch (error) {
-      setSubmitError(error.message || "Error desconocido");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const formClasses = useMemo(
+    () => ({
+      root: "w-full md:w-[41.02%] min-h-[127%] bg-white border-2 border-[#C0B2CF] rounded-sm px-5 py-3 md:relative md:left-4 flex flex-col justify-evenly",
+      input:
+        "h-12 md:h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]",
+      textarea:
+        "h-32 md:h-[18.01%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]",
+      label: "text-[0.9rem] text-[#15032A]",
+      checkboxLabel: "text-[0.8rem] text-[#929292] py-2",
+      smallText: "text-center text-[0.7rem] text-[#929292] py-2",
+    }),
+    []
+  );
 
   return (
-    <section className=" w-screen min-h-[max-content] h-auto flex flex-col">
-      <h1 className="text-center pt-4 ">Contactanos</h1>
-      <small className="text-center pt-4">
+    <section className="border border-black w-full min-h-screen flex flex-col">
+      <h1 className="text-center text-2xl md:text-[2rem] pt-4 [font-family:var(--font-sans)]">
+        Contactanos
+      </h1>
+      <small className="text-center text-sm md:text-md pt-4 px-4 md:px-0">
         ¿Tienes preguntas sobre Play Attention? Estamos aquí para ayudarte
       </small>
-      <div className="box-border h-[min-content] py-20">
-        <div className="bg-[#e9e9f1] w-screen h-[60vh] flex items-center justify-evenly ">
-          <div>datos 1</div>
+      <div className="flex-1 py-8 md:py-20">
+        <div className="bg-[#e9e9f1] w-full min-h-[70vh] md:h-[66vh] flex flex-col md:flex-row items-center justify-center md:items-center md:justify-evenly gap-8 md:gap-0 px-4 md:px-0">
+          {/* Contenido izquierdo (visible solo en desktop) */}
+          <div className="hidden md:block">datos 1</div>
+
+          {/* Formulario (igual que tu versión original en desktop) */}
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="min-h-[127.1137%]  max-h-[127.1137%] w-[36.02%] bg-white border-2 border-[#C0B2CF] shadow-[0_0_3px_#C0B2CF] rounded-sm p-5 relative left-4 flex flex-col justify-evenly"
+              className={formClasses.root}
             >
               <FormField
                 control={form.control}
                 name="fullname"
                 render={({ field }) => (
                   <div>
-                    <FormLabel className={"text-[0.9rem] text-[#15032A] "}>
-                      Nombre*
-                    </FormLabel>
+                    <FormLabel className={formClasses.label}>Nombre*</FormLabel>
                     <FormControl>
                       <Input
-                        className={
-                          "h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]"
-                        }
+                        className={formClasses.input}
                         {...field}
                         placeholder="Tu nombre completo"
                       />
@@ -173,14 +172,12 @@ export const ContactSection = () => {
                 name="email"
                 render={({ field }) => (
                   <div>
-                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
                       Correo electrónico*
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className={
-                          "h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF] "
-                        }
+                        className={formClasses.input}
                         {...field}
                         placeholder="tu@email.com"
                       />
@@ -189,19 +186,18 @@ export const ContactSection = () => {
                   </div>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="company"
                 render={({ field }) => (
                   <div>
-                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
                       Institución
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className={
-                          "h-[4.62%]  border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF] "
-                        }
+                        className={formClasses.input}
                         {...field}
                         placeholder="Nombre de institución o empresa"
                       />
@@ -216,18 +212,14 @@ export const ContactSection = () => {
                 name="service"
                 render={({ field }) => (
                   <div className="m-0">
-                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
                       ¿Quién lo va a usar?
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl
-                        className={
-                          "h-[4.62%] border-1 border-[#C0B2CF] text-[0.9rem] py-1"
-                        }
-                      >
+                      <FormControl className={`${formClasses.input} py-1`}>
                         <SelectTrigger className="text-[#C0B2CF]">
                           <SelectValue placeholder="Selecciona una opción" />
                         </SelectTrigger>
@@ -260,15 +252,13 @@ export const ContactSection = () => {
                 name="message"
                 render={({ field }) => (
                   <div className="m-0">
-                    <FormLabel className={"mt-4 text-[0.9rem] text-[#15032A]"}>
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
                       Contexto de uso
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Texto"
-                        className={
-                          "h-[18.01%]  border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]"
-                        }
+                        className={formClasses.textarea}
                         {...field}
                       />
                     </FormControl>
@@ -276,24 +266,30 @@ export const ContactSection = () => {
                   </div>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="terms"
                 render={({ field }) => (
-                  <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md ">
-                    {" "}
-                    {/* Eliminé border */}
+                  <div className="flex flex-row items-center space-x-3 space-y-0 rounded-md">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-none" // Asegura que el checkbox no tenga borde
+                        className="
+                        text-[#6d28d9]
+                        bg-[#C0B2CF]
+                        data-[state=checked]:text-white
+                        data-[state=checked]:border-[#6d28d9]
+                      "
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="text-[0.7rem] text-[#929292] py-1">
-                        {" "}
-                        {/* Cambié a morado */}
+                      <FormLabel
+                        className={`${formClasses.checkboxLabel} ${
+                          field.value ? "text-[#15032A]" : "text-[#929292]"
+                        }`}
+                      >
                         Quiero recibir novedades, actualizaciones y ofertas
                         especiales de Play Attention
                       </FormLabel>
@@ -302,16 +298,18 @@ export const ContactSection = () => {
                   </div>
                 )}
               />
+
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className=" w-full h-[5.31%]"
+                className="w-full h-12 md:h-[5.31%]"
               >
                 {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
               </Button>
-              <small className="text-center text-[0.7rem] py-1">
-                Al enviar este formulario, aceptas nuestra Política de
-                Privacidad y el tratamiento de tus datos.
+              <small className={formClasses.smallText}>
+                Al enviar este formulario, aceptas nuestra &nbsp;
+                <b>Política de Privacidad</b> &nbsp; y el tratamiento de tus
+                datos.
               </small>
             </form>
           </Form>
