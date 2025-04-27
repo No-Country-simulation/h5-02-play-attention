@@ -3,3 +3,5 @@
  */
 export * from './useUsers';
 export * from './useCreateUser';
+export * from './useUpdateUserRole';
+export * from './useUpdateUserStatus';
