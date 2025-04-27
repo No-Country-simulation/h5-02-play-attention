@@ -1,75 +1,84 @@
 'use client';
 
-import { PlusIcon, RefreshCw } from 'lucide-react';
-import { Button } from '@/shared/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/shared/ui/dropdown-menu';
-import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+  Search,
+  PlusCircle,
+  Download,
+  LayoutGrid,
+  LayoutList
+} from 'lucide-react';
 
-export default function UserToolbar({
-  onCreateUser,
-  onRefresh,
-  onViewChange,
-  viewMode = 'table',
-  isLoading = false
-}) {
-  const isMobile = useMediaQuery('(max-width: 640px)');
-
+/**
+ * Componente de barra de herramientas para la gestión de usuarios
+ */
+const UserToolbar = ({
+  searchTerm,
+  onSearchChange,
+  onCreateClick,
+  onExportClick,
+  viewLayout,
+  onViewLayoutChange
+}) => {
   return (
-    <div className='flex justify-between items-center mb-4'>
-      <div>
-        <h1 className='text-xl font-bold'>Usuarios</h1>
-        <p className='text-sm text-muted-foreground'>
-          Gestiona los usuarios del sistema
-        </p>
+    <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 mt-8'>
+      {/* Búsqueda */}
+      <div className='relative w-full lg:w-auto'>
+        <input
+          type='text'
+          placeholder='Buscar usuarios...'
+          className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full lg:w-80'
+          value={searchTerm}
+          onChange={e => onSearchChange(e.target.value)}
+        />
+        <Search className='absolute left-3 top-2.5 h-5 w-5 text-gray-400' />
       </div>
 
-      <div className='flex gap-2'>
-        {!isMobile && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='sm'>
-                Ver como: {viewMode === 'table' ? 'Tabla' : 'Tarjetas'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem
-                onClick={() => onViewChange('table')}
-                disabled={viewMode === 'table'}
-              >
-                Tabla
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onViewChange('cards')}
-                disabled={viewMode === 'cards'}
-              >
-                Tarjetas
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+      {/* Botones de acción */}
+      <div className='flex gap-2 w-full lg:w-auto'>
+        {/* Selector de vista */}
+        <div className='flex mr-2 rounded-lg overflow-hidden border border-gray-300'>
+          <button
+            className={`flex items-center justify-center p-1.5 h-8 w-8 ${
+              viewLayout === 'list'
+                ? 'bg-purple-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => onViewLayoutChange('list')}
+            aria-label='Vista de lista'
+          >
+            <LayoutList className='h-4 w-4' />
+          </button>
+          <button
+            className={`flex items-center justify-center p-1.5 h-8 w-8 ${
+              viewLayout === 'grouped'
+                ? 'bg-purple-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => onViewLayoutChange('grouped')}
+            aria-label='Vista agrupada'
+          >
+            <LayoutGrid className='h-4 w-4' />
+          </button>
+        </div>
 
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={onRefresh}
-          disabled={isLoading}
+        <button
+          className='flex items-center gap-1.5 px-3 py-1.5 bg-purple-700 text-white text-sm rounded-lg hover:bg-purple-800 transition-colors'
+          onClick={onCreateClick}
         >
-          <RefreshCw
-            className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
-          />
-          <span className='hidden sm:inline'>Actualizar</span>
-        </Button>
+          <PlusCircle className='h-4 w-4' />
+          <span>Nuevo Usuario</span>
+        </button>
 
-        <Button size='sm' onClick={onCreateUser}>
-          <PlusIcon className='h-4 w-4 mr-2' />
-          <span className='hidden sm:inline'>Nuevo Usuario</span>
-        </Button>
+        <button
+          className='flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 text-sm rounded-lg bg-white hover:bg-gray-50 transition-colors'
+          onClick={onExportClick}
+        >
+          <Download className='h-4 w-4' />
+          <span>Exportar</span>
+        </button>
       </div>
     </div>
   );
-}
+};
+
+export default UserToolbar;

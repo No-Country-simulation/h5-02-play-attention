@@ -4,6 +4,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/shared/ui/tooltip';
+import { ROLES_USUARIO } from '../lib/hooks';
 
 export default function UserEditModal({
   isOpen,
@@ -67,9 +68,11 @@ export default function UserEditModal({
                         value={formData.role}
                         onChange={e => onChange('role', e.target.value)}
                       >
-                        <option value='Usuario'>Usuario</option>
-                        <option value='Comercial'>Comercial</option>
-                        <option value='Admin'>Admin</option>
+                        {ROLES_USUARIO.map(rol => (
+                          <option key={rol.value} value={rol.value}>
+                            {rol.label}
+                          </option>
+                        ))}
                       </select>
                       <p className='mt-1 text-sm text-gray-500'>
                         El rol determina qué acciones puede realizar el usuario.

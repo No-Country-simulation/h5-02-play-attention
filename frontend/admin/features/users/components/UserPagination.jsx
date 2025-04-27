@@ -1,90 +1,61 @@
 'use client';
 
-import { Button } from '@/shared/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/shared/ui/select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export function UserPagination({
+/**
+ * Componente de paginación para la tabla de usuarios
+ */
+const UserPagination = ({
   currentPage,
   totalPages,
+  currentCount,
+  totalCount,
   pageSize,
-  onPageChange,
-  onPageSizeChange,
-  totalItems
-}) {
-  const pageSizeOptions = [10, 20, 50, 100];
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      onPageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      onPageChange(currentPage + 1);
-    }
-  };
-
-  const getPageRangeDisplay = () => {
-    const start = (currentPage - 1) * pageSize + 1;
-    const end = Math.min(currentPage * pageSize, totalItems);
-    return `${start}-${end} de ${totalItems}`;
-  };
-
+  onPrevious,
+  onNext
+}) => {
   return (
-    <div className='flex flex-col-reverse items-center justify-between gap-4 py-2 sm:flex-row'>
-      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-        <span>Mostrar</span>
-        <Select
-          value={pageSize.toString()}
-          onValueChange={value => onPageSizeChange(Number(value))}
-        >
-          <SelectTrigger className='h-8 w-16'>
-            <SelectValue placeholder={pageSize} />
-          </SelectTrigger>
-          <SelectContent>
-            {pageSizeOptions.map(size => (
-              <SelectItem key={size} value={size.toString()}>
-                {size}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <span>por página</span>
+    <div className='flex flex-col lg:flex-row justify-between items-center gap-4 mb-8'>
+      <div className='text-xs lg:text-sm text-gray-700 text-center lg:text-left'>
+        Mostrando{' '}
+        <span className='font-medium'>
+          {currentCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}
+        </span>{' '}
+        a{' '}
+        <span className='font-medium'>
+          {(currentPage - 1) * pageSize + currentCount}
+        </span>{' '}
+        de <span className='font-medium'>{totalCount}</span> resultados
       </div>
-
-      <div className='flex items-center justify-center gap-1 sm:justify-end'>
-        <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-          {totalItems ? getPageRangeDisplay() : 'No hay usuarios'}
+      <div className='flex space-x-2'>
+        <button
+          onClick={onPrevious}
+          disabled={currentPage === 1}
+          className={`flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 rounded-md ${
+            currentPage === 1
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+          }`}
+        >
+          <ChevronLeft className='h-4 w-4 lg:h-5 lg:w-5' />
+        </button>
+        <div className='flex items-center justify-center px-2 lg:px-3 h-9 lg:h-10 rounded-md bg-gray-50 text-xs lg:text-sm font-medium'>
+          {currentPage} / {totalPages}
         </div>
-        <Button
-          variant='outline'
-          size='icon'
-          onClick={handlePrevious}
-          disabled={currentPage <= 1}
-          className='h-8 w-8'
+        <button
+          onClick={onNext}
+          disabled={currentPage === totalPages}
+          className={`flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 rounded-md ${
+            currentPage === totalPages
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+          }`}
         >
-          <ChevronLeft className='h-4 w-4' />
-          <span className='sr-only'>Página anterior</span>
-        </Button>
-        <Button
-          variant='outline'
-          size='icon'
-          onClick={handleNext}
-          disabled={currentPage >= totalPages || totalPages === 0}
-          className='h-8 w-8'
-        >
-          <ChevronRight className='h-4 w-4' />
-          <span className='sr-only'>Página siguiente</span>
-        </Button>
+          <ChevronRight className='h-4 w-4 lg:h-5 lg:w-5' />
+        </button>
       </div>
     </div>
   );
-}
+};
+
+export default UserPagination;

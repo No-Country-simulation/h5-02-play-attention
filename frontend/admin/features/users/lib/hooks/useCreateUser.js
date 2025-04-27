@@ -6,7 +6,7 @@ import { toast } from 'sonner';
  * Hook para crear un nuevo usuario
  * @returns {Object} - Objeto con la mutación y funciones relacionadas
  */
-export const useCreateUser = () => {
+const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -31,3 +31,5 @@ export const useCreateUser = () => {
     }
   });
 };
+
+export default useCreateUser;
