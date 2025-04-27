@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/shared/ui/select';
-import { ROLES_USUARIO, ESTADOS_USUARIO } from '../lib/hooks';
+import { ROLES_USUARIO, ESTADOS_USUARIO } from '../../lib/hooks';
 import { useState } from 'react';
 
 /**
@@ -176,7 +176,7 @@ const GroupedUsersView = ({
 
       {/* Vista móvil y tablet */}
       <div className='lg:hidden'>
-        {users.length > 0 ? (
+        {users?.length > 0 ? (
           <div className='space-y-3'>
             {users.map(user => (
               <UserMobileCard key={user.id} user={user} groupTitle={title} />
@@ -193,47 +193,41 @@ const GroupedUsersView = ({
 
       {/* Vista desktop */}
       <div className='hidden lg:block'>
-        {users.length > 0 ? (
+        {users?.length > 0 ? (
           <div className='overflow-x-auto'>
             <table className='min-w-full bg-white shadow-md rounded-lg'>
               <thead className='bg-gray-50'>
                 <tr>
-                  <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                     Usuario
                   </th>
-                  <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Email
-                  </th>
-                  <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                     Rol
                   </th>
-                  <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                     Estado
                   </th>
-                  <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Creado
-                  </th>
-                  <th className='py-4 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                     Acciones
                   </th>
                 </tr>
               </thead>
               <tbody className='divide-y divide-gray-200'>
                 {users.map(user => (
-                  <tr key={user.id} className='hover:bg-gray-50'>
-                    <td className='py-4 px-4 whitespace-nowrap'>
+                  <tr key={user.id}>
+                    <td className='px-4 py-3 whitespace-nowrap'>
                       <div className='flex items-center'>
-                        <div className='ml-2'>
+                        <div>
                           <div className='text-sm font-medium text-gray-900'>
                             {user.name}
+                          </div>
+                          <div className='text-sm text-gray-500'>
+                            {user.email}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className='py-4 px-4 whitespace-nowrap'>
-                      <div className='text-sm text-gray-500'>{user.email}</div>
-                    </td>
-                    <td className='py-4 px-4 whitespace-nowrap'>
+                    <td className='px-4 py-3 whitespace-nowrap'>
                       <div className='relative'>
                         <Select
                           value={user.role}
@@ -241,7 +235,7 @@ const GroupedUsersView = ({
                           disabled={updatingRoles[user.id]}
                         >
                           <SelectTrigger
-                            className='h-8 px-2 text-xs sm:text-sm border'
+                            className='h-8 w-full border'
                             aria-label='Cambiar rol'
                           >
                             <SelectValue placeholder='Seleccionar rol' />
@@ -261,7 +255,7 @@ const GroupedUsersView = ({
                         )}
                       </div>
                     </td>
-                    <td className='py-4 px-4 whitespace-nowrap'>
+                    <td className='px-4 py-3 whitespace-nowrap'>
                       <div className='relative'>
                         <Select
                           value={user.status}
@@ -271,7 +265,7 @@ const GroupedUsersView = ({
                           disabled={updatingStatuses[user.id]}
                         >
                           <SelectTrigger
-                            className={`h-8 px-2 text-xs sm:text-sm border capitalize ${getStatusSelectClass(
+                            className={`h-8 w-full px-2 text-xs border capitalize ${getStatusSelectClass(
                               user.status
                             )}`}
                             aria-label='Cambiar estado'
@@ -301,29 +295,22 @@ const GroupedUsersView = ({
                         )}
                       </div>
                     </td>
-                    <td className='py-4 px-4 whitespace-nowrap'>
-                      <div className='text-sm text-gray-500'>
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className='py-4 px-4 whitespace-nowrap text-sm font-medium'>
-                      <div className='flex justify-center'>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => onEditUser(user)}
-                                className='h-8 w-8 rounded-md flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors'
-                              >
-                                <Edit className='h-4 w-4 text-gray-600' />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Editar usuario</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                    <td className='px-4 py-3 whitespace-nowrap text-right text-sm font-medium'>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => onEditUser(user)}
+                              className='text-purple-600 hover:text-purple-900 mr-3'
+                            >
+                              <Edit className='h-4 w-4' />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Editar usuario</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </td>
                   </tr>
                 ))}
@@ -341,16 +328,20 @@ const GroupedUsersView = ({
     </div>
   );
 
+  // Renderizar los grupos
   return (
-    <div className='mb-6 space-y-6'>
-      {/* Sección de equipo (Admin y Comercial) */}
+    <div className='space-y-8'>
+      {/* Equipo interno */}
       <UserGroup
-        users={groupedUsers.teamMembers}
+        users={groupedUsers?.team || []}
         title='Equipo de la empresa'
       />
 
-      {/* Sección de clientes (User) */}
-      <UserGroup users={groupedUsers.clients} title='Usuarios / Clientes' />
+      {/* Usuarios externos/clientes */}
+      <UserGroup
+        users={groupedUsers?.clients || []}
+        title='Usuarios / Clientes'
+      />
     </div>
   );
 };

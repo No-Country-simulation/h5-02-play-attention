@@ -89,14 +89,14 @@ const useUserManagement = () => {
 
   // Agrupar usuarios por roles
   const getGroupedUsers = () => {
-    const teamMembers = filteredUsers.filter(
+    const team = filteredUsers.filter(
       user => user.role === 'Admin' || user.role === 'Comercial'
     );
 
     const clients = filteredUsers.filter(user => user.role === 'User');
 
     return {
-      teamMembers,
+      team,
       clients
     };
   };

@@ -4,7 +4,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/shared/ui/tooltip';
-import { ROLES_USUARIO } from '../lib/hooks';
+import { ROLES_USUARIO } from '../../lib/hooks';
 
 export default function UserEditModal({
   isOpen,
