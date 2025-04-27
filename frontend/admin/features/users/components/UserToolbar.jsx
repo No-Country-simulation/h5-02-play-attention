@@ -20,13 +20,13 @@ const UserToolbar = ({
   onViewLayoutChange
 }) => {
   return (
-    <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 mt-8'>
+    <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 mt-8'>
       {/* Búsqueda */}
-      <div className='relative w-full md:w-auto'>
+      <div className='relative w-full lg:w-auto'>
         <input
           type='text'
           placeholder='Buscar usuarios...'
-          className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full md:w-80'
+          className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full lg:w-80'
           value={searchTerm}
           onChange={e => onSearchChange(e.target.value)}
         />
@@ -34,7 +34,7 @@ const UserToolbar = ({
       </div>
 
       {/* Botones de acción */}
-      <div className='flex gap-2 w-full md:w-auto'>
+      <div className='flex gap-2 w-full lg:w-auto'>
         {/* Selector de vista */}
         <div className='flex mr-2 rounded-lg overflow-hidden border border-gray-300'>
           <button
