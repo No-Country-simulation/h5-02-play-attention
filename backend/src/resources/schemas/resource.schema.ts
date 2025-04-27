@@ -11,13 +11,13 @@ export enum ResourceType {
 
 @Schema({ timestamps: true })
 export class Resource extends Document {
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String,trim:true })
   title: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String,trim:true })
   description: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String,trim:true })
   url: string;
 
   @Prop({ required: true, enum: ResourceType })

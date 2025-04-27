@@ -12,33 +12,32 @@ export class ResourcesController {
   constructor(private readonly resourcesService: ResourcesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Subir un recurso' })
-  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Crear un recurso' })
+  @ApiConsumes('multipart/form-data', 'application/json')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary' },
-        createResourceDto: { type: 'object', properties: {
-          title: { type: 'string' },
-          description: { type: 'string' },
-          type: { type: 'string' },
-          published: { type: 'boolean' },
-          category: { type: 'string' },
-        }},
+        file: { type: 'string', format: 'binary'},
+        title: { type: 'string' },
+        description: { type: 'string' },
+        type: { type: 'string' },
+        published: { type: 'boolean' },
+        category: { type: 'string' },
+        url: { type: 'string', },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Recurso subido correctamente' })
+  @ApiResponse({ status: 201, description: 'Recurso creado correctamente' })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(
+  async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() createResourceDto: CreateResourceDto,
   ) {
     const resource = await this.resourcesService.create(file, createResourceDto);
     return {
-      message: 'Archivo subido correctamente',
+      message: 'Recurso creado correctamente',
       resource
     };
   }

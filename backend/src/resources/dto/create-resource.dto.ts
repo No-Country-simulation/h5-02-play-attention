@@ -31,4 +31,8 @@ export class CreateResourceDto {
   @IsNotEmpty({ message: 'La categoría es requerida' })
   category: Types.ObjectId;
 
+  @ApiProperty({ name: 'url', required: false, type: String, description: 'URL del recurso (opcional)', example: 'https://youtube.com/watch?v=...' })
+  @IsString()
+  @IsOptional()
+  url?: string;
 }

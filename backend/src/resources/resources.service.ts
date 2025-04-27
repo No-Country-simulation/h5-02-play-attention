@@ -15,33 +15,47 @@ export class ResourcesService {
   ) {}
 
   async create(file: Express.Multer.File, createResourceDto: CreateResourceDto): Promise<Resource> {
-    if (!file) {
-      throw new BadRequestException('No se ha proporcionado ningún archivo');
+    if (!file && !createResourceDto.url) {
+      throw new BadRequestException('Se debe proporcionar un archivo o una URL');
     }
 
     try {
-      const uploadResult = await this.uploadService.uploadFile(file);
+      let url: string;
+      
+      if (file) {
+        const uploadResult = await this.uploadService.uploadFile(file);
+        url = uploadResult.secure_url;
+      } else {
+        // Validar que la URL sea válida
+        try {
+          new URL(createResourceDto.url);
+          url = createResourceDto.url;
+        } catch (error) {
+          throw new BadRequestException('La URL proporcionada no es válida');
+        }
+      }
       
       const newResource = new this.resourceModel({
         title: createResourceDto.title,
         description: createResourceDto.description,
         type: createResourceDto.type,
         published: createResourceDto.published,
-        url: uploadResult.secure_url,
+        url: url,
       });
-const category=await this.categoriesModel.findById(createResourceDto.category);
-if(!category){
-  throw new BadRequestException('La categoría no existe');
-} 
 
- category.resources_id.push(newResource._id as Types.ObjectId);
-    const [,resource]=await Promise.all([category.save(),newResource.save()]) 
+      const category = await this.categoriesModel.findById(createResourceDto.category);
+      if (!category) {
+        throw new BadRequestException('La categoría no existe');
+      }
 
-      return resource
+      category.resources_id.push(newResource._id as Types.ObjectId);
+      const [, resource] = await Promise.all([category.save(), newResource.save()]);
+
+      return resource;
     } catch (error) {
-      throw new BadRequestException('Error al subir el archivo: ' + error.message);
+      throw new BadRequestException('Error al crear el recurso: ' + error.message);
     }
-   }
+  }
 
   async findAll(): Promise<Resource[]> {
     return this.resourceModel.find().sort({ createdAt: -1 }).exec();
