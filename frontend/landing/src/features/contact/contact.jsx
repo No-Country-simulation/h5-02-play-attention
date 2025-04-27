@@ -1,8 +1,8 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useState, useCallback, useMemo } from "react";
 
 import { Button } from "@/shared/ui/button";
 import {
@@ -24,138 +24,242 @@ import { Textarea } from "@/shared/ui/textarea";
 import { Checkbox } from "@/shared/ui/checkbox";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/shared/ui/dialog";
-import { useState } from "react";
+import { StaticContact } from "./staticContact";
 
 const formSchema = z.object({
-  nombre: z
+  fullname: z
     .string()
-    .min(2, {
-      message: "El nombre debe tener al menos 2 caracteres.",
-    })
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
     .max(50, { message: "El nombre debe tener máximo 50 caracteres." }),
-  correo: z.string().email({
-    message: "Por favor ingresa un correo válido.",
-  }),
-  telefono: z.string().min(6, {
-    message: "El teléfono debe tener al menos 6 caracteres.",
-  }),
-  institucion: z
+  email: z.string().email({ message: "Por favor ingresa un correo válido." }),
+  company: z
     .string()
-    .min(2, {
-      message: "La institución debe tener al menos 2 caracteres.",
-    })
+    .min(2, { message: "La institución debe tener al menos 2 caracteres." })
     .max(50, { message: "La institución debe tener máximo 50 caracteres" }),
-  interest: z.string({
+  service: z.string({
     required_error: "Por favor selecciona un área de interés",
   }),
   message: z
     .string()
-    .min(10, {
-      message: "El mensaje debe tener al menos 10 caracteres.",
-    })
+    .min(10, { message: "El mensaje debe tener al menos 10 caracteres." })
     .max(1100, { message: "El mensaje debe tener máximo 1100 carácteres" }),
-
-  terms: z.boolean().default(false),
+  relation: z.string({ required_error: "Por favor selecciona tu relación" }),
 });
 
-export function ContactSection() {
+const initialFormValues = {
+  fullname: "",
+  email: "",
+  company: "",
+  phone: "",
+  service: "",
+  message: "",
+  relation: "",
+};
+
+export const ContactSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [contactUser, setContactUser] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombre: "",
-      correo: "",
-      telefono: "",
-      institucion: "",
-      interest: "",
-      message: "",
-      terms: false,
-    },
+    defaultValues: initialFormValues,
   });
 
-  function onSubmit(values) {
-    console.log(values);
-    const firstName = values.nombre.split(" ")[0];
+  const { reset } = form;
 
-    setContactUser(firstName);
-    setIsModalOpen(true);
-  }
+  const onSubmit = useCallback(
+    async (data) => {
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      const apiData = {
+        message: data.message,
+        fullname: data.fullname,
+        company: data.company || "",
+        email: data.email,
+        service: data.service,
+        relation: data.relation,
+      };
+
+      setContactUser(data.fullname.split(" ")[0]);
+
+      try {
+        const response = await fetch(
+          "https://play-attention.onrender.com/api/leads/form-website",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(apiData),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Error en el registro");
+        }
+
+        setSubmitSuccess(true);
+        reset();
+        setIsModalOpen(true);
+      } catch (error) {
+        setSubmitError(error.message || "Error desconocido");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [reset]
+  );
+
+  const formClasses = useMemo(
+    () => ({
+      root: "w-full md:w-[41.02%] min-h-[121%] bg-white border-2 border-[#C0B2CF] rounded-sm px-5 py-3 md:relative md:left-4 flex flex-col justify-evenly",
+      input:
+        "h-12 md:h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]",
+      textarea:
+        "h-32 md:h-[18.01%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]",
+      label: "text-[0.9rem] text-[#15032A]",
+      checkboxLabel: "text-[0.8rem] text-[#929292] py-2",
+      smallText: "text-center text-[0.7rem] text-[#929292] py-2",
+    }),
+    []
+  );
 
   return (
-    <section className=" m-h-[140vh] h-auto flex flex-col items-center bg-[#EFF6FF] ">
-      <h1 className="h-[8.27vh] flex items-center justify-center text-xl">
+    <section className="w-full min-h-screen flex flex-col">
+      <h1 className="text-center text-2xl md:text-[2rem] pt-4 [font-family:var(--font-sans)] font-[700]">
         Contactanos
       </h1>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-[75.23vw] h-[50.37%] bg-white md:p-6"
-        >
-          <h5 className=" py-4 m-0">Solicita información</h5>
-          {/* Sección de 2x2 columnas*/}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 m-0 justify-items-stretch">
-            {/* Columna 1*/}
-            <div className="space-y-4">
+      <small className="text-center text-sm text-[#656573] md:text-md pt-4 px-4 md:px-0 [font-family:var(--font-sans)] font-[400]">
+        ¿Tienes preguntas sobre Play Attention? Estamos aquí para ayudarte
+      </small>
+      <div className="flex-1 py-8 md:py-20">
+        <div className="bg-[#e9e9f1] w-full min-h-[70vh] md:h-[66vh] flex flex-col md:flex-row items-center justify-center md:items-center md:justify-evenly gap-8 md:gap-0 px-4 md:px-0">
+          {/* Contenido izquierdo (visible solo en desktop) */}
+          <StaticContact />
+          {/* Formulario  */}
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className={formClasses.root}
+            >
               <FormField
                 control={form.control}
-                name="nombre"
+                name="fullname"
                 render={({ field }) => (
                   <div>
-                    <FormLabel className={"py-3"}>Nombre Completo*</FormLabel>
+                    <FormLabel className={formClasses.label}>Nombre*</FormLabel>
                     <FormControl>
                       <Input
-                        className={
-                          "border border-black rounded-none md:w-[32.86vw] "
-                        }
+                        className={formClasses.input}
                         {...field}
+                        placeholder="Tu nombre completo"
                       />
                     </FormControl>
                     <FormMessage />
                   </div>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="telefono"
-                render={({ field }) => (
-                  <div>
-                    <FormLabel className={"py-3"}>Teléfono</FormLabel>
-                    <FormControl>
-                      <Input
-                        className={
-                          "border border-black rounded-none md:w-[32.86vw] "
-                        }
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </div>
-                )}
-              />
-            </div>
 
-            {/* Columna 2*/}
-            <div className="space-y-4 md:justify-self-end ">
               <FormField
                 control={form.control}
-                name="correo"
+                name="email"
                 render={({ field }) => (
                   <div>
-                    <FormLabel className={"py-3"}>
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
                       Correo electrónico*
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className={
-                          "border border-black rounded-none md:w-[32.86vw] "
-                        }
+                        className={formClasses.input}
+                        {...field}
+                        placeholder="tu@email.com"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="company"
+                render={({ field }) => (
+                  <div>
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
+                      Institución
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className={formClasses.input}
+                        {...field}
+                        placeholder="Nombre de institución o empresa"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="service"
+                render={({ field }) => (
+                  <div className="m-0">
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
+                      ¿Quién lo va a usar?
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl className={`${formClasses.input} py-1`}>
+                        <SelectTrigger className="text-[#C0B2CF]">
+                          <SelectValue placeholder="Selecciona una opción" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem
+                          value="Profesional"
+                          className="text-[#A592B5]"
+                        >
+                          Profesional
+                        </SelectItem>
+                        <SelectItem
+                          value="Individuo"
+                          className="text-[#A592B5]"
+                        >
+                          Individuo
+                        </SelectItem>
+                        <SelectItem value="Empresa" className="text-[#B0A2C0]">
+                          Empresa
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </div>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <div className="m-0">
+                    <FormLabel className={`mt-3 ${formClasses.label}`}>
+                      Contexto de uso
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Texto"
+                        className={formClasses.textarea}
                         {...field}
                       />
                     </FormControl>
@@ -166,103 +270,53 @@ export function ContactSection() {
 
               <FormField
                 control={form.control}
-                name="institucion"
+                name="terms"
                 render={({ field }) => (
-                  <div>
-                    <FormLabel className={"py-3"}>
-                      Institución (si aplica)
-                    </FormLabel>
+                  <div className="flex flex-row items-center space-x-3 space-y-0 rounded-md">
                     <FormControl>
-                      <Input
-                        className={
-                          "border border-black rounded-none md:w-[32.86vw] "
-                        }
-                        {...field}
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="
+                        text-[#6d28d9]
+                        bg-[#C0B2CF]
+                        data-[state=checked]:text-white
+                        data-[state=checked]:border-[#6d28d9]
+                      "
                       />
                     </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel
+                        className={`${formClasses.checkboxLabel} ${
+                          field.value ? "text-[#15032A]" : "text-[#929292]"
+                        }`}
+                      >
+                        Quiero recibir novedades, actualizaciones y ofertas
+                        especiales de Play Attention
+                      </FormLabel>
+                    </div>
                     <FormMessage />
                   </div>
                 )}
               />
-            </div>
-          </div>
 
-          {/* Resto de campos en orden vertical*/}
-          <FormField
-            control={form.control}
-            name="interest"
-            render={({ field }) => (
-              <div className="m-0">
-                <FormLabel className={"py-4"}>¿Quién lo va a usar?*</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="border border-black rounded-none">
-                      <SelectValue placeholder="Selecciona una opción" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="sitio web">Sitio Web</SelectItem>
-                    <SelectItem value="development">Desarrollo</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="support">Soporte al cliente</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </div>
-            )}
-          />
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full h-12 md:h-[5.31%]"
+              >
+                {isSubmitting ? "Enviando..." : "Enviar mensaje"}
+              </Button>
+              <small className={formClasses.smallText}>
+                Al enviar este formulario, aceptas nuestra &nbsp;
+                <b>Política de Privacidad</b> &nbsp; y el tratamiento de tus
+                datos.
+              </small>
+            </form>
+          </Form>
+        </div>
+      </div>
 
-          <FormField
-            control={form.control}
-            name="message"
-            render={({ field }) => (
-              <div className="m-0">
-                <FormLabel className={"py-4"}>Contexto de uso*</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Cuèntanos brevemente para què necesitas Play Attention"
-                    className="min-h-[100px] border border-black rounded-none"
-                    {...field}
-                  />
-                </FormControl>
-
-                <FormMessage />
-              </div>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="terms"
-            render={({ field }) => (
-              <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Suscribirme al newsletter para recibir novedades y consejos
-                  </FormLabel>
-                </div>
-                <FormMessage />
-              </div>
-            )}
-          />
-
-          <Button
-            type="submit"
-            className="mx-auto w-[62.73vw] h-[3.31%] rounded-none block "
-          >
-            Enviar Solicitud
-          </Button>
-        </form>
-      </Form>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -272,11 +326,11 @@ export function ContactSection() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            {/* Contenido personalizado aquí */}
             <p>¡Nos pondremos en contacto contigo!</p>
+            {submitError && <p className="text-red-500">{submitError}</p>}
           </div>
         </DialogContent>
       </Dialog>
     </section>
   );
-}
+};
