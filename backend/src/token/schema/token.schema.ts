@@ -12,7 +12,7 @@ export class Token {
     @Prop({
         required: true,
         type: Date,
-        default: () => new Date(Date.now() + 60 * 60 * 1000)
+        default: () => new Date(Date.now() + 15 * 60 * 1000)
     })
     expiresAt: Date;
 

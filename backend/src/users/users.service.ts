@@ -39,7 +39,7 @@ export class UsersService {
       this.userModel.countDocuments().exec(),
     ]);
 
-    if (!users.length) throw new NotFoundException('No existen usuarios');
+    if (!users.length) return {message:"No existen usuarios",users:[]}
 
     return {
       data: users,
