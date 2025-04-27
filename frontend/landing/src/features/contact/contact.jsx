@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/shared/ui/dialog";
+import { StaticContact } from "./staticContact";
 
 const formSchema = z.object({
   fullname: z
@@ -54,6 +55,7 @@ const initialFormValues = {
   fullname: "",
   email: "",
   company: "",
+  phone: "",
   service: "",
   message: "",
   relation: "",
@@ -118,7 +120,7 @@ export const ContactSection = () => {
 
   const formClasses = useMemo(
     () => ({
-      root: "w-full md:w-[41.02%] min-h-[127%] bg-white border-2 border-[#C0B2CF] rounded-sm px-5 py-3 md:relative md:left-4 flex flex-col justify-evenly",
+      root: "w-full md:w-[41.02%] min-h-[121%] bg-white border-2 border-[#C0B2CF] rounded-sm px-5 py-3 md:relative md:left-4 flex flex-col justify-evenly",
       input:
         "h-12 md:h-[4.62%] border-1 border-[#C0B2CF] placeholder:text-[0.9rem] placeholder:text-[#C0B2CF]",
       textarea:
@@ -131,19 +133,18 @@ export const ContactSection = () => {
   );
 
   return (
-    <section className="border border-black w-full min-h-screen flex flex-col">
-      <h1 className="text-center text-2xl md:text-[2rem] pt-4 [font-family:var(--font-sans)]">
+    <section className="w-full min-h-screen flex flex-col">
+      <h1 className="text-center text-2xl md:text-[2rem] pt-4 [font-family:var(--font-sans)] font-[700]">
         Contactanos
       </h1>
-      <small className="text-center text-sm md:text-md pt-4 px-4 md:px-0">
+      <small className="text-center text-sm text-[#656573] md:text-md pt-4 px-4 md:px-0 [font-family:var(--font-sans)] font-[400]">
         ¿Tienes preguntas sobre Play Attention? Estamos aquí para ayudarte
       </small>
       <div className="flex-1 py-8 md:py-20">
         <div className="bg-[#e9e9f1] w-full min-h-[70vh] md:h-[66vh] flex flex-col md:flex-row items-center justify-center md:items-center md:justify-evenly gap-8 md:gap-0 px-4 md:px-0">
           {/* Contenido izquierdo (visible solo en desktop) */}
-          <div className="hidden md:block">datos 1</div>
-
-          {/* Formulario (igual que tu versión original en desktop) */}
+          <StaticContact />
+          {/* Formulario  */}
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -304,7 +305,7 @@ export const ContactSection = () => {
                 disabled={isSubmitting}
                 className="w-full h-12 md:h-[5.31%]"
               >
-                {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
+                {isSubmitting ? "Enviando..." : "Enviar mensaje"}
               </Button>
               <small className={formClasses.smallText}>
                 Al enviar este formulario, aceptas nuestra &nbsp;
