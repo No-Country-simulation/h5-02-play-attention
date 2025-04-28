@@ -47,7 +47,6 @@ export const apiToEngagementAdapter = apiData => {
  * @returns {Array} - Lista formateada para el frontend
  */
 export const apiEngagementsListAdapter = (apiResponse = {}) => {
-  console.log('Raw API Engagements received:', apiResponse);
 
   // Si no hay respuesta o no tiene datos, devolver array vacío
   if (!apiResponse) {
@@ -63,17 +62,16 @@ export const apiEngagementsListAdapter = (apiResponse = {}) => {
     return [];
   }
 
-  console.log('Processing engagements from data property:', engagements);
+
 
   const result = engagements
     .map(engagement => {
-      console.log('Processing engagement:', engagement);
+
       return apiToEngagementAdapter(engagement);
     })
     .filter(Boolean) // Eliminar elementos null
     .sort((a, b) => new Date(b.date) - new Date(a.date)); // Más recientes primero
 
-  console.log('Final processed engagements:', result);
   return result;
 };
 
