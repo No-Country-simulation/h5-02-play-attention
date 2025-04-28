@@ -210,6 +210,16 @@ export default function LeadList({
       return;
     }
 
+    // Verificar si el lead actual está en estado cliente
+    const lead = leads.find(l => l.id === leadId);
+    const currentStatus = getLeadStatus(leadId, lead?.status);
+
+    // No permitir cambiar de cliente a otro estado
+    if (currentStatus === 'cliente' && uiStatus !== 'cliente') {
+      toast.error('No se puede cambiar un Lead desde Cliente a otro estado');
+      return;
+    }
+
     // Guardar localmente para UI inmediata
     setLeadStatuses(prev => ({
       ...prev,
@@ -298,6 +308,7 @@ export default function LeadList({
                   <Select
                     value={getLeadStatus(lead.id, lead.status)}
                     onValueChange={value => handleStatusChange(lead.id, value)}
+                    disabled={getLeadStatus(lead.id, lead.status) === 'cliente'}
                   >
                     <SelectTrigger
                       className={cn(
@@ -381,6 +392,7 @@ export default function LeadList({
                 <Select
                   value={getLeadStatus(lead.id, lead.status)}
                   onValueChange={value => handleStatusChange(lead.id, value)}
+                  disabled={getLeadStatus(lead.id, lead.status) === 'cliente'}
                 >
                   <SelectTrigger
                     className={cn(

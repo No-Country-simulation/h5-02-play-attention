@@ -4,3 +4,4 @@
  */
 
 export * from './contents.adapter';
+export * from './categories.adapter';

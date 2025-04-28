@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ContentList from './components/ContentList';
 import ContentForm from './components/ContentForm';
 import ContentFilters from './components/ContentFilters';
 import ContentTypeSelector from './components/ContentTypeSelector';
+import CategoriesList from './components/categories/CategoriesList';
 import { Button } from '@/shared/ui/button';
-import { Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
+import { Plus, FileText, Tag } from 'lucide-react';
 import PageHeader from '@/shared/ui/page-header';
 import { getPageMetadata } from '@/shared/lib/utils/page-metadata';
 
@@ -16,6 +19,11 @@ import { getPageMetadata } from '@/shared/lib/utils/page-metadata';
  * permitiendo extensiones futuras sin modificar el componente existente
  */
 export default function ContentManager() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'content');
+  
   const [isCreating, setIsCreating] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentType, setContentType] = useState('all');
@@ -25,6 +33,12 @@ export default function ContentManager() {
     status: 'Todos'
   });
   const { title, description } = getPageMetadata('content');
+
+  // Función para cambiar de pestaña y actualizar la URL
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    router.push(`/content?tab=${value}`, { scroll: false });
+  };
 
   // Función para manejar la creación de nuevo contenido
   const handleCreateContent = () => {
@@ -49,35 +63,82 @@ export default function ContentManager() {
     setSearchFilters(newFilters);
   }, []);
 
+  // Renderizado condicional para mostrar el contenido de la pestaña activa
+  const renderContent = () => {
+    if (activeTab === 'categories') {
+      return <CategoriesList />;
+    }
+
+    // Pestaña de contenido
+    if (isCreating) {
+      return <ContentForm initialData={selectedContent} onCancel={handleCancel} />;
+    }
+
+    // Listado de contenido
+    return (
+      <>
+        <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6'>
+          <ContentTypeSelector
+            selectedType={contentType}
+            onTypeChange={setContentType}
+          />
+
+          <Button onClick={handleCreateContent}>
+            <Plus className='mr-2 h-4 w-4' />
+            Nuevo Contenido
+          </Button>
+        </div>
+
+        <ContentFilters onFiltersChange={handleFiltersChange} />
+
+        <ContentList
+          contentType={contentType}
+          searchFilters={searchFilters}
+          onEdit={handleEditContent}
+        />
+      </>
+    );
+  };
+
   return (
     <div className='p-6 max-w-7xl mx-auto'>
       {!isCreating && <PageHeader title={title} description={description} />}
 
-      {isCreating ? (
-        <ContentForm initialData={selectedContent} onCancel={handleCancel} />
-      ) : (
-        <>
-          <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6'>
-            <ContentTypeSelector
-              selectedType={contentType}
-              onTypeChange={setContentType}
-            />
+      <Tabs
+        defaultValue='content'
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className='mb-6'
+      >
+        <div className='w-full overflow-x-auto pb-2 no-scrollbar'>
+          <TabsList className='w-full sm:w-auto justify-start sm:justify-center'>
+            <TabsTrigger
+              value='content'
+              className='flex items-center whitespace-nowrap'
+            >
+              <FileText className='h-4 w-4 mr-2' />
+              <span className='hidden sm:inline'>Gestión de Contenido</span>
+              <span className='sm:hidden'>Contenido</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value='categories'
+              className='flex items-center whitespace-nowrap'
+            >
+              <Tag className='h-4 w-4 mr-2' />
+              <span className='hidden sm:inline'>Gestión de Categorías</span>
+              <span className='sm:hidden'>Categorías</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-            <Button onClick={handleCreateContent}>
-              <Plus className='mr-2 h-4 w-4' />
-              Nuevo Contenido
-            </Button>
-          </div>
+        <TabsContent value='content' className='mt-4'>
+          {activeTab === 'content' && renderContent()}
+        </TabsContent>
 
-          <ContentFilters onFiltersChange={handleFiltersChange} />
-
-          <ContentList
-            contentType={contentType}
-            searchFilters={searchFilters}
-            onEdit={handleEditContent}
-          />
-        </>
-      )}
+        <TabsContent value='categories' className='mt-4'>
+          {activeTab === 'categories' && renderContent()}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

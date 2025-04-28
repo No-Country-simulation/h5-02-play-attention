@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -9,10 +9,123 @@ import {
   TableHeader,
   TableRow
 } from '@/shared/ui/table';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Download } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import DeleteConfirmationModal from '@/shared/ui/modals/DeleteConfirmationModal';
 import { useContents, useDeleteContent } from '../lib/hooks';
+
+/**
+ * Genera un nombre de archivo significativo basado en el tipo y título del contenido
+ * @param {Object} content - El contenido a descargar
+ * @returns {string} - Nombre del archivo con extensión
+ */
+function getFileName(content) {
+  // Limpiar el título para un nombre de archivo válido
+  const title = content.title.replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+
+  // Detectar el tipo de archivo de forma más precisa
+  let extension = '';
+
+  // 1. Primero intentar detectar por el tipo de contenido en minúsculas
+  const type = content.type ? content.type.toLowerCase() : '';
+
+  if (type === 'pdf') {
+    extension = '.pdf';
+  } else if (type === 'video') {
+    extension = '.mp4';
+  } else if (type === 'artículo' || type === 'articulo') {
+    extension = '.html';
+  } else if (type === 'imagen' || type === 'image') {
+    extension = '.jpg';
+  } else if (type === 'audio') {
+    extension = '.mp3';
+  } else if (type === 'presentación' || type === 'presentacion') {
+    extension = '.pptx';
+  } else {
+    // 2. Si no podemos determinar por el tipo, intentar detectar por la URL
+    const url = content.fileUrl || content.url || '';
+
+    console.log('Detectando tipo por URL:', url);
+
+    if (url.includes('.pdf') || url.includes('/pdf/')) {
+      extension = '.pdf';
+    } else if (url.includes('.mp4') || url.includes('/video/')) {
+      extension = '.mp4';
+    } else if (
+      url.includes('.jpg') ||
+      url.includes('.jpeg') ||
+      url.includes('/image/')
+    ) {
+      extension = '.jpg';
+    } else if (url.includes('.png')) {
+      extension = '.png';
+    } else if (url.includes('.mp3') || url.includes('/audio/')) {
+      extension = '.mp3';
+    } else if (url.includes('.ppt') || url.includes('.pptx')) {
+      extension = '.pptx';
+    } else if (url.includes('.doc') || url.includes('.docx')) {
+      extension = '.docx';
+    } else {
+      // 3. Si todo falla, usar .txt como predeterminado
+      extension = '.txt';
+    }
+  }
+
+  console.log(`Asignando nombre: ${title}${extension} para tipo: ${type}`);
+
+  return `${title}${extension}`;
+}
+
+/**
+ * Maneja la descarga de archivos con el nombre y extensión correctos
+ * @param {Object} content - El contenido a descargar
+ * @returns {Function} - Función controladora de eventos
+ */
+function handleDownload(content) {
+  return async e => {
+    e.preventDefault();
+
+    if (!content.fileUrl && !content.url) return;
+
+    const url = content.fileUrl || content.url;
+    const fileName = getFileName(content);
+
+    try {
+      // Mostrar indicador de carga
+      const button = e.currentTarget;
+      const originalText = button.innerText;
+      button.innerText = 'Descargando...';
+
+      // Realizar fetch para obtener el archivo como blob
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // Crear un objeto URL para el blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Crear un enlace temporal
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+
+      // Añadir al DOM, hacer clic y limpiar
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Liberar el objeto URL
+      window.URL.revokeObjectURL(blobUrl);
+
+      // Restaurar el texto del botón
+      button.innerText = originalText;
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+      alert(
+        'Hubo un error al descargar el archivo. Por favor, intenta nuevamente.'
+      );
+    }
+  };
+}
 
 /**
  * Componente para listar contenido con opciones CRUD
@@ -24,6 +137,10 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
 
   // Obtener contenidos desde la API
   const { data: contents = [], isLoading, error } = useContents();
+
+  // Debug: imprimir contenidos para diagnóstico
+  console.log('Contenidos recibidos en componente:', contents);
+
   const deleteMutation = useDeleteContent();
 
   // Función para filtrar contenido con todos los criterios
@@ -112,6 +229,7 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
               <TableHead>Categoría</TableHead>
               <TableHead>Fecha</TableHead>
               <TableHead>Estado</TableHead>
+              <TableHead>Descargar</TableHead>
               <TableHead className='text-right'>Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -133,6 +251,23 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
                     >
                       {content.status}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    {content.fileUrl || content.url ? (
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={handleDownload(content)}
+                        className='inline-flex items-center'
+                      >
+                        <Download className='h-4 w-4 mr-1' />
+                        Descargar
+                      </Button>
+                    ) : (
+                      <span className='text-gray-400 text-sm'>
+                        No disponible
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className='text-right space-x-2'>
                     <Button
@@ -157,7 +292,7 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className='text-center py-10 text-gray-500'
                 >
                   No se encontró contenido para mostrar
@@ -199,6 +334,19 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
                 </div>
                 <div>
                   <span className='font-medium'>Fecha:</span> {content.date}
+                </div>
+                <div>
+                  <span className='font-medium'>Archivo:</span>{' '}
+                  {content.fileUrl || content.url ? (
+                    <button
+                      onClick={handleDownload(content)}
+                      className='text-blue-600 hover:underline bg-transparent border-0 p-0 cursor-pointer'
+                    >
+                      Descargar
+                    </button>
+                  ) : (
+                    <span className='text-gray-400'>No disponible</span>
+                  )}
                 </div>
               </div>
 

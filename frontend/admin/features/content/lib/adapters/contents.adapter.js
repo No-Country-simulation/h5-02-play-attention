@@ -14,8 +14,10 @@ import { mapContentTypeToFrontend } from '../api/config';
 export const contentAdapter = (apiContent = {}) => {
   if (!apiContent) return null;
 
-  return {
-    id: apiContent.id || '',
+  console.log('Adaptando contenido individual:', apiContent);
+
+  const adaptedContent = {
+    id: apiContent._id || apiContent.id || '',
     title: apiContent.title || '',
     type: mapContentTypeToFrontend(apiContent.type || apiContent.contentType),
     content: apiContent.description || apiContent.content || '',
@@ -31,6 +33,9 @@ export const contentAdapter = (apiContent = {}) => {
       ? new Date(apiContent.createdAt).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0]
   };
+
+  console.log('Contenido adaptado:', adaptedContent);
+  return adaptedContent;
 };
 
 /**
@@ -39,7 +44,22 @@ export const contentAdapter = (apiContent = {}) => {
  * @returns {Array} - Datos formateados para el frontend
  */
 export const contentsAdapter = (apiContents = []) => {
-  if (!apiContents.length) return [];
+  console.log('Adaptando lista de contenidos:', apiContents);
 
-  return apiContents.map(content => contentAdapter(content));
+  if (!Array.isArray(apiContents)) {
+    console.error(
+      'Error: contentsAdapter esperaba un array pero recibió:',
+      apiContents
+    );
+    return [];
+  }
+
+  if (!apiContents.length) {
+    console.log('No hay contenidos para adaptar');
+    return [];
+  }
+
+  const adaptedContents = apiContents.map(content => contentAdapter(content));
+  console.log('Lista de contenidos adaptada:', adaptedContents);
+  return adaptedContents;
 };
