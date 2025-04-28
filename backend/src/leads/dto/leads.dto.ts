@@ -17,7 +17,7 @@ export class CreateLeadDto {
 
     @ApiProperty({ example: '+34 53281985739', description: 'Número de teléfono del usuario'})
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     phone: string;
 
     @ApiProperty({ example: 'juan@mail.com', description: 'correo electrónico del usuario'})
