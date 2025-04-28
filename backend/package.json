@@ -34,7 +34,7 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^10.4.17",
-    "@nestjs/platform-socket.io": "^11.1.0",
+    "@nestjs/platform-socket.io": "^10.4.17",
     "@nestjs/swagger": "^8.1.1",
     "@nestjs/websockets": "^10.4.17",
     "bcrypt": "^5.1.1",
