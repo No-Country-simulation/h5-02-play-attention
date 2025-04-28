@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Param, Delete, UploadedFile, UseInterceptors, ParseUUIDPipe, Body, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, UploadedFile, UseInterceptors, ParseUUIDPipe, Body, NotFoundException, Put } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcesService } from './resources.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { MongoIdValidationPipe } from 'src/common/pipes/isMongoIdValidation.pipe';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UpdateResourceDto } from './dto/update-resource.dto';
 
 
 @ApiTags("resources")
@@ -41,7 +42,18 @@ export class ResourcesController {
       resource
     };
   }
-  
+
+  @Put(":id")
+  @ApiOperation({ summary: 'Actualizar un recurso por ID' })
+  @ApiResponse({ status: 200, description: 'Recurso actualizado correctamente' })
+  @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
+  async update(@Param('id', MongoIdValidationPipe) id: string, @Body() updateResourceDto: UpdateResourceDto) {
+    const resource = await this.resourcesService.update(id, updateResourceDto);
+    return {
+      message: 'Recurso actualizado correctamente',
+      resource
+    };
+  }
   @Get()
   @ApiOperation({ summary: 'Obtener todos los recursos' })
   @ApiResponse({ status: 200, description: 'Recursos obtenidos correctamente' })

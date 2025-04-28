@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument } from 'mongoose';
+import { Document, HydratedDocument, Types } from 'mongoose';
 
 
 export type RespurceDocument = HydratedDocument<Resource>
@@ -25,6 +25,9 @@ export class Resource extends Document {
 
   @Prop({ required: true, type: Boolean, default: false })
   published: boolean;
+
+  @Prop({ required: true, type: Types.ObjectId, ref: 'Categories' })
+  category: Types.ObjectId;
 }
 
 export const ResourceSchema = SchemaFactory.createForClass(Resource);

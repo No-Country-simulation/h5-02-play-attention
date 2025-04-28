@@ -5,6 +5,7 @@ import { Resource } from './schemas/resource.schema';
 import { UploadService } from '../cloudinary/upload.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { Categories } from '../categories/schema/categories.model';
+import { UpdateResourceDto } from './dto/update-resource.dto';
 
 @Injectable()
 export class ResourcesService {
@@ -41,6 +42,7 @@ export class ResourcesService {
         type: createResourceDto.type,
         published: createResourceDto.published,
         url: url,
+        category: createResourceDto.category
       });
 
       const category = await this.categoriesModel.findById(createResourceDto.category);
@@ -56,9 +58,13 @@ export class ResourcesService {
       throw new BadRequestException('Error al crear el recurso: ' + error.message);
     }
   }
+  async update(id: string, updateResourceDto: UpdateResourceDto): Promise<Resource> {
+    const resource = await this.resourceModel.findByIdAndUpdate(id, updateResourceDto, { new: true });
+    return resource;
+  }
 
   async findAll(): Promise<Resource[]> {
-    return this.resourceModel.find().sort({ createdAt: -1 }).exec();
+    return this.resourceModel.find().sort({ createdAt: -1 }).populate('category').exec();
   }
 
   async findOne(id: string): Promise<Resource> {

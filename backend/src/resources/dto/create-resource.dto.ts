@@ -41,4 +41,5 @@ export class CreateResourceDto {
   @IsString()
   @IsOptional()
   url?: string;
+
 }

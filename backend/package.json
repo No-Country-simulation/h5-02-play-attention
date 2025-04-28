@@ -34,8 +34,13 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^10.4.17",
+    "@nestjs/platform-socket.io": "^11.1.0",
     "@nestjs/swagger": "^8.1.1",
+<<<<<<< HEAD
     "@nestjs/websockets": "^10.4.17",
+=======
+    "@nestjs/websockets": "^11.1.0",
+>>>>>>> 5d01ff70497bb8adf55f7626c2354c167dcd9158
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -49,6 +54,7 @@
     "nodemailer": "^6.10.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
