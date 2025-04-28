@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsOptional, IsMongoId, IsEnum } from 'class-validator';
 import { ResourceType } from '../schemas/resource.schema';
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
@@ -15,8 +15,14 @@ export class CreateResourceDto {
   @IsNotEmpty({ message: 'La descripción es requerida' })
   description: string;
 
-  @ApiProperty({ name: 'type', required: true, type: String, description: 'Tipo de recurso', example: 'Tipo de recurso' })
-  @IsString()
+  @ApiProperty({ 
+    name: 'type', 
+    required: true, 
+    enum: ResourceType,
+    description: 'Tipo de recurso', 
+    example: ResourceType.VIDEO 
+  })
+  @IsEnum(ResourceType, { message: 'El tipo de recurso debe ser uno de los siguientes: video, image, pdf' })
   @IsNotEmpty({ message: 'El tipo de recurso es requerido' })
   type: ResourceType;
 
@@ -27,7 +33,7 @@ export class CreateResourceDto {
   published: boolean;
 
   @ApiProperty({ name: 'category', required: true, type: Types.ObjectId, description: 'Categoría del recurso', example:"667464646464646464646464" })
-  @IsString()
+  @IsMongoId({ message: 'El ID de la categoría no es válido' })
   @IsNotEmpty({ message: 'La categoría es requerida' })
   category: Types.ObjectId;
 

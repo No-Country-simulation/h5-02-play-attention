@@ -25,8 +25,8 @@ export class ResourcesService {
       if (file) {
         const uploadResult = await this.uploadService.uploadFile(file);
         url = uploadResult.secure_url;
-      } else {
-        // Validar que la URL sea válida
+      } else if (createResourceDto.url) {
+       
         try {
           new URL(createResourceDto.url);
           url = createResourceDto.url;
