@@ -14,11 +14,15 @@ import fetchClient from './fetch-client';
  */
 export const createUser = async userData => {
   try {
-    // Preparar datos para la API exactamente como el formato que funcionó en Postman
+    // Mapear los roles según lo que espera el backend
+    const mappedRole = mapRole(userData.role);
+
+    // Preparar datos para la API exactamente como el formato que espera el backend
     const apiData = {
+      fullname: userData.fullname,
       email: userData.email,
       password: userData.password,
-      role: userData.role === 'Usuario' ? 'User' : userData.role,
+      role: mappedRole,
       service: userData.service
     };
 
@@ -34,23 +38,6 @@ export const createUser = async userData => {
 };
 
 /**
- * Mapea el rol de usuario a un tipo de servicio
- * @param {string} role - Rol del usuario
- * @returns {string} - Servicio mapeado
- */
-function mapServiceType(role) {
-  switch (role) {
-    case 'Admin':
-      return 'System';
-    case 'Comercial':
-      return 'Comercial';
-    case 'Usuario':
-    default:
-      return 'Individuo';
-  }
-}
-
-/**
  * Mapea el rol al formato esperado por el backend
  * @param {string} role - Rol del usuario en la interfaz
  * @returns {string} - Rol en el formato del backend
@@ -59,7 +46,7 @@ function mapRole(role) {
   switch (role) {
     case 'Usuario':
       return 'User';
-    case 'Admin':
+    case 'Administrador':
       return 'Admin';
     case 'Comercial':
       return 'Comercial';

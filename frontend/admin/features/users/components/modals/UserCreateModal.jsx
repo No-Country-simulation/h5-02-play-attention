@@ -20,7 +20,7 @@ import {
  */
 export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    name: '',
+    fullname: '',
     email: '',
     role: 'Usuario',
     service: 'Individuo',
@@ -57,8 +57,8 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
+    if (!formData.fullname || !formData.fullname.trim()) {
+      newErrors.fullname = 'El nombre es requerido';
     }
 
     if (!formData.email.trim()) {
@@ -88,9 +88,9 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
       setIsSubmitting(true);
       try {
         await onSubmit(formData);
-        // Resetear formulario
+        // Resetear formulario solo en caso de éxito
         setFormData({
-          name: '',
+          fullname: '',
           email: '',
           role: 'Usuario',
           service: 'Individuo',
@@ -107,6 +107,7 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
             email: 'Este email ya está registrado en el sistema'
           });
         }
+        // No resetear el formulario en caso de error
       } finally {
         setIsSubmitting(false);
       }
@@ -115,7 +116,7 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
 
   const resetForm = () => {
     setFormData({
-      name: '',
+      fullname: '',
       email: '',
       role: 'Usuario',
       service: 'Individuo',
@@ -152,23 +153,25 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                     <div className='space-y-4'>
                       <div>
                         <Label
-                          htmlFor='name'
+                          htmlFor='fullname'
                           className='block text-sm font-medium text-gray-700'
                         >
                           Nombre
                         </Label>
                         <Input
-                          id='name'
+                          id='fullname'
                           type='text'
                           className={`mt-1 ${
-                            errors.name ? 'border-red-500' : ''
+                            errors.fullname ? 'border-red-500' : ''
                           }`}
-                          value={formData.name}
-                          onChange={e => handleChange('name', e.target.value)}
+                          value={formData.fullname}
+                          onChange={e =>
+                            handleChange('fullname', e.target.value)
+                          }
                         />
-                        {errors.name && (
+                        {errors.fullname && (
                           <p className='mt-1 text-xs text-red-500'>
-                            {errors.name}
+                            {errors.fullname}
                           </p>
                         )}
                       </div>
@@ -224,7 +227,9 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                               <SelectItem value='Administrador'>
                                 Administrador
                               </SelectItem>
-                              <SelectItem value='Editor'>Editor</SelectItem>
+                              <SelectItem value='Comercial'>
+                                Comercial
+                              </SelectItem>
                               <SelectItem value='Usuario'>Usuario</SelectItem>
                             </SelectContent>
                           </Select>
@@ -254,7 +259,9 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                                 Individuo
                               </SelectItem>
                               <SelectItem value='Empresa'>Empresa</SelectItem>
-                              <SelectItem value='Gobierno'>Gobierno</SelectItem>
+                              <SelectItem value='Profesional'>
+                                Profesional
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
