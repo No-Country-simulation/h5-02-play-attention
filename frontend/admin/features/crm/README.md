@@ -19,6 +19,31 @@ frontend/admin/features/crm/
         └── ... etc
 ```
 
+## Estructura de API
+
+La API se ha refactorizado para seguir el Principio de Responsabilidad Única (SRP). Cada archivo tiene una responsabilidad específica:
+
+- `config.js`: Configuración centralizada para las APIs (URL base, headers comunes, funciones de mapeo).
+- `getLeads.js`: Obtiene todos los leads.
+- `getLeadById.js`: Obtiene un lead específico por ID.
+- `createLead.js`: Crea un nuevo lead.
+- `updateLead.js`: Actualiza un lead existente.
+- `deleteLead.js`: Elimina un lead.
+- `getLeadEngagements.js`: Obtiene los contactos de un lead.
+- `createEngagement.js`: Crea un nuevo contacto.
+- `index.js`: Archivo de barril que exporta todas las funciones.
+
+### Uso
+
+```javascript
+// Importar API completa (para compatibilidad)
+import { leadsApi, engagementsApi } from '@/features/crm/lib/api';
+
+// Importar funciones individuales (recomendado)
+import { createLead, updateLead } from '@/features/crm/lib/api';
+import { mapUserTypeToService } from '@/features/crm/lib/api/config';
+```
+
 ## Flujo de Datos
 
 1. El usuario interactúa con un componente (ej: `NewLeadForm.jsx`)

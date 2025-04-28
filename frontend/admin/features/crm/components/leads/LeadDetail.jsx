@@ -79,7 +79,7 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
         company: lead.company || '',
         service:
           lead.userType === 'persona'
-            ? 'Persona Individual'
+            ? 'Persona individual'
             : lead.userType === 'profesional'
             ? 'Profesional'
             : 'Empresa',

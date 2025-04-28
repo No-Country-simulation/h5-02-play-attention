@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { leadsApi } from '../api/api';
+import { leadsApi } from '../api';
 import { leadsAdapter } from '../adapters';
 import { toast } from 'sonner';
 
@@ -87,29 +87,10 @@ export function useUpdateLeadStatus() {
       // Adaptar el lead al formato del frontend
       const adaptedLead = leadsAdapter(currentLead);
 
-      // Función auxiliar para mapear el origen a los valores exactos que espera el backend
-      function mapSourceToBackend(source) {
-        const sourceMap = {
-          'Sitio web': 'Sitio web',
-          'Formulario Landing': 'Sitio web',
-          WhatsApp: 'Whatsapp',
-          'Redes sociales': 'Redes sociales',
-          Recomendación: 'Referencia',
-          Otro: 'Otro',
-          LinkedIn: 'LinkedIn'
-        };
-        return sourceMap[source] || 'Sitio web';
-      }
-
-      // Función auxiliar para mapear el tipo de usuario al servicio que espera el backend
-      function mapUserTypeToService(userType) {
-        const serviceMap = {
-          persona: 'Persona individual',
-          profesional: 'Profesional',
-          empresa: 'Empresa'
-        };
-        return serviceMap[userType] || 'Persona individual';
-      }
+      // Importamos las funciones del archivo de configuración
+      const { mapSourceToBackend, mapUserTypeToService } = await import(
+        '../api/config'
+      );
 
       // Crear payload manteniendo los datos del lead y actualizando el estado
       // Nota: Ahora el status ya viene en formato backend desde el componente LeadList
