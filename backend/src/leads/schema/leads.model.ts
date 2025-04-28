@@ -28,7 +28,7 @@ export class Leads {
 
     @Prop({
         type: String,
-        required: true,
+        required: false,
     })
     phone: string;
 

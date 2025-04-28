@@ -36,6 +36,7 @@ import { TokenModule } from './token/token.module';
     CategoriesModule,
     EngagementsModule,
     ListenersModule,
+    SupportMessagesModule
   ],
   controllers: [AppController],
   providers: [AppService],
