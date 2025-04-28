@@ -41,6 +41,7 @@ export class ResourcesService {
         type: createResourceDto.type,
         published: createResourceDto.published,
         url: url,
+        category: createResourceDto.category
       });
 
       const category = await this.categoriesModel.findById(createResourceDto.category);
@@ -58,7 +59,7 @@ export class ResourcesService {
   }
 
   async findAll(): Promise<Resource[]> {
-    return this.resourceModel.find().sort({ createdAt: -1 }).exec();
+    return this.resourceModel.find().sort({ createdAt: -1 }).populate('category').exec();
   }
 
   async findOne(id: string): Promise<Resource> {
