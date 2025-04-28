@@ -9,7 +9,8 @@ import {
   Link2,
   X,
   Bookmark,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react';
 import {
   Dialog,
@@ -19,6 +20,7 @@ import {
   DialogFooter,
   DialogClose
 } from '@/shared/ui/dialog';
+import { useCreateContent, useUpdateContent } from '../lib/hooks';
 
 /**
  * Componente para crear y editar contenido
@@ -27,6 +29,14 @@ import {
  */
 export default function ContentForm({ initialData, onCancel }) {
   const isEditing = !!initialData;
+
+  // Hooks para crear/editar contenido
+  const createMutation = useCreateContent();
+  const updateMutation = isEditing ? useUpdateContent(initialData.id) : null;
+
+  // Estado para controlar envío
+  const isSubmitting =
+    createMutation.isPending || updateMutation?.isPending || false;
 
   // Estado inicial del formulario
   const [formData, setFormData] = useState({
@@ -45,6 +55,9 @@ export default function ContentForm({ initialData, onCancel }) {
   const [tempYoutubeUrl, setTempYoutubeUrl] = useState('');
   const [tempLink, setTempLink] = useState('');
   const [youtubeError, setYoutubeError] = useState('');
+
+  // Validación del formulario
+  const [errors, setErrors] = useState({});
 
   // Si estamos editando, cargamos la información inicial
   useEffect(() => {
@@ -166,13 +179,57 @@ export default function ContentForm({ initialData, onCancel }) {
   const categoryOptions = ['Tutoriales', 'Educativo', 'Médico', 'Otro'];
   const statusOptions = ['Borrador', 'Publicado'];
 
+  // Función para validar el formulario antes de enviar
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validación de campos requeridos por el backend
+    if (!formData.title || !formData.title.trim()) {
+      newErrors.title = 'El título es obligatorio';
+    }
+
+    if (formData.title.length > 100) {
+      newErrors.title = 'El título no puede exceder los 100 caracteres';
+    }
+
+    if (!formData.type) {
+      newErrors.type = 'El tipo de recurso es obligatorio';
+    }
+
+    if (!formData.category) {
+      newErrors.category = 'La categoría es obligatoria';
+    }
+
+    // La descripción es requerida si no hay archivo o video de YouTube
+    if (!formData.content.trim() && !formData.file && !formData.youtubeId) {
+      newErrors.content = 'Debes proporcionar contenido, un archivo o un video';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Manejar el envío del formulario
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    // Aquí iría la lógica para guardar o actualizar el contenido
-    console.log('Guardando contenido:', formData);
-    // Después de guardar, volvemos a la lista
-    onCancel();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      if (isEditing) {
+        await updateMutation.mutateAsync(formData);
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
+
+      // Después de guardar, volvemos a la lista
+      onCancel();
+    } catch (error) {
+      console.error('Error al guardar contenido:', error);
+      // El toast ya se muestra desde los hooks
+    }
   };
 
   return (
@@ -194,7 +251,7 @@ export default function ContentForm({ initialData, onCancel }) {
             htmlFor='title'
             className='block text-sm font-medium text-gray-700 mb-1'
           >
-            Título
+            Título <span className='text-red-500'>*</span>
           </label>
           <input
             id='title'
@@ -203,9 +260,15 @@ export default function ContentForm({ initialData, onCancel }) {
             required
             value={formData.title}
             onChange={handleChange}
-            className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300'
+            className={`w-full p-3 border ${
+              errors.title ? 'border-red-500' : 'border-gray-300'
+            } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
             placeholder='Ingresa un título descriptivo'
+            disabled={isSubmitting}
           />
+          {errors.title && (
+            <p className='text-red-500 text-sm mt-1'>{errors.title}</p>
+          )}
         </div>
 
         {/* Tipo y Categoría (fila) */}
@@ -215,14 +278,17 @@ export default function ContentForm({ initialData, onCancel }) {
               htmlFor='type'
               className='block text-sm font-medium text-gray-700 mb-1'
             >
-              Tipo de Contenido
+              Tipo de Contenido <span className='text-red-500'>*</span>
             </label>
             <select
               id='type'
               name='type'
               value={formData.type}
               onChange={handleChange}
-              className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300'
+              className={`w-full p-3 border ${
+                errors.type ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+              disabled={isSubmitting}
             >
               <option disabled>Tipo de contenido</option>
               {typeOptions.map(option => (
@@ -231,6 +297,9 @@ export default function ContentForm({ initialData, onCancel }) {
                 </option>
               ))}
             </select>
+            {errors.type && (
+              <p className='text-red-500 text-sm mt-1'>{errors.type}</p>
+            )}
           </div>
 
           <div>
@@ -238,14 +307,17 @@ export default function ContentForm({ initialData, onCancel }) {
               htmlFor='category'
               className='block text-sm font-medium text-gray-700 mb-1'
             >
-              Categoría
+              Categoría <span className='text-red-500'>*</span>
             </label>
             <select
               id='category'
               name='category'
               value={formData.category}
               onChange={handleChange}
-              className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300'
+              className={`w-full p-3 border ${
+                errors.category ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+              disabled={isSubmitting}
             >
               <option disabled>Categoría</option>
               {categoryOptions.map(option => (
@@ -254,6 +326,9 @@ export default function ContentForm({ initialData, onCancel }) {
                 </option>
               ))}
             </select>
+            {errors.category && (
+              <p className='text-red-500 text-sm mt-1'>{errors.category}</p>
+            )}
           </div>
         </div>
 
@@ -271,9 +346,15 @@ export default function ContentForm({ initialData, onCancel }) {
             rows={6}
             value={formData.content}
             onChange={handleChange}
-            className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300'
+            className={`w-full p-3 border ${
+              errors.content ? 'border-red-500' : 'border-gray-300'
+            } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
             placeholder='Ingresa el contenido o una descripción detallada'
+            disabled={isSubmitting}
           />
+          {errors.content && (
+            <p className='text-red-500 text-sm mt-1'>{errors.content}</p>
+          )}
         </div>
 
         {/* Subir archivo */}
@@ -353,6 +434,28 @@ export default function ContentForm({ initialData, onCancel }) {
             </div>
           </div>
 
+          {/* Vista previa de archivo */}
+          {formData.file && (
+            <div className='mt-2'>
+              <div className='flex items-center space-x-2 text-sm text-green-600'>
+                <svg
+                  className='h-5 w-5'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    d='M5 13l4 4L19 7'
+                  />
+                </svg>
+                <span>Archivo seleccionado: {formData.file.name}</span>
+              </div>
+            </div>
+          )}
+
           {/* Vista previa de video de YouTube */}
           {formData.youtubeId && (
             <div className='mt-4'>
@@ -426,6 +529,7 @@ export default function ContentForm({ initialData, onCancel }) {
               onClick={onCancel}
               variant='outline'
               className='h-12 px-6 border border-gray-300 rounded-lg hover:bg-gray-50'
+              disabled={isSubmitting}
             >
               Cancelar
             </Button>
@@ -434,8 +538,14 @@ export default function ContentForm({ initialData, onCancel }) {
               type='submit'
               variant='default'
               className='bg-purple-700 hover:bg-purple-800 h-12 px-6'
+              disabled={isSubmitting}
             >
-              {formData.status === 'Borrador' ? (
+              {isSubmitting ? (
+                <div className='flex items-center'>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Guardando...
+                </div>
+              ) : formData.status === 'Borrador' ? (
                 <>
                   <Bookmark className='mr-2 h-4 w-4' />
                   {isEditing ? 'Guardar como borrador' : 'Guardar borrador'}

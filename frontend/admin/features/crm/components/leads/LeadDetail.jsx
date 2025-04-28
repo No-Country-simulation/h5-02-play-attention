@@ -20,10 +20,12 @@ import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { Textarea } from '@/shared/ui/textarea';
+import { Input } from '@/shared/ui/input';
 import { leadStatusConfig } from '../../lib/config/ui-config';
 import { cn } from '@/shared/lib/utils';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { FaWhatsapp } from 'react-icons/fa';
+import { useUpdateLead } from '../../lib/hooks/useLeads';
 
 /**
  * Componente para mostrar el detalle de un lead
@@ -35,12 +37,32 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
   const [isSaving, setIsSaving] = useState(false);
   const [localNotes, setLocalNotes] = useState('');
 
-  // Inicializar notas locales cuando el lead cambia
+  // Estado para edición de información del lead
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [leadInfo, setLeadInfo] = useState({
+    email: '',
+    phone: '',
+    company: '',
+    position: '',
+    source: ''
+  });
+
+  // Inicializar el hook de mutación
+  const updateLeadMutation = useUpdateLead(lead?.id);
+
+  // Inicializar notas y datos locales cuando el lead cambia
   useEffect(() => {
     if (lead) {
       setLocalNotes(lead.notes || '');
+      setLeadInfo({
+        email: lead.email || '',
+        phone: lead.phone || '',
+        company: lead.company || '',
+        position: lead.position || '',
+        source: lead.source || ''
+      });
     }
-  }, [lead?.notes]);
+  }, [lead]);
 
   // Iniciar edición de notas
   const handleEditNotes = () => {
@@ -48,17 +70,33 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
     setEditingNotes(true);
   };
 
+  // Iniciar edición de información del lead
+  const handleEditInfo = () => {
+    setLeadInfo({
+      email: lead.email || '',
+      phone: lead.phone || '',
+      company: lead.company || '',
+      position: lead.position || '',
+      source: lead.source || ''
+    });
+    setEditingInfo(true);
+  };
+
   // Cancelar edición
   const handleCancelEdit = () => {
     setEditingNotes(false);
   };
 
+  // Cancelar edición de información
+  const handleCancelEditInfo = () => {
+    setEditingInfo(false);
+  };
+
   // Guardar notas
   const handleSaveNotes = async () => {
-    setIsSaving(true);
-
     // Mostrar toast de carga
     const toastId = toast.loading('Guardando notas...');
+    setIsSaving(true);
 
     try {
       // Mapear el estado del frontend al formato del backend
@@ -79,7 +117,7 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
         company: lead.company || '',
         service:
           lead.userType === 'persona'
-            ? 'Persona Individual'
+            ? 'Persona individual'
             : lead.userType === 'profesional'
             ? 'Profesional'
             : 'Empresa',
@@ -89,39 +127,11 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
         relation: lead.position || ''
       };
 
-      // Conectar directamente con el endpoint del backend
-      const response = await fetch(
-        `https://play-attention.onrender.com/api/leads/${lead.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(updateData)
-        }
-      );
-
-      if (!response.ok) {
-        let errorText = '';
-        try {
-          const errorResponse = await response.json();
-          errorText = JSON.stringify(errorResponse);
-        } catch (parseError) {
-          errorText = await response.text();
-        }
-        throw new Error(`Error ${response.status}: ${errorText}`);
-      }
-
-      const updatedLead = await response.json();
+      // Usar la mutación de React Query para actualizar
+      await updateLeadMutation.mutateAsync(updateData);
 
       // Actualizar notas localmente
       setLocalNotes(notesValue);
-
-      // Actualizar el lead en el componente padre si existe la función
-      if (onLeadUpdate) {
-        onLeadUpdate(updatedLead);
-      }
-
       setEditingNotes(false);
 
       // Actualizar toast a éxito
@@ -129,10 +139,85 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
         id: toastId,
         description: 'Los cambios se han guardado en el sistema'
       });
+
+      // Actualizar el lead en el componente padre si existe la función
+      if (onLeadUpdate) {
+        onLeadUpdate({ ...lead, notes: notesValue });
+      }
     } catch (error) {
       console.error('Error al actualizar notas:', error);
       // Actualizar toast a error
       toast.error('Error al guardar las notas', {
+        id: toastId,
+        description:
+          error.message || 'Ha ocurrido un error al procesar la solicitud'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Guardar información del lead
+  const handleSaveInfo = async () => {
+    // Mostrar toast de carga
+    const toastId = toast.loading('Guardando información...');
+    setIsSaving(true);
+
+    try {
+      // Mapear el estado del frontend al formato del backend
+      const statusMap = {
+        nuevo: 'Nuevo',
+        proceso: 'Activo',
+        cliente: 'Cliente'
+      };
+
+      // Asegurar que el estado sea uno de los valores aceptados por el backend
+      const backendStatus = statusMap[lead.status] || 'Nuevo';
+
+      // Preparar el payload con los campos necesarios para el backend
+      const updateData = {
+        fullname: lead.name || '',
+        email: leadInfo.email,
+        phone: leadInfo.phone,
+        company: leadInfo.company,
+        service:
+          lead.userType === 'persona'
+            ? 'Persona individual'
+            : lead.userType === 'profesional'
+            ? 'Profesional'
+            : 'Empresa',
+        notes: lead.notes || '',
+        status: backendStatus, // Debe ser Nuevo, Activo o Cliente
+        origen: leadInfo.source,
+        relation: leadInfo.position
+      };
+
+      // Usar la mutación de React Query para actualizar
+      await updateLeadMutation.mutateAsync(updateData);
+
+      setEditingInfo(false);
+
+      // Actualizar el lead en el componente padre si existe la función
+      if (onLeadUpdate) {
+        onLeadUpdate({
+          ...lead,
+          email: leadInfo.email,
+          phone: leadInfo.phone,
+          company: leadInfo.company,
+          position: leadInfo.position,
+          source: leadInfo.source
+        });
+      }
+
+      // Actualizar toast a éxito
+      toast.success('Información actualizada correctamente', {
+        id: toastId,
+        description: 'Los cambios se han guardado en el sistema'
+      });
+    } catch (error) {
+      console.error('Error al actualizar información:', error);
+      // Actualizar toast a error
+      toast.error('Error al guardar la información', {
         id: toastId,
         description:
           error.message || 'Ha ocurrido un error al procesar la solicitud'
@@ -196,9 +281,51 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
         <Card className='w-full h-full lg:col-span-2'>
           <CardHeader className='pt-4 pb-4 px-6 flex justify-between items-center border-b'>
             <CardTitle className='text-base'>Información de contacto</CardTitle>
-            <div>
-              <div className='text-xs text-muted-foreground'>Estado</div>
-              <div className='text-right'>{renderStatusBadge(lead.status)}</div>
+            <div className='flex items-center gap-2'>
+              <div>
+                <div className='text-xs text-muted-foreground'>Estado</div>
+                <div className='text-right'>
+                  {renderStatusBadge(lead.status)}
+                </div>
+              </div>
+              {!editingInfo ? (
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-8 w-8 text-muted-foreground hover:text-white'
+                  onClick={handleEditInfo}
+                >
+                  <Edit className='h-4 w-4' />
+                  <span className='sr-only'>Editar información</span>
+                </Button>
+              ) : (
+                <div className='flex gap-1'>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-8 w-8 text-muted-foreground hover:text-destructive'
+                    onClick={handleCancelEditInfo}
+                    disabled={isSaving}
+                  >
+                    <X className='h-4 w-4' />
+                    <span className='sr-only'>Cancelar</span>
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-8 w-8 text-muted-foreground hover:text-primary'
+                    onClick={handleSaveInfo}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <span className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                    ) : (
+                      <Save className='h-4 w-4' />
+                    )}
+                    <span className='sr-only'>Guardar</span>
+                  </Button>
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent className='p-0'>
@@ -208,70 +335,115 @@ export default function LeadDetail({ lead, isLoading, onLeadUpdate }) {
                 <div className='w-1/4 text-muted-foreground text-sm'>Email</div>
                 <div className='w-3/4 flex'>
                   <Mail className='h-4 w-4 mr-2 text-muted-foreground' />
-                  <span>{lead.email}</span>
+                  {editingInfo ? (
+                    <Input
+                      value={leadInfo.email}
+                      onChange={e =>
+                        setLeadInfo({ ...leadInfo, email: e.target.value })
+                      }
+                      className='h-8 px-2'
+                      disabled={isSaving}
+                    />
+                  ) : (
+                    <span>{lead.email}</span>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Teléfono */}
-            {lead.phone && (
-              <div className='border-b'>
-                <div className='flex py-4 px-6'>
-                  <div className='w-1/4 text-muted-foreground text-sm'>
-                    Teléfono
-                  </div>
-                  <div className='w-3/4 flex'>
-                    <Phone className='h-4 w-4 mr-2 text-muted-foreground' />
-                    <span>{lead.phone}</span>
-                  </div>
+            <div className='border-b'>
+              <div className='flex py-4 px-6'>
+                <div className='w-1/4 text-muted-foreground text-sm'>
+                  Teléfono
+                </div>
+                <div className='w-3/4 flex'>
+                  <Phone className='h-4 w-4 mr-2 text-muted-foreground' />
+                  {editingInfo ? (
+                    <Input
+                      value={leadInfo.phone}
+                      onChange={e =>
+                        setLeadInfo({ ...leadInfo, phone: e.target.value })
+                      }
+                      className='h-8 px-2'
+                      disabled={isSaving}
+                    />
+                  ) : (
+                    <span>{lead.phone || 'No disponible'}</span>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Empresa */}
-            {lead.company && (
-              <div className='border-b'>
-                <div className='flex py-4 px-6'>
-                  <div className='w-1/4 text-muted-foreground text-sm'>
-                    Empresa
-                  </div>
-                  <div className='w-3/4 flex'>
-                    <Building className='h-4 w-4 mr-2 text-muted-foreground' />
-                    <span>{lead.company}</span>
-                  </div>
+            <div className='border-b'>
+              <div className='flex py-4 px-6'>
+                <div className='w-1/4 text-muted-foreground text-sm'>
+                  Empresa
+                </div>
+                <div className='w-3/4 flex'>
+                  <Building className='h-4 w-4 mr-2 text-muted-foreground' />
+                  {editingInfo ? (
+                    <Input
+                      value={leadInfo.company}
+                      onChange={e =>
+                        setLeadInfo({ ...leadInfo, company: e.target.value })
+                      }
+                      className='h-8 px-2'
+                      disabled={isSaving}
+                    />
+                  ) : (
+                    <span>{lead.company || 'No disponible'}</span>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Cargo */}
-            {lead.position && (
-              <div className='border-b'>
-                <div className='flex py-4 px-6'>
-                  <div className='w-1/4 text-muted-foreground text-sm'>
-                    Cargo
-                  </div>
-                  <div className='w-3/4 flex'>
-                    <User className='h-4 w-4 mr-2 text-muted-foreground' />
-                    <span>{lead.position}</span>
-                  </div>
+            <div className='border-b'>
+              <div className='flex py-4 px-6'>
+                <div className='w-1/4 text-muted-foreground text-sm'>Cargo</div>
+                <div className='w-3/4 flex'>
+                  <User className='h-4 w-4 mr-2 text-muted-foreground' />
+                  {editingInfo ? (
+                    <Input
+                      value={leadInfo.position}
+                      onChange={e =>
+                        setLeadInfo({ ...leadInfo, position: e.target.value })
+                      }
+                      className='h-8 px-2'
+                      disabled={isSaving}
+                    />
+                  ) : (
+                    <span>{lead.position || 'No disponible'}</span>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Origen */}
-            {lead.source && (
-              <div className='border-b'>
-                <div className='flex py-4 px-6'>
-                  <div className='w-1/4 text-muted-foreground text-sm'>
-                    Origen
-                  </div>
-                  <div className='w-3/4 flex'>
-                    <User className='h-4 w-4 mr-2 text-muted-foreground' />
-                    <span>{lead.source}</span>
-                  </div>
+            <div className='border-b'>
+              <div className='flex py-4 px-6'>
+                <div className='w-1/4 text-muted-foreground text-sm'>
+                  Origen
+                </div>
+                <div className='w-3/4 flex'>
+                  <User className='h-4 w-4 mr-2 text-muted-foreground' />
+                  {editingInfo ? (
+                    <Input
+                      value={leadInfo.source}
+                      onChange={e =>
+                        setLeadInfo({ ...leadInfo, source: e.target.value })
+                      }
+                      className='h-8 px-2'
+                      disabled={isSaving}
+                    />
+                  ) : (
+                    <span>{lead.source || 'No disponible'}</span>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Fechas */}
             <div className='px-6 pt-4 pb-4'>

@@ -12,50 +12,7 @@ import {
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import DeleteConfirmationModal from '@/shared/ui/modals/DeleteConfirmationModal';
-
-// Datos de ejemplo para la demostración
-const MOCK_CONTENT = [
-  {
-    id: 1,
-    title: 'Guía de concentración',
-    type: 'Artículo',
-    category: 'Tutoriales',
-    date: '2023-10-15',
-    status: 'Publicado'
-  },
-  {
-    id: 2,
-    title: 'Técnicas de meditación',
-    type: 'Video',
-    category: 'Educativo',
-    date: '2023-11-01',
-    status: 'Publicado'
-  },
-  {
-    id: 3,
-    title: 'Presentación mindfulness',
-    type: 'Presentación',
-    category: 'Educativo',
-    date: '2023-11-10',
-    status: 'Borrador'
-  },
-  {
-    id: 4,
-    title: 'Guía TDAH para padres',
-    type: 'PDF',
-    category: 'Médico',
-    date: '2023-09-20',
-    status: 'Publicado'
-  },
-  {
-    id: 5,
-    title: 'Ejercicios de atención',
-    type: 'Artículo',
-    category: 'Tutoriales',
-    date: '2023-10-05',
-    status: 'Borrador'
-  }
-];
+import { useContents, useDeleteContent } from '../lib/hooks';
 
 /**
  * Componente para listar contenido con opciones CRUD
@@ -65,10 +22,17 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [contentToDelete, setContentToDelete] = useState(null);
 
+  // Obtener contenidos desde la API
+  const { data: contents = [], isLoading, error } = useContents();
+  const deleteMutation = useDeleteContent();
+
   // Función para filtrar contenido con todos los criterios
-  const filteredContent = MOCK_CONTENT.filter(item => {
+  const filteredContent = contents.filter(item => {
     // Filtrar por tipo de contenido (selector superior)
-    if (contentType !== 'all' && item.type.toLowerCase() !== contentType) {
+    if (
+      contentType !== 'all' &&
+      item.type.toLowerCase() !== contentType.toLowerCase()
+    ) {
       return false;
     }
 
@@ -112,12 +76,29 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
   };
 
   // Función para confirmar eliminación
-  const confirmDelete = () => {
-    // Lógica para eliminar el contenido
-    console.log('Eliminando contenido:', contentToDelete);
-    setDeleteModalOpen(false);
-    setContentToDelete(null);
+  const confirmDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(contentToDelete.id);
+      setDeleteModalOpen(false);
+      setContentToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+    }
   };
+
+  // Mostrar estado de carga
+  if (isLoading) {
+    return <div className='text-center py-10'>Cargando contenidos...</div>;
+  }
+
+  // Mostrar error si ocurre
+  if (error) {
+    return (
+      <div className='text-center py-10 text-red-500'>
+        Error al cargar contenidos: {error.message}
+      </div>
+    );
+  }
 
   return (
     <div className='mt-4'>

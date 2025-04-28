@@ -20,7 +20,7 @@ import {
  */
 export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    name: '',
+    fullname: '',
     email: '',
     role: 'Usuario',
     service: 'Individuo',
@@ -57,8 +57,8 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
+    if (!formData.fullname || !formData.fullname.trim()) {
+      newErrors.fullname = 'El nombre es requerido';
     }
 
     if (!formData.email.trim()) {
@@ -88,9 +88,9 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
       setIsSubmitting(true);
       try {
         await onSubmit(formData);
-        // Resetear formulario
+        // Resetear formulario solo en caso de éxito
         setFormData({
-          name: '',
+          fullname: '',
           email: '',
           role: 'Usuario',
           service: 'Individuo',
@@ -107,6 +107,7 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
             email: 'Este email ya está registrado en el sistema'
           });
         }
+        // No resetear el formulario en caso de error
       } finally {
         setIsSubmitting(false);
       }
@@ -115,7 +116,7 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
 
   const resetForm = () => {
     setFormData({
-      name: '',
+      fullname: '',
       email: '',
       role: 'Usuario',
       service: 'Individuo',
@@ -152,23 +153,25 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                     <div className='space-y-4'>
                       <div>
                         <Label
-                          htmlFor='name'
+                          htmlFor='fullname'
                           className='block text-sm font-medium text-gray-700'
                         >
                           Nombre
                         </Label>
                         <Input
-                          id='name'
+                          id='fullname'
                           type='text'
                           className={`mt-1 ${
-                            errors.name ? 'border-red-500' : ''
+                            errors.fullname ? 'border-red-500' : ''
                           }`}
-                          value={formData.name}
-                          onChange={e => handleChange('name', e.target.value)}
+                          value={formData.fullname}
+                          onChange={e =>
+                            handleChange('fullname', e.target.value)
+                          }
                         />
-                        {errors.name && (
+                        {errors.fullname && (
                           <p className='mt-1 text-xs text-red-500'>
-                            {errors.name}
+                            {errors.fullname}
                           </p>
                         )}
                       </div>
@@ -201,56 +204,67 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                           </p>
                         )}
                       </div>
-                      <div>
-                        <Label
-                          htmlFor='role'
-                          className='block text-sm font-medium text-gray-700'
-                        >
-                          Rol
-                        </Label>
-                        <Select
-                          value={formData.role}
-                          onValueChange={value => handleChange('role', value)}
-                        >
-                          <SelectTrigger id='role' className='w-full'>
-                            <SelectValue placeholder='Seleccionar rol' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='Usuario'>Usuario</SelectItem>
-                            <SelectItem value='Comercial'>Comercial</SelectItem>
-                            <SelectItem value='Admin'>Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className='mt-1 text-xs text-gray-500'>
-                          El rol determina qué acciones puede realizar el
-                          usuario. Los permisos específicos se configuran en la
-                          sección "Permisos y Roles".
-                        </p>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor='service'
-                          className='block text-sm font-medium text-gray-700'
-                        >
-                          Tipo de Servicio
-                        </Label>
-                        <Select
-                          value={formData.service}
-                          onValueChange={value =>
-                            handleChange('service', value)
-                          }
-                        >
-                          <SelectTrigger id='service' className='w-full'>
-                            <SelectValue placeholder='Seleccionar servicio' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='Individuo'>Individuo</SelectItem>
-                            <SelectItem value='Empresa'>Empresa</SelectItem>
-                            <SelectItem value='Profesional'>
-                              Profesional
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className='grid grid-cols-2 gap-4'>
+                        <div>
+                          <Label
+                            htmlFor='role'
+                            className='block text-sm font-medium text-gray-700'
+                          >
+                            Rol del usuario
+                          </Label>
+                          <Select
+                            value={formData.role}
+                            onValueChange={value => handleChange('role', value)}
+                          >
+                            <SelectTrigger
+                              className='w-full mt-1'
+                              id='role'
+                              aria-label='Selecciona el rol'
+                            >
+                              <SelectValue placeholder='Selecciona rol' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='Administrador'>
+                                Administrador
+                              </SelectItem>
+                              <SelectItem value='Comercial'>
+                                Comercial
+                              </SelectItem>
+                              <SelectItem value='Usuario'>Usuario</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label
+                            htmlFor='service'
+                            className='block text-sm font-medium text-gray-700'
+                          >
+                            Servicio
+                          </Label>
+                          <Select
+                            value={formData.service}
+                            onValueChange={value =>
+                              handleChange('service', value)
+                            }
+                          >
+                            <SelectTrigger
+                              className='w-full mt-1'
+                              id='service'
+                              aria-label='Selecciona el servicio'
+                            >
+                              <SelectValue placeholder='Selecciona servicio' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='Individuo'>
+                                Individuo
+                              </SelectItem>
+                              <SelectItem value='Empresa'>Empresa</SelectItem>
+                              <SelectItem value='Profesional'>
+                                Profesional
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       <div>
                         <Label
@@ -259,11 +273,11 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                         >
                           Contraseña
                         </Label>
-                        <div className='relative'>
+                        <div className='relative mt-1'>
                           <Input
                             id='password'
                             type={showPassword ? 'text' : 'password'}
-                            className={`mt-1 pr-10 ${
+                            className={`pr-10 ${
                               errors.password ? 'border-red-500' : ''
                             }`}
                             value={formData.password}
@@ -273,13 +287,13 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                           />
                           <button
                             type='button'
-                            className='absolute inset-y-0 right-0 mt-1 pr-3 flex items-center text-gray-400 hover:text-gray-500'
+                            className='absolute inset-y-0 right-0 pr-3 flex items-center'
                             onClick={() => setShowPassword(!showPassword)}
                           >
                             {showPassword ? (
-                              <EyeOff className='h-5 w-5' />
+                              <EyeOff className='h-5 w-5 text-gray-400' />
                             ) : (
-                              <Eye className='h-5 w-5' />
+                              <Eye className='h-5 w-5 text-gray-400' />
                             )}
                           </button>
                         </div>
@@ -296,11 +310,11 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                         >
                           Confirmar contraseña
                         </Label>
-                        <div className='relative'>
+                        <div className='relative mt-1'>
                           <Input
                             id='confirmPassword'
                             type={showConfirmPassword ? 'text' : 'password'}
-                            className={`mt-1 pr-10 ${
+                            className={`pr-10 ${
                               errors.confirmPassword ? 'border-red-500' : ''
                             }`}
                             value={formData.confirmPassword}
@@ -310,15 +324,15 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                           />
                           <button
                             type='button'
-                            className='absolute inset-y-0 right-0 mt-1 pr-3 flex items-center text-gray-400 hover:text-gray-500'
+                            className='absolute inset-y-0 right-0 pr-3 flex items-center'
                             onClick={() =>
                               setShowConfirmPassword(!showConfirmPassword)
                             }
                           >
                             {showConfirmPassword ? (
-                              <EyeOff className='h-5 w-5' />
+                              <EyeOff className='h-5 w-5 text-gray-400' />
                             ) : (
-                              <Eye className='h-5 w-5' />
+                              <Eye className='h-5 w-5 text-gray-400' />
                             )}
                           </button>
                         </div>
@@ -336,14 +350,15 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
             <div className='bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse'>
               <Button
                 type='submit'
-                className='w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm'
+                className='w-full sm:ml-3 sm:w-auto'
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Creando...' : 'Crear'}
+                {isSubmitting ? 'Creando...' : 'Crear usuario'}
               </Button>
               <Button
                 type='button'
-                className='mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'
+                variant='outline'
+                className='mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto'
                 onClick={resetForm}
                 disabled={isSubmitting}
               >

@@ -43,8 +43,7 @@ export default function LeadContactHistory({ leadId, onAddContact }) {
   // Adaptamos los datos de la API al formato esperado por el componente
   const contactHistory = apiEngagementsListAdapter(engagements);
 
-  console.log('API Response - Engagements:', engagements);
-  console.log('Formatted Contact History:', contactHistory);
+
 
   // Formatear la fecha
   const formatDate = date => {

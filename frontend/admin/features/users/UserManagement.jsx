@@ -2,16 +2,16 @@
 
 import PageHeader from '@/shared/ui/page-header';
 import { getPageMetadata } from '@/shared/lib/utils/page-metadata';
-import UserStats from './components/UserStats';
-import UserCreateModal from './components/UserCreateModal';
-import UserEditModal from './components/UserEditModal';
+import UserStats from './components/stats/UserStats';
+import UserCreateModal from './components/modals/UserCreateModal';
+import UserEditModal from './components/modals/UserEditModal';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 import { useUserManagement } from './lib/hooks';
-import UserTable from './components/UserTable';
-import GroupedUsersView from './components/GroupedUsersView';
-import UserToolbar from './components/UserToolbar';
-import UserStatusFilters from './components/UserStatusFilters';
-import UserPagination from './components/UserPagination';
+import UserTable from './components/table/UserTable';
+import GroupedUsersView from './components/views/GroupedUsersView';
+import UserToolbar from './components/toolbar/UserToolbar';
+import UserStatusFilters from './components/filters/UserStatusFilters';
+import UserPagination from './components/table/UserPagination';
 
 /**
  * Componente principal de gestión de usuarios

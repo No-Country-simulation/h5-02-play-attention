@@ -14,8 +14,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/shared/ui/select';
-import { ROLES_USUARIO, ESTADOS_USUARIO } from '../lib/hooks';
 import { useState } from 'react';
+import { ESTADOS_USUARIO, ROLES_USUARIO } from '../../lib/hooks';
 
 /**
  * Componente de tabla de usuarios
