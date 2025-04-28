@@ -13,18 +13,21 @@ export const commonHeaders = {
 };
 
 /**
- * Mapea el tipo de contenido del frontend al formato esperado por el backend
+ * Mapea el tipo de contenido del frontend al formato esperado por el backend (siempre en minúsculas)
  * @param {string} type - Tipo de contenido en el frontend
- * @returns {string} - Tipo de contenido para el backend
+ * @returns {string} - Tipo de contenido para el backend en minúsculas
  */
 export function mapContentTypeToBackend(type) {
   const typeMap = {
-    Artículo: 'article',
+    Artículo: 'texto',
     Video: 'video',
     PDF: 'pdf',
-    Presentación: 'presentation'
+    Imagen: 'image',
+    Presentación: 'otros'
   };
-  return typeMap[type] || 'article';
+
+  // Si existe en el mapeo, usar ese valor, sino convertir a minúsculas y usar como fallback
+  return typeMap[type] || type.toLowerCase();
 }
 
 /**
@@ -33,13 +36,18 @@ export function mapContentTypeToBackend(type) {
  * @returns {string} - Tipo de contenido para el frontend
  */
 export function mapContentTypeToFrontend(type) {
+  if (!type) return 'Artículo';
+
   const typeMap = {
-    article: 'Artículo',
+    texto: 'Artículo',
     video: 'Video',
     pdf: 'PDF',
-    presentation: 'Presentación'
+    image: 'Imagen',
+    imagen: 'Imagen',
+    otros: 'Presentación'
   };
-  return typeMap[type] || 'Artículo';
+
+  return typeMap[type.toLowerCase()] || 'Artículo';
 }
 
 /**

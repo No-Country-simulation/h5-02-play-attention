@@ -20,7 +20,11 @@ import {
   DialogFooter,
   DialogClose
 } from '@/shared/ui/dialog';
-import { useCreateContent, useUpdateContent } from '../lib/hooks';
+import {
+  useCreateContent,
+  useUpdateContent,
+  useCategories
+} from '../lib/hooks';
 
 /**
  * Componente para crear y editar contenido
@@ -34,6 +38,10 @@ export default function ContentForm({ initialData, onCancel }) {
   const createMutation = useCreateContent();
   const updateMutation = isEditing ? useUpdateContent(initialData.id) : null;
 
+  // Obtener categorías desde el backend
+  const { data: categories = [], isLoading: loadingCategories } =
+    useCategories();
+
   // Estado para controlar envío
   const isSubmitting =
     createMutation.isPending || updateMutation?.isPending || false;
@@ -42,7 +50,8 @@ export default function ContentForm({ initialData, onCancel }) {
   const [formData, setFormData] = useState({
     title: '',
     type: 'Artículo',
-    category: 'Tutoriales',
+    category: '', // Ahora será el ID de la categoría
+    categoryId: '', // Añadimos categoryId para almacenar el ID
     content: '',
     status: 'Borrador',
     file: null,
@@ -64,18 +73,79 @@ export default function ContentForm({ initialData, onCancel }) {
     if (initialData) {
       setFormData({
         ...initialData,
+        // Asegurar que se mantenga el ID de la categoría si ya existe
+        categoryId: initialData.categoryId || '',
         file: null // Siempre reiniciamos el archivo
       });
     }
   }, [initialData]);
 
+  // Cuando se cargan las categorías y estamos editando, necesitamos establecer la categoría correcta
+  useEffect(() => {
+    // Si tenemos categorías y estamos editando, intentamos encontrar la categoría por nombre
+    if (categories.length > 0 && initialData && initialData.category) {
+      // Intentar encontrar por ID primero si está disponible
+      if (initialData.categoryId) {
+        const foundCategory = categories.find(
+          cat => cat.id === initialData.categoryId
+        );
+        if (foundCategory) {
+          setFormData(prev => ({
+            ...prev,
+            categoryId: foundCategory.id,
+            category: foundCategory.name
+          }));
+          return;
+        }
+      }
+
+      // Si no hay ID o no se encontró por ID, intentar buscar por nombre
+      const foundCategory = categories.find(
+        cat => cat.name.toLowerCase() === initialData.category.toLowerCase()
+      );
+
+      if (foundCategory) {
+        setFormData(prev => ({
+          ...prev,
+          categoryId: foundCategory.id,
+          category: foundCategory.name
+        }));
+      } else if (categories.length > 0) {
+        // Si no se encuentra, seleccionar la primera categoría disponible
+        setFormData(prev => ({
+          ...prev,
+          categoryId: categories[0].id,
+          category: categories[0].name
+        }));
+      }
+    } else if (categories.length > 0 && !formData.categoryId) {
+      // Si no estamos editando y hay categorías, seleccionar la primera por defecto
+      setFormData(prev => ({
+        ...prev,
+        categoryId: categories[0].id,
+        category: categories[0].name
+      }));
+    }
+  }, [categories, initialData]);
+
   // Manejar cambios en los campos del formulario
   const handleChange = e => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    // Caso especial para el cambio de categoría
+    if (name === 'categoryId') {
+      const selectedCategory = categories.find(cat => cat.id === value);
+      setFormData(prev => ({
+        ...prev,
+        categoryId: value,
+        category: selectedCategory ? selectedCategory.name : prev.category
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   // Manejar cambios en el archivo
@@ -175,8 +245,7 @@ export default function ContentForm({ initialData, onCancel }) {
   };
 
   // Opciones disponibles para el formulario
-  const typeOptions = ['Artículo', 'Video', 'PDF', 'Presentación'];
-  const categoryOptions = ['Tutoriales', 'Educativo', 'Médico', 'Otro'];
+  const typeOptions = ['Artículo', 'Video', 'PDF', 'Imagen', 'Presentación'];
   const statusOptions = ['Borrador', 'Publicado'];
 
   // Función para validar el formulario antes de enviar
@@ -196,7 +265,7 @@ export default function ContentForm({ initialData, onCancel }) {
       newErrors.type = 'El tipo de recurso es obligatorio';
     }
 
-    if (!formData.category) {
+    if (!formData.categoryId) {
       newErrors.category = 'La categoría es obligatoria';
     }
 
@@ -217,11 +286,18 @@ export default function ContentForm({ initialData, onCancel }) {
       return;
     }
 
+    // Crear el objeto de datos para enviar al backend
+    const contentData = {
+      ...formData,
+      // Asegurarse de que se envíe el ID de la categoría en lugar del nombre
+      category: formData.categoryId
+    };
+
     try {
       if (isEditing) {
-        await updateMutation.mutateAsync(formData);
+        await updateMutation.mutateAsync(contentData);
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(contentData);
       }
 
       // Después de guardar, volvemos a la lista
@@ -302,32 +378,52 @@ export default function ContentForm({ initialData, onCancel }) {
             )}
           </div>
 
+          {/* Selector de categorías */}
           <div>
             <label
-              htmlFor='category'
+              htmlFor='categoryId'
               className='block text-sm font-medium text-gray-700 mb-1'
             >
               Categoría <span className='text-red-500'>*</span>
             </label>
-            <select
-              id='category'
-              name='category'
-              value={formData.category}
-              onChange={handleChange}
-              className={`w-full p-3 border ${
-                errors.category ? 'border-red-500' : 'border-gray-300'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
-              disabled={isSubmitting}
-            >
-              <option disabled>Categoría</option>
-              {categoryOptions.map(option => (
-                <option key={option} value={option}>
-                  {option}
+            {loadingCategories ? (
+              <div className='flex items-center text-sm text-gray-500'>
+                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                Cargando categorías...
+              </div>
+            ) : (
+              <select
+                id='categoryId'
+                name='categoryId'
+                value={formData.categoryId}
+                onChange={handleChange}
+                className={`w-full p-3 border ${
+                  errors.category ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+                disabled={isSubmitting}
+              >
+                <option disabled value=''>
+                  Selecciona una categoría
                 </option>
-              ))}
-            </select>
+                {categories.length > 0 ? (
+                  categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No hay categorías disponibles</option>
+                )}
+              </select>
+            )}
             {errors.category && (
               <p className='text-red-500 text-sm mt-1'>{errors.category}</p>
+            )}
+            {categories.length === 0 && !loadingCategories && (
+              <p className='text-amber-500 text-sm mt-1'>
+                No hay categorías disponibles. Por favor, crea una categoría
+                primero.
+              </p>
             )}
           </div>
         </div>
