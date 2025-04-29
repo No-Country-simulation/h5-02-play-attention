@@ -1,108 +1,94 @@
 "use client";
-
-import { Facebook, Instagram, Linkedin } from "lucide-react";
+import Link from "next/link";
+import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
 
 export function Footer() {
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
-    <footer className="w-full border-t border-gray-200 bg-black text-white py-10 px-4 lg:px-20">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Columna 1: Logo + descripción + redes */}
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-bold text-white">Play Attention</h2>
-          <p className="text-sm text-gray-300">
-            Tecnología de neurofeedback para mejorar la atención, la memoria y
-            el control impulsivo.
-          </p>
-          <div className="mt-4">
-            <div className="flex gap-4 mt-2">
-              {/* <a
-                href="https://www.facebook.com/playattention"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="icon"
-                  className="rounded-full cursor-pointer"                  
-                >
-                  <Facebook className="h-4 w-4" />
-                </Button>
-              </a> */}
-              <a
-                href="https://www.instagram.com/dislexiayconducta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="icon"
-                  className="rounded-full cursor-pointer"                  
-                >
-                  <Instagram className="h-4 w-4" />
-                </Button>
-              </a>
-             {/*  <a
-                href="https://www.linkedin.com/company/playattention"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="icon"
-                  className="rounded-full cursor-pointer"                  
-                >
-                  <Linkedin className="h-4 w-4" />
-                </Button>
-              </a> */}
-            </div>
+    <footer className="w-full bg-neutral-white-500 py-4 px-4 lg:px-20">
+      <div className="container mx-auto flex flex-col items-center justify-between md:flex-row">
+        {/* Logo */}
+        <div className="mb-4 md:mb-0">
+          <img src="/logo-deeper-v2.png" alt="Logo" className="h-8 w-auto" />
+        </div>
+
+        {/* Copyright */}
+        <div className="flex mb-4 text-center text-sm text-secondary-800 md:mb-0 space-x-4">
+          <div className="flex h-5 items-center space-x-2 text-sm">
+            <div>Copyright © {new Date().getFullYear()} Play Attetion</div>
+            <Separator orientation="vertical" />
+            <div>All Rights Reserved</div>
           </div>
         </div>
 
-        {/* Columna 2: Navegación */}
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={() => scrollToSection("hero")}
-            className="text-left text-sm text-gray-300 hover:text-gray-100 transition"
+        {/* Social Media Icons */}
+        <div className="flex space-x-2">
+          <Button
+            size="icon"
+            className="bg-secondary-800"
+            asChild
+            aria-label="Facebook"
           >
-            Inicio
-          </button>
-          <button
-            onClick={() => scrollToSection("demo-videos")}
-            className="text-left text-sm text-gray-300 hover:text-gray-100 transition"
+            <Link
+              href="https://www.facebook.com/profile.php?id=100063829610982"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Facebook
+                className="h-5 w-5 text-neutral-white-100"
+                fill="white"
+              />
+            </Link>
+          </Button>
+          {/* <Button
+            size="icon"
+            className="bg-secondary-800"
+            asChild
+            aria-label="Twitter"
           >
-            Beneficios
-          </button>
-          <button
-            onClick={() => scrollToSection("audience-segmentation")}
-            className="text-left text-sm text-gray-300 hover:text-gray-100 transition"
+            <Link href="#" target="_blank" rel="noopener noreferrer">
+              <Twitter
+                className="h-5 w-5 text-neutral-white-100"
+                fill="white"
+              />
+            </Link>
+          </Button> */}
+          <Button
+            size="icon"
+            className="bg-secondary-800"
+            asChild
+            aria-label="Instagram"
           >
-            Soluciones
-          </button>
-          <button
-            onClick={() => scrollToSection("contact")}
-            className="text-left text-sm text-gray-300 hover:text-gray-100  transition"
+            <Link
+              href="https://www.instagram.com/dislexiayconducta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Instagram className="h-5 w-5 text-neutral-white-100" />
+            </Link>
+          </Button>
+          {/* <Button
+            size="icon"
+            className="bg-secondary-800"
+            asChild
+            aria-label="LinkedIn"
           >
-            Contacto
-          </button>
+            <Link href="#" target="_blank" rel="noopener noreferrer">
+              <Linkedin className="h-5 w-5 text-neutral-white-100" fill="white"/>
+            </Link>
+          </Button> */}
+          {/* <Button
+            size="icon"
+            className="bg-secondary-800"
+            asChild
+            aria-label="YouTube"
+          >
+            <Link href="#" target="_blank" rel="noopener noreferrer">
+              <Youtube className="h-5 w-5 text-neutral-white-100" />
+            </Link>
+          </Button> */}
         </div>
-
-        {/* Columna 3: Contacto */}
-        <div className="flex flex-col gap-2 text-sm text-gray-300">
-          <span className="font-semibold text-gray-300">Contáctanos</span>
-          <p>Office Park - Km 42.5, Buenos Aires, Argentina 3324</p>
-          <p>+123 456 7890</p>
-          <p>contacto@playattention.com</p>
-        </div>
-      </div>
-
-      <div className="mt-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Play Attention. Todos los derechos
-        reservados.
       </div>
     </footer>
   );
