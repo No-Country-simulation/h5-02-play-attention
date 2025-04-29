@@ -8,7 +8,7 @@ export interface IEngagementsRepository {
   findEngagementsByLeadId(
     leadId: string,
     take?: number,
-    cursor?: number,
+    page?: number,
   ): Promise<Engagements[]>;
   countEngagementsById(leadId: string): Promise<number>;
   findEngagement(id: string): Promise<Engagements>;
