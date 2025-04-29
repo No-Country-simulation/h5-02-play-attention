@@ -70,13 +70,13 @@ export function Navbar() {
           <img
             src="/logo.svg"
             alt="Logo"
-            className="h-8 w-auto block lg:hidden xl:block"
+            className="h-10 w-auto block lg:hidden xl:block"
           />
 
           <img
             src="/logo-dipper.svg"
             alt="Logo"
-            className="h-8 w-auto hidden lg:block xl:hidden"
+            className="h-10 w-auto hidden lg:block xl:hidden"
           />
         </button>
 
