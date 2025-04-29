@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ContentList from './components/ContentList';
 import ContentForm from './components/ContentForm';
@@ -13,12 +13,8 @@ import { Plus, FileText, Tag } from 'lucide-react';
 import PageHeader from '@/shared/ui/page-header';
 import { getPageMetadata } from '@/shared/lib/utils/page-metadata';
 
-/**
- * Componente principal para la gestión de contenido
- * Sigue el principio de Responsabilidad Única (SRP) y Abierto/Cerrado (OCP)
- * permitiendo extensiones futuras sin modificar el componente existente
- */
-export default function ContentManager() {
+// Componente interno que utiliza useSearchParams
+function ContentManagerInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -146,5 +142,21 @@ export default function ContentManager() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+/**
+ * Componente principal para la gestión de contenido
+ * Sigue el principio de Responsabilidad Única (SRP) y Abierto/Cerrado (OCP)
+ * permitiendo extensiones futuras sin modificar el componente existente
+ */
+export default function ContentManager() {
+  // Envolver en Suspense para manejar el uso de useSearchParams
+  return (
+    <Suspense
+      fallback={<div className='p-6'>Cargando gestor de contenido...</div>}
+    >
+      <ContentManagerInner />
+    </Suspense>
   );
 }
