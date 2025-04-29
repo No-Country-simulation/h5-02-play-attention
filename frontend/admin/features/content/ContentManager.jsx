@@ -23,7 +23,7 @@ export default function ContentManager() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'content');
-  
+
   const [isCreating, setIsCreating] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentType, setContentType] = useState('all');
@@ -35,7 +35,7 @@ export default function ContentManager() {
   const { title, description } = getPageMetadata('content');
 
   // Función para cambiar de pestaña y actualizar la URL
-  const handleTabChange = (value) => {
+  const handleTabChange = value => {
     setActiveTab(value);
     router.push(`/content?tab=${value}`, { scroll: false });
   };
@@ -71,22 +71,28 @@ export default function ContentManager() {
 
     // Pestaña de contenido
     if (isCreating) {
-      return <ContentForm initialData={selectedContent} onCancel={handleCancel} />;
+      return (
+        <ContentForm initialData={selectedContent} onCancel={handleCancel} />
+      );
     }
 
     // Listado de contenido
     return (
       <>
-        <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6'>
-          <ContentTypeSelector
-            selectedType={contentType}
-            onTypeChange={setContentType}
-          />
+        <div className='flex flex-col gap-4 mb-6'>
+          <div className='w-full'>
+            <ContentTypeSelector
+              selectedType={contentType}
+              onTypeChange={setContentType}
+            />
+          </div>
 
-          <Button onClick={handleCreateContent}>
-            <Plus className='mr-2 h-4 w-4' />
-            Nuevo Contenido
-          </Button>
+          <div className='w-full flex justify-end'>
+            <Button onClick={handleCreateContent} className='w-full lg:w-auto'>
+              <Plus className='mr-2 h-4 w-4' />
+              Nuevo Contenido
+            </Button>
+          </div>
         </div>
 
         <ContentFilters onFiltersChange={handleFiltersChange} />

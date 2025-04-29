@@ -371,8 +371,8 @@ export default function ContentForm({ initialData, onCancel }) {
           )}
         </div>
 
-        {/* Tipo y Categoría (fila) */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        {/* Tipo y Categoría (siempre en columna en móvil y tablet, en fila en desktop) */}
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
           <div>
             <label
               htmlFor='type'
@@ -385,7 +385,7 @@ export default function ContentForm({ initialData, onCancel }) {
               name='type'
               value={formData.type}
               onChange={handleChange}
-              className={`w-full p-3 border ${
+              className={`w-full p-3 h-12 border ${
                 errors.type ? 'border-red-500' : 'border-gray-300'
               } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
               disabled={isSubmitting}
@@ -421,7 +421,7 @@ export default function ContentForm({ initialData, onCancel }) {
                 name='categoryId'
                 value={formData.categoryId}
                 onChange={handleChange}
-                className={`w-full p-3 border ${
+                className={`w-full p-3 h-12 border ${
                   errors.category ? 'border-red-500' : 'border-gray-300'
                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
                 disabled={isSubmitting}
@@ -662,8 +662,8 @@ export default function ContentForm({ initialData, onCancel }) {
         </div>
 
         {/* Estado y botones de acción */}
-        <div className='flex flex-col sm:flex-row justify-between items-center pt-4 border-t'>
-          <div>
+        <div className='flex flex-col pt-4 border-t'>
+          <div className='mb-4 w-full'>
             <label
               htmlFor='status'
               className='block text-sm font-medium text-gray-700 mb-1'
@@ -675,7 +675,7 @@ export default function ContentForm({ initialData, onCancel }) {
               name='status'
               value={formData.status}
               onChange={handleChange}
-              className='h-12 w-full sm:w-56 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 appearance-none bg-white bg-no-repeat'
+              className='h-12 w-full px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 appearance-none bg-white bg-no-repeat'
               style={{
                 backgroundImage:
                   "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
@@ -692,12 +692,12 @@ export default function ContentForm({ initialData, onCancel }) {
             </select>
           </div>
 
-          <div className='flex gap-4 mt-4 sm:mt-0'>
+          <div className='grid grid-cols-2 gap-3'>
             <Button
               type='button'
               onClick={onCancel}
               variant='outline'
-              className='h-12 px-6 border border-gray-300 rounded-lg hover:bg-gray-50'
+              className='h-12 border border-gray-300 rounded-lg hover:bg-gray-50'
               disabled={isSubmitting}
             >
               Cancelar
@@ -706,7 +706,7 @@ export default function ContentForm({ initialData, onCancel }) {
             <Button
               type='submit'
               variant='default'
-              className='bg-purple-700 hover:bg-purple-800 h-12 px-6'
+              className='bg-purple-700 hover:bg-purple-800 h-12'
               disabled={isSubmitting}
             >
               {isSubmitting ? (
