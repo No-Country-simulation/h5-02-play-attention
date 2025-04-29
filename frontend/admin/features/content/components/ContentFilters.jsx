@@ -3,6 +3,7 @@
 import { Search, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
+import { useCategories } from '../lib/hooks';
 
 /**
  * Componente de filtros para la búsqueda y filtrado de contenido
@@ -18,8 +19,15 @@ export default function ContentFilters({ onFiltersChange }) {
   const categoryRef = useRef(null);
   const statusRef = useRef(null);
 
-  // Categorías disponibles para filtrar
-  const categories = ['Todos', 'Tutoriales', 'Educativo', 'Médico'];
+  // Obtener categorías desde la API
+  const { data: categoriesData = [], isLoading: loadingCategories } =
+    useCategories();
+
+  // Preparar categorías para el dropdown
+  const categories = [
+    'Todos',
+    ...categoriesData.map(category => category.name)
+  ];
 
   // Estados disponibles para filtrar
   const statuses = ['Todos', 'Publicado', 'Borrador'];
@@ -96,19 +104,25 @@ export default function ContentFilters({ onFiltersChange }) {
 
             {categoryOpen && (
               <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg'>
-                {categories.map(category => (
-                  <div
-                    key={category}
-                    className={`px-3 py-2 cursor-pointer hover:bg-purple-100 ${
-                      selectedCategory === category
-                        ? 'bg-purple-100 text-purple-800'
-                        : ''
-                    }`}
-                    onClick={() => handleCategoryChange(category)}
-                  >
-                    {category}
+                {loadingCategories ? (
+                  <div className='px-3 py-2 text-center text-gray-500'>
+                    Cargando categorías...
                   </div>
-                ))}
+                ) : (
+                  categories.map(category => (
+                    <div
+                      key={category}
+                      className={`px-3 py-2 cursor-pointer hover:bg-purple-100 ${
+                        selectedCategory === category
+                          ? 'bg-purple-100 text-purple-800'
+                          : ''
+                      }`}
+                      onClick={() => handleCategoryChange(category)}
+                    >
+                      {category}
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>

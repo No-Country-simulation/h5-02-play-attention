@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
 import {
   ArrowLeft,
@@ -55,7 +55,8 @@ export default function ContentForm({ initialData, onCancel }) {
     content: '',
     status: 'Borrador',
     file: null,
-    youtubeId: null
+    youtubeId: null,
+    url: null
   });
 
   // Estados para los modales
@@ -67,6 +68,25 @@ export default function ContentForm({ initialData, onCancel }) {
 
   // Validación del formulario
   const [errors, setErrors] = useState({});
+
+  // Referencias para los objetos URL creados
+  const objectURLs = useRef([]);
+
+  // Limpiar los objectURLs cuando el componente se desmonte
+  useEffect(() => {
+    return () => {
+      // Limpiar cualquier URL creada
+      objectURLs.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  // Función para crear y registrar una nueva URL para objetos
+  const createObjectURL = file => {
+    if (!file) return '';
+    const url = URL.createObjectURL(file);
+    objectURLs.current.push(url);
+    return url;
+  };
 
   // Si estamos editando, cargamos la información inicial
   useEffect(() => {
@@ -101,7 +121,11 @@ export default function ContentForm({ initialData, onCancel }) {
 
       // Si no hay ID o no se encontró por ID, intentar buscar por nombre
       const foundCategory = categories.find(
-        cat => cat.name.toLowerCase() === initialData.category.toLowerCase()
+        cat =>
+          cat.name.toLowerCase() ===
+          (typeof initialData.category === 'string'
+            ? initialData.category.toLowerCase()
+            : initialData.category?.name?.toLowerCase() || '')
       );
 
       if (foundCategory) {
@@ -183,8 +207,8 @@ export default function ContentForm({ initialData, onCancel }) {
         setFormData(prev => ({
           ...prev,
           type: 'Video',
-          content: `${prev.content}\n\nVideo de YouTube: ${tempYoutubeUrl}`,
-          youtubeId: videoId
+          youtubeId: videoId,
+          url: tempYoutubeUrl // Guardamos la URL completa
         }));
         setYoutubeModalOpen(false);
       } else {
@@ -289,7 +313,7 @@ export default function ContentForm({ initialData, onCancel }) {
     // Crear el objeto de datos para enviar al backend
     const contentData = {
       ...formData,
-      // Asegurarse de que se envíe el ID de la categoría en lugar del nombre
+      description: formData.content, // Mapear content a description
       category: formData.categoryId
     };
 
@@ -549,6 +573,49 @@ export default function ContentForm({ initialData, onCancel }) {
                 </svg>
                 <span>Archivo seleccionado: {formData.file.name}</span>
               </div>
+
+              {/* Vista previa para videos locales */}
+              {formData.file &&
+                formData.file.type &&
+                formData.file.type.startsWith('video/') && (
+                  <div className='mt-4'>
+                    <p className='text-sm font-medium text-gray-700 mb-2'>
+                      Vista previa del video:
+                    </p>
+                    <div className='max-w-md mx-auto'>
+                      <div
+                        className='relative w-full'
+                        style={{ paddingBottom: '56.25%' }}
+                      >
+                        <video
+                          className='absolute top-0 left-0 w-full h-full rounded-lg shadow-md'
+                          controls
+                          src={createObjectURL(formData.file)}
+                        >
+                          Tu navegador no soporta la etiqueta de video.
+                        </video>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              {/* Vista previa para imágenes */}
+              {formData.file &&
+                formData.file.type &&
+                formData.file.type.startsWith('image/') && (
+                  <div className='mt-4'>
+                    <p className='text-sm font-medium text-gray-700 mb-2'>
+                      Vista previa de la imagen:
+                    </p>
+                    <div className='max-w-md mx-auto'>
+                      <img
+                        src={createObjectURL(formData.file)}
+                        alt='Vista previa'
+                        className='rounded-lg shadow-md max-h-64 object-contain'
+                      />
+                    </div>
+                  </div>
+                )}
             </div>
           )}
 
@@ -558,18 +625,20 @@ export default function ContentForm({ initialData, onCancel }) {
               <p className='text-sm font-medium text-gray-700 mb-2'>
                 Vista previa del video:
               </p>
-              <div
-                className='relative w-full'
-                style={{ paddingBottom: '56.25%' }}
-              >
-                <iframe
-                  className='absolute top-0 left-0 w-full h-full rounded-lg shadow-md'
-                  src={`https://www.youtube.com/embed/${formData.youtubeId}`}
-                  title='Vista previa de YouTube'
-                  frameBorder='0'
-                  allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-                  allowFullScreen
-                ></iframe>
+              <div className='max-w-md mx-auto'>
+                <div
+                  className='relative w-full'
+                  style={{ paddingBottom: '56.25%' }}
+                >
+                  <iframe
+                    className='absolute top-0 left-0 w-full h-full rounded-lg shadow-md'
+                    src={`https://www.youtube.com/embed/${formData.youtubeId}`}
+                    title='Vista previa de YouTube'
+                    frameBorder='0'
+                    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                    allowFullScreen
+                  ></iframe>
+                </div>
               </div>
               <div className='flex justify-end mt-2'>
                 <Button
@@ -578,7 +647,11 @@ export default function ContentForm({ initialData, onCancel }) {
                   size='sm'
                   className='text-red-500 hover:text-red-700'
                   onClick={() =>
-                    setFormData(prev => ({ ...prev, youtubeId: null }))
+                    setFormData(prev => ({
+                      ...prev,
+                      youtubeId: null,
+                      url: null
+                    }))
                   }
                 >
                   Eliminar video

@@ -16,6 +16,22 @@ export const contentAdapter = (apiContent = {}) => {
 
   console.log('Adaptando contenido individual:', apiContent);
 
+  // Procesar youtubeId y URL
+  let youtubeId = apiContent.youtubeId || null;
+  let url = apiContent.url || null;
+  let fileUrl = apiContent.fileUrl || null;
+  
+  // Si no tenemos youtubeId pero tenemos una URL de YouTube, extraerla
+  if (!youtubeId && url && typeof url === 'string' && url.includes('youtube.com/watch?v=')) {
+    try {
+      const urlObj = new URL(url);
+      youtubeId = urlObj.searchParams.get('v');
+      console.log(`Extrayendo youtubeId de URL: ${youtubeId}`);
+    } catch (e) {
+      console.log('Error al extraer youtubeId de URL:', e);
+    }
+  }
+
   const adaptedContent = {
     id: apiContent._id || apiContent.id || '',
     title: apiContent.title || '',
@@ -24,8 +40,9 @@ export const contentAdapter = (apiContent = {}) => {
     category: apiContent.category || 'Otros',
     // Convertir boolean published a string de estado
     status: apiContent.published === true ? 'Publicado' : 'Borrador',
-    youtubeId: apiContent.youtubeId || null,
-    fileUrl: apiContent.fileUrl || apiContent.url || null,
+    youtubeId: youtubeId,
+    url: url,
+    fileUrl: fileUrl,
     createdAt: apiContent.createdAt || new Date().toISOString(),
     updatedAt: apiContent.updatedAt || null,
     // Formato de fecha para UI
