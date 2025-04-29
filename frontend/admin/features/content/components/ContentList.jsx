@@ -26,6 +26,7 @@ import { Button } from '@/shared/ui/button';
 import DeleteConfirmationModal from '@/shared/ui/modals/DeleteConfirmationModal';
 import { useContents, useDeleteContent } from '../lib/hooks';
 import ContentPagination from './ContentPagination';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 /**
  * Genera un nombre de archivo significativo basado en el tipo y título del contenido
@@ -480,7 +481,11 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
 
   // Mostrar estado de carga
   if (isLoading) {
-    return <div className='text-center py-10'>Cargando contenidos...</div>;
+    return (
+      <div className='flex justify-center items-center py-20'>
+        <LoadingSpinner text='Cargando contenidos' size={40} />
+      </div>
+    );
   }
 
   // Mostrar error si ocurre

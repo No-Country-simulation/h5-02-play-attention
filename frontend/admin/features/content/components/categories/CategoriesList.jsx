@@ -25,6 +25,7 @@ import {
 } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
 import CategoryForm from './CategoryForm';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 /**
  * Componente para gestionar las categorías de contenido
@@ -106,7 +107,11 @@ export default function CategoriesList() {
 
   // Mostrar estado de carga
   if (isLoading) {
-    return <div className='text-center py-10'>Cargando categorías...</div>;
+    return (
+      <div className='flex justify-center items-center py-20'>
+        <LoadingSpinner text='Cargando categorías' size={40} />
+      </div>
+    );
   }
 
   // Mostrar error si ocurre
