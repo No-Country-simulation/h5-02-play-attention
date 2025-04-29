@@ -3,6 +3,7 @@
 import { Search, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
+import { useCategories } from '../lib/hooks';
 
 /**
  * Componente de filtros para la búsqueda y filtrado de contenido
@@ -18,8 +19,15 @@ export default function ContentFilters({ onFiltersChange }) {
   const categoryRef = useRef(null);
   const statusRef = useRef(null);
 
-  // Categorías disponibles para filtrar
-  const categories = ['Todos', 'Tutoriales', 'Educativo', 'Médico'];
+  // Obtener categorías desde la API
+  const { data: categoriesData = [], isLoading: loadingCategories } =
+    useCategories();
+
+  // Preparar categorías para el dropdown
+  const categories = [
+    'Todos',
+    ...categoriesData.map(category => category.name)
+  ];
 
   // Estados disponibles para filtrar
   const statuses = ['Todos', 'Publicado', 'Borrador'];
@@ -66,85 +74,98 @@ export default function ContentFilters({ onFiltersChange }) {
 
   return (
     <div className='bg-gray-50 p-4 rounded-lg mb-6'>
-      <div className='flex flex-col md:flex-row gap-4'>
+      <div className='flex flex-col lg:flex-row gap-4'>
         {/* Buscador */}
-        <div className='relative flex-grow'>
+        <div className='relative flex-grow mb-3 lg:mb-0'>
           <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5' />
           <input
             type='text'
             placeholder='Buscar contenido...'
             value={searchTerm}
             onChange={handleSearchChange}
-            className='pl-10 pr-4 py-2 h-10 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 hover:border-purple-300'
+            className='pl-10 pr-4 py-3 h-12 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 hover:border-purple-300'
             style={{ color: '#333' }}
           />
         </div>
 
-        {/* Filtro por categoría personalizado */}
-        <div className='w-full md:w-48' ref={categoryRef}>
-          <div className='relative'>
-            <div
-              className='w-full h-10 border border-gray-300 rounded-lg px-3 flex items-center justify-between cursor-pointer hover:border-purple-300 bg-white'
-              onClick={() => setCategoryOpen(!categoryOpen)}
-            >
-              <div className='flex flex-col'>
-                <span className='text-xs text-gray-500'>Categoría</span>
-                <span>{selectedCategory}</span>
+        <div className='flex flex-col sm:flex-row gap-4 w-full lg:w-auto'>
+          {/* Filtro por categoría personalizado */}
+          <div
+            className='w-full sm:w-1/2 lg:w-48 mb-3 sm:mb-0'
+            ref={categoryRef}
+          >
+            <div className='relative'>
+              <div
+                className='w-full h-12 border border-gray-300 rounded-lg px-3 flex items-center justify-between cursor-pointer hover:border-purple-300 bg-white'
+                onClick={() => setCategoryOpen(!categoryOpen)}
+              >
+                <div className='flex flex-col'>
+                  <span className='text-xs text-gray-500'>Categoría</span>
+                  <span className='truncate max-w-[120px]'>
+                    {selectedCategory}
+                  </span>
+                </div>
+                <ChevronDown className='h-4 w-4 text-gray-500 ml-2 flex-shrink-0' />
               </div>
-              <ChevronDown className='h-4 w-4 text-gray-500' />
-            </div>
 
-            {categoryOpen && (
-              <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg'>
-                {categories.map(category => (
-                  <div
-                    key={category}
-                    className={`px-3 py-2 cursor-pointer hover:bg-purple-100 ${
-                      selectedCategory === category
-                        ? 'bg-purple-100 text-purple-800'
-                        : ''
-                    }`}
-                    onClick={() => handleCategoryChange(category)}
-                  >
-                    {category}
-                  </div>
-                ))}
-              </div>
-            )}
+              {categoryOpen && (
+                <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto'>
+                  {loadingCategories ? (
+                    <div className='px-3 py-3 text-center text-gray-500'>
+                      Cargando categorías...
+                    </div>
+                  ) : (
+                    categories.map(category => (
+                      <div
+                        key={category}
+                        className={`px-3 py-3 cursor-pointer hover:bg-purple-100 ${
+                          selectedCategory === category
+                            ? 'bg-purple-100 text-purple-800'
+                            : ''
+                        }`}
+                        onClick={() => handleCategoryChange(category)}
+                      >
+                        {category}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Filtro por estado personalizado */}
-        <div className='w-full md:w-48' ref={statusRef}>
-          <div className='relative'>
-            <div
-              className='w-full h-10 border border-gray-300 rounded-lg px-3 flex items-center justify-between cursor-pointer hover:border-purple-300 bg-white'
-              onClick={() => setStatusOpen(!statusOpen)}
-            >
-              <div className='flex flex-col'>
-                <span className='text-xs text-gray-500'>Estado</span>
-                <span>{selectedStatus}</span>
+          {/* Filtro por estado personalizado */}
+          <div className='w-full sm:w-1/2 lg:w-48' ref={statusRef}>
+            <div className='relative'>
+              <div
+                className='w-full h-12 border border-gray-300 rounded-lg px-3 flex items-center justify-between cursor-pointer hover:border-purple-300 bg-white'
+                onClick={() => setStatusOpen(!statusOpen)}
+              >
+                <div className='flex flex-col'>
+                  <span className='text-xs text-gray-500'>Estado</span>
+                  <span>{selectedStatus}</span>
+                </div>
+                <ChevronDown className='h-4 w-4 text-gray-500 ml-2 flex-shrink-0' />
               </div>
-              <ChevronDown className='h-4 w-4 text-gray-500' />
+
+              {statusOpen && (
+                <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg'>
+                  {statuses.map(status => (
+                    <div
+                      key={status}
+                      className={`px-3 py-3 cursor-pointer hover:bg-purple-100 ${
+                        selectedStatus === status
+                          ? 'bg-purple-100 text-purple-800'
+                          : ''
+                      }`}
+                      onClick={() => handleStatusChange(status)}
+                    >
+                      {status}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            {statusOpen && (
-              <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg'>
-                {statuses.map(status => (
-                  <div
-                    key={status}
-                    className={`px-3 py-2 cursor-pointer hover:bg-purple-100 ${
-                      selectedStatus === status
-                        ? 'bg-purple-100 text-purple-800'
-                        : ''
-                    }`}
-                    onClick={() => handleStatusChange(status)}
-                  >
-                    {status}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -39,7 +39,7 @@ const UserTable = ({
     }
     return '';
   };
-
+  console.log(users);
   // Estado para manejar qué tarjetas están expandidas en vista móvil
   const [expandedRows, setExpandedRows] = useState({});
 
@@ -66,7 +66,7 @@ const UserTable = ({
                 onClick={() => toggleRow(user.id)}
               >
                 <div>
-                  <h3 className='font-medium text-gray-900'>{user.name}</h3>
+                  <h3 className='font-medium text-gray-900'>{user.fullname}</h3>
                   <p className='text-sm text-gray-500'>{user.email}</p>
                 </div>
                 <div className='flex items-center'>
@@ -214,7 +214,7 @@ const UserTable = ({
                     <div className='flex items-center'>
                       <div className='ml-2'>
                         <div className='text-sm font-medium text-gray-900'>
-                          {user.name}
+                          {user.fullname}
                         </div>
                       </div>
                     </div>

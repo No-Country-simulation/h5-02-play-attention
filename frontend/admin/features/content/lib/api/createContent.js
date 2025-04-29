@@ -17,59 +17,98 @@ import {
 export async function createContent(formData) {
   try {
     // Validación para garantizar que todos los campos requeridos están presentes
-    if (!formData.title || !formData.type || !formData.category) {
-      throw new Error('Faltan campos obligatorios: título, tipo o categoría');
+    if (
+      !formData.title ||
+      !formData.type ||
+      !formData.categoryId ||
+      !formData.description
+    ) {
+      throw new Error(
+        'Faltan campos obligatorios: título, tipo, categoría o descripción'
+      );
     }
 
-    // Transformar los datos al formato exacto que espera el backend
+    // Validar que no se envíen archivo y URL simultáneamente
+    if (formData.file && formData.url) {
+      throw new Error(
+        'No se puede enviar un archivo y una URL al mismo tiempo'
+      );
+    }
+
+    // Si hay un archivo adjunto, debemos usar FormData
+    if (formData.file && formData.file instanceof File) {
+      const formDataObj = new FormData();
+
+      // Añadir todos los campos de texto
+      formDataObj.append('title', formData.title);
+      formDataObj.append('description', formData.description);
+      formDataObj.append('type', mapContentTypeToBackend(formData.type));
+      formDataObj.append('category', formData.categoryId);
+      formDataObj.append('published', false); // Siempre false (borrador) por defecto
+      formDataObj.append('url', ''); // URL vacía cuando hay archivo
+      formDataObj.append('youtubeId', ''); // youtubeId vacío cuando hay archivo
+
+      // Añadir el archivo
+      formDataObj.append('file', formData.file);
+
+      console.log('Enviando formulario con archivo al backend');
+
+      const response = await fetch(`${API_URL}/resources`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json'
+        },
+        body: formDataObj,
+        mode: 'cors',
+        credentials: 'omit'
+      });
+
+      if (!response.ok) {
+        const errorMessage = await handleResponseError(response);
+        throw new Error(`Error al crear contenido: ${errorMessage}`);
+      }
+
+      const data = await response.json();
+      console.log('Contenido creado:', data);
+      return data;
+    }
+
+    // Si no hay archivo pero hay URL, o no hay ninguno de los dos
     const payload = {
       title: formData.title,
-      description: formData.content || '',
+      description: formData.description,
       type: mapContentTypeToBackend(formData.type),
-      category: formData.category,
-      published: formData.status === 'Publicado',
-      youtubeId: formData.youtubeId || null
+      category: formData.categoryId,
+      published: false, // Siempre false (borrador) por defecto
+      youtubeId: formData.youtubeId || '',
+      url: formData.youtubeId
+        ? `https://www.youtube.com/watch?v=${formData.youtubeId}`
+        : formData.url || '', // URL de YouTube o URL proporcionada
+      file: null // Siempre null cuando se envía URL
     };
 
     // Log para depuración
     console.log('Enviando payload al backend:', JSON.stringify(payload));
 
-    // Si hay un archivo, necesitamos usar FormData para envío multipart
-    if (formData.file) {
-      const multipartData = new FormData();
+    const response = await fetch(`${API_URL}/resources`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(payload),
+      mode: 'cors',
+      credentials: 'omit'
+    });
 
-      // Agregar el archivo
-      multipartData.append('file', formData.file);
-
-      // Agregar los datos del contenido como JSON string
-      multipartData.append('data', JSON.stringify(payload));
-
-      const response = await fetch(`${API_URL}/resources`, {
-        method: 'POST',
-        body: multipartData
-      });
-
-      if (!response.ok) {
-        const errorText = await handleResponseError(response);
-        throw new Error(errorText);
-      }
-
-      return response.json();
-    } else {
-      // Si no hay archivo, hacemos una petición JSON normal
-      const response = await fetch(`${API_URL}/resources`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorText = await handleResponseError(response);
-        throw new Error(errorText);
-      }
-
-      return response.json();
+    if (!response.ok) {
+      const errorMessage = await handleResponseError(response);
+      throw new Error(`Error al crear contenido: ${errorMessage}`);
     }
+
+    const data = await response.json();
+    console.log('Contenido creado:', data);
+    return data;
   } catch (error) {
     console.error('Error creating content:', error);
     throw error;

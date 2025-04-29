@@ -47,12 +47,13 @@ const useUserManagement = () => {
     email: '',
     role: 'Usuario'
   });
-
+  console.log(usersData);
   // Transformar datos del API al formato esperado
   const users = usersData?.data
     ? usersData.data.map(user => ({
         id: user._id,
-        name: user.email.split('@')[0],
+        name: user.fullname,
+        fullname: user.fullname,
         email: user.email,
         role: user.role || 'Usuario',
         status: user.isActive ? 'active' : 'inactive',

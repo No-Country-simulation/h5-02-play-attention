@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
 import {
   ArrowLeft,
@@ -20,7 +20,11 @@ import {
   DialogFooter,
   DialogClose
 } from '@/shared/ui/dialog';
-import { useCreateContent, useUpdateContent } from '../lib/hooks';
+import {
+  useCreateContent,
+  useUpdateContent,
+  useCategories
+} from '../lib/hooks';
 
 /**
  * Componente para crear y editar contenido
@@ -34,6 +38,10 @@ export default function ContentForm({ initialData, onCancel }) {
   const createMutation = useCreateContent();
   const updateMutation = isEditing ? useUpdateContent(initialData.id) : null;
 
+  // Obtener categorías desde el backend
+  const { data: categories = [], isLoading: loadingCategories } =
+    useCategories();
+
   // Estado para controlar envío
   const isSubmitting =
     createMutation.isPending || updateMutation?.isPending || false;
@@ -42,11 +50,13 @@ export default function ContentForm({ initialData, onCancel }) {
   const [formData, setFormData] = useState({
     title: '',
     type: 'Artículo',
-    category: 'Tutoriales',
+    category: '', // Ahora será el ID de la categoría
+    categoryId: '', // Añadimos categoryId para almacenar el ID
     content: '',
     status: 'Borrador',
     file: null,
-    youtubeId: null
+    youtubeId: null,
+    url: null
   });
 
   // Estados para los modales
@@ -59,23 +69,107 @@ export default function ContentForm({ initialData, onCancel }) {
   // Validación del formulario
   const [errors, setErrors] = useState({});
 
+  // Referencias para los objetos URL creados
+  const objectURLs = useRef([]);
+
+  // Limpiar los objectURLs cuando el componente se desmonte
+  useEffect(() => {
+    return () => {
+      // Limpiar cualquier URL creada
+      objectURLs.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  // Función para crear y registrar una nueva URL para objetos
+  const createObjectURL = file => {
+    if (!file) return '';
+    const url = URL.createObjectURL(file);
+    objectURLs.current.push(url);
+    return url;
+  };
+
   // Si estamos editando, cargamos la información inicial
   useEffect(() => {
     if (initialData) {
       setFormData({
         ...initialData,
+        // Asegurar que se mantenga el ID de la categoría si ya existe
+        categoryId: initialData.categoryId || '',
         file: null // Siempre reiniciamos el archivo
       });
     }
   }, [initialData]);
 
+  // Cuando se cargan las categorías y estamos editando, necesitamos establecer la categoría correcta
+  useEffect(() => {
+    // Si tenemos categorías y estamos editando, intentamos encontrar la categoría por nombre
+    if (categories.length > 0 && initialData && initialData.category) {
+      // Intentar encontrar por ID primero si está disponible
+      if (initialData.categoryId) {
+        const foundCategory = categories.find(
+          cat => cat.id === initialData.categoryId
+        );
+        if (foundCategory) {
+          setFormData(prev => ({
+            ...prev,
+            categoryId: foundCategory.id,
+            category: foundCategory.name
+          }));
+          return;
+        }
+      }
+
+      // Si no hay ID o no se encontró por ID, intentar buscar por nombre
+      const foundCategory = categories.find(
+        cat =>
+          cat.name.toLowerCase() ===
+          (typeof initialData.category === 'string'
+            ? initialData.category.toLowerCase()
+            : initialData.category?.name?.toLowerCase() || '')
+      );
+
+      if (foundCategory) {
+        setFormData(prev => ({
+          ...prev,
+          categoryId: foundCategory.id,
+          category: foundCategory.name
+        }));
+      } else if (categories.length > 0) {
+        // Si no se encuentra, seleccionar la primera categoría disponible
+        setFormData(prev => ({
+          ...prev,
+          categoryId: categories[0].id,
+          category: categories[0].name
+        }));
+      }
+    } else if (categories.length > 0 && !formData.categoryId) {
+      // Si no estamos editando y hay categorías, seleccionar la primera por defecto
+      setFormData(prev => ({
+        ...prev,
+        categoryId: categories[0].id,
+        category: categories[0].name
+      }));
+    }
+  }, [categories, initialData]);
+
   // Manejar cambios en los campos del formulario
   const handleChange = e => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    // Caso especial para el cambio de categoría
+    if (name === 'categoryId') {
+      const selectedCategory = categories.find(cat => cat.id === value);
+      setFormData(prev => ({
+        ...prev,
+        categoryId: value,
+        category: selectedCategory ? selectedCategory.name : prev.category
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   // Manejar cambios en el archivo
@@ -113,8 +207,8 @@ export default function ContentForm({ initialData, onCancel }) {
         setFormData(prev => ({
           ...prev,
           type: 'Video',
-          content: `${prev.content}\n\nVideo de YouTube: ${tempYoutubeUrl}`,
-          youtubeId: videoId
+          youtubeId: videoId,
+          url: tempYoutubeUrl // Guardamos la URL completa
         }));
         setYoutubeModalOpen(false);
       } else {
@@ -175,8 +269,7 @@ export default function ContentForm({ initialData, onCancel }) {
   };
 
   // Opciones disponibles para el formulario
-  const typeOptions = ['Artículo', 'Video', 'PDF', 'Presentación'];
-  const categoryOptions = ['Tutoriales', 'Educativo', 'Médico', 'Otro'];
+  const typeOptions = ['Artículo', 'Video', 'PDF', 'Imagen', 'Presentación'];
   const statusOptions = ['Borrador', 'Publicado'];
 
   // Función para validar el formulario antes de enviar
@@ -196,7 +289,7 @@ export default function ContentForm({ initialData, onCancel }) {
       newErrors.type = 'El tipo de recurso es obligatorio';
     }
 
-    if (!formData.category) {
+    if (!formData.categoryId) {
       newErrors.category = 'La categoría es obligatoria';
     }
 
@@ -217,11 +310,18 @@ export default function ContentForm({ initialData, onCancel }) {
       return;
     }
 
+    // Crear el objeto de datos para enviar al backend
+    const contentData = {
+      ...formData,
+      description: formData.content, // Mapear content a description
+      category: formData.categoryId
+    };
+
     try {
       if (isEditing) {
-        await updateMutation.mutateAsync(formData);
+        await updateMutation.mutateAsync(contentData);
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(contentData);
       }
 
       // Después de guardar, volvemos a la lista
@@ -271,8 +371,8 @@ export default function ContentForm({ initialData, onCancel }) {
           )}
         </div>
 
-        {/* Tipo y Categoría (fila) */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        {/* Tipo y Categoría (siempre en columna en móvil y tablet, en fila en desktop) */}
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
           <div>
             <label
               htmlFor='type'
@@ -285,7 +385,7 @@ export default function ContentForm({ initialData, onCancel }) {
               name='type'
               value={formData.type}
               onChange={handleChange}
-              className={`w-full p-3 border ${
+              className={`w-full p-3 h-12 border ${
                 errors.type ? 'border-red-500' : 'border-gray-300'
               } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
               disabled={isSubmitting}
@@ -302,32 +402,52 @@ export default function ContentForm({ initialData, onCancel }) {
             )}
           </div>
 
+          {/* Selector de categorías */}
           <div>
             <label
-              htmlFor='category'
+              htmlFor='categoryId'
               className='block text-sm font-medium text-gray-700 mb-1'
             >
               Categoría <span className='text-red-500'>*</span>
             </label>
-            <select
-              id='category'
-              name='category'
-              value={formData.category}
-              onChange={handleChange}
-              className={`w-full p-3 border ${
-                errors.category ? 'border-red-500' : 'border-gray-300'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
-              disabled={isSubmitting}
-            >
-              <option disabled>Categoría</option>
-              {categoryOptions.map(option => (
-                <option key={option} value={option}>
-                  {option}
+            {loadingCategories ? (
+              <div className='flex items-center text-sm text-gray-500'>
+                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                Cargando categorías...
+              </div>
+            ) : (
+              <select
+                id='categoryId'
+                name='categoryId'
+                value={formData.categoryId}
+                onChange={handleChange}
+                className={`w-full p-3 h-12 border ${
+                  errors.category ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+                disabled={isSubmitting}
+              >
+                <option disabled value=''>
+                  Selecciona una categoría
                 </option>
-              ))}
-            </select>
+                {categories.length > 0 ? (
+                  categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No hay categorías disponibles</option>
+                )}
+              </select>
+            )}
             {errors.category && (
               <p className='text-red-500 text-sm mt-1'>{errors.category}</p>
+            )}
+            {categories.length === 0 && !loadingCategories && (
+              <p className='text-amber-500 text-sm mt-1'>
+                No hay categorías disponibles. Por favor, crea una categoría
+                primero.
+              </p>
             )}
           </div>
         </div>
@@ -453,6 +573,49 @@ export default function ContentForm({ initialData, onCancel }) {
                 </svg>
                 <span>Archivo seleccionado: {formData.file.name}</span>
               </div>
+
+              {/* Vista previa para videos locales */}
+              {formData.file &&
+                formData.file.type &&
+                formData.file.type.startsWith('video/') && (
+                  <div className='mt-4'>
+                    <p className='text-sm font-medium text-gray-700 mb-2'>
+                      Vista previa del video:
+                    </p>
+                    <div className='max-w-md mx-auto'>
+                      <div
+                        className='relative w-full'
+                        style={{ paddingBottom: '56.25%' }}
+                      >
+                        <video
+                          className='absolute top-0 left-0 w-full h-full rounded-lg shadow-md'
+                          controls
+                          src={createObjectURL(formData.file)}
+                        >
+                          Tu navegador no soporta la etiqueta de video.
+                        </video>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              {/* Vista previa para imágenes */}
+              {formData.file &&
+                formData.file.type &&
+                formData.file.type.startsWith('image/') && (
+                  <div className='mt-4'>
+                    <p className='text-sm font-medium text-gray-700 mb-2'>
+                      Vista previa de la imagen:
+                    </p>
+                    <div className='max-w-md mx-auto'>
+                      <img
+                        src={createObjectURL(formData.file)}
+                        alt='Vista previa'
+                        className='rounded-lg shadow-md max-h-64 object-contain'
+                      />
+                    </div>
+                  </div>
+                )}
             </div>
           )}
 
@@ -462,18 +625,20 @@ export default function ContentForm({ initialData, onCancel }) {
               <p className='text-sm font-medium text-gray-700 mb-2'>
                 Vista previa del video:
               </p>
-              <div
-                className='relative w-full'
-                style={{ paddingBottom: '56.25%' }}
-              >
-                <iframe
-                  className='absolute top-0 left-0 w-full h-full rounded-lg shadow-md'
-                  src={`https://www.youtube.com/embed/${formData.youtubeId}`}
-                  title='Vista previa de YouTube'
-                  frameBorder='0'
-                  allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-                  allowFullScreen
-                ></iframe>
+              <div className='max-w-md mx-auto'>
+                <div
+                  className='relative w-full'
+                  style={{ paddingBottom: '56.25%' }}
+                >
+                  <iframe
+                    className='absolute top-0 left-0 w-full h-full rounded-lg shadow-md'
+                    src={`https://www.youtube.com/embed/${formData.youtubeId}`}
+                    title='Vista previa de YouTube'
+                    frameBorder='0'
+                    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                    allowFullScreen
+                  ></iframe>
+                </div>
               </div>
               <div className='flex justify-end mt-2'>
                 <Button
@@ -482,7 +647,11 @@ export default function ContentForm({ initialData, onCancel }) {
                   size='sm'
                   className='text-red-500 hover:text-red-700'
                   onClick={() =>
-                    setFormData(prev => ({ ...prev, youtubeId: null }))
+                    setFormData(prev => ({
+                      ...prev,
+                      youtubeId: null,
+                      url: null
+                    }))
                   }
                 >
                   Eliminar video
@@ -493,8 +662,8 @@ export default function ContentForm({ initialData, onCancel }) {
         </div>
 
         {/* Estado y botones de acción */}
-        <div className='flex flex-col sm:flex-row justify-between items-center pt-4 border-t'>
-          <div>
+        <div className='flex flex-col pt-4 border-t'>
+          <div className='mb-4 w-full'>
             <label
               htmlFor='status'
               className='block text-sm font-medium text-gray-700 mb-1'
@@ -506,7 +675,7 @@ export default function ContentForm({ initialData, onCancel }) {
               name='status'
               value={formData.status}
               onChange={handleChange}
-              className='h-12 w-full sm:w-56 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 appearance-none bg-white bg-no-repeat'
+              className='h-12 w-full px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 appearance-none bg-white bg-no-repeat'
               style={{
                 backgroundImage:
                   "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
@@ -523,12 +692,12 @@ export default function ContentForm({ initialData, onCancel }) {
             </select>
           </div>
 
-          <div className='flex gap-4 mt-4 sm:mt-0'>
+          <div className='grid grid-cols-2 gap-3'>
             <Button
               type='button'
               onClick={onCancel}
               variant='outline'
-              className='h-12 px-6 border border-gray-300 rounded-lg hover:bg-gray-50'
+              className='h-12 border border-gray-300 rounded-lg hover:bg-gray-50'
               disabled={isSubmitting}
             >
               Cancelar
@@ -537,7 +706,7 @@ export default function ContentForm({ initialData, onCancel }) {
             <Button
               type='submit'
               variant='default'
-              className='bg-purple-700 hover:bg-purple-800 h-12 px-6'
+              className='bg-purple-700 hover:bg-purple-800 h-12'
               disabled={isSubmitting}
             >
               {isSubmitting ? (

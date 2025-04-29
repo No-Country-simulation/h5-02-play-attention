@@ -4,3 +4,4 @@
  */
 
 export * from './useContents';
+export * from './useCategories';
