@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from '@/shared/ui/badge';
@@ -10,34 +10,7 @@ import { Calendar, Clock, User, MessageSquare } from 'lucide-react';
 
 import TicketConversation from './TicketConversation';
 import TicketReplyModal from './TicketReplyModal';
-
-// Mock de mensajes de ejemplo para el ticket
-const mockMessages = [
-  {
-    id: '1',
-    content:
-      'Hola, estoy teniendo problemas para acceder a mi cuenta. Me sale un error de autenticación.',
-    date: '2023-06-10T09:30:00',
-    author: 'Juan Pérez',
-    isAdminReply: false
-  },
-  {
-    id: '2',
-    content:
-      'Buenos días Juan. ¿Podrías indicarme qué mensaje de error exacto estás viendo? También, ¿has intentado restablecer tu contraseña?',
-    date: '2023-06-10T10:15:00',
-    author: 'Soporte Técnico',
-    isAdminReply: true
-  },
-  {
-    id: '3',
-    content:
-      'Dice "Credenciales inválidas". Sí, intenté restablecer la contraseña pero no recibo el correo de restablecimiento.',
-    date: '2023-06-10T10:30:00',
-    author: 'Juan Pérez',
-    isAdminReply: false
-  }
-];
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 // Funciones de utilidad para status y prioridad
 const getStatusBadge = status => {
@@ -45,6 +18,7 @@ const getStatusBadge = status => {
     abierto: 'destructive',
     'en proceso': 'warning',
     resuelto: 'success',
+    cerrado: 'secondary',
     default: 'secondary'
   };
   return statusMap[status] || statusMap.default;
@@ -60,31 +34,93 @@ const getPriorityBadge = priority => {
   return priorityMap[priority] || priorityMap.default;
 };
 
-export default function TicketDetail({ ticket, onBack }) {
-  const [messages, setMessages] = useState(mockMessages);
+export default function TicketDetail({ ticket, onBack, onUpdate }) {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [ticketStatus, setTicketStatus] = useState(ticket?.status || 'abierto');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleReplySubmit = replyData => {
-    // En producción, esto se enviaría a la API
-    const newMessage = {
-      id: `temp-${Date.now()}`,
-      content: replyData.message,
-      date: new Date().toISOString(),
-      author: 'Soporte Técnico',
-      isAdminReply: true
-    };
+  // Formatear la fecha para mostrarla en formato legible
+  const formatDateTime = dateString => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Fecha desconocida';
+      }
+      return format(date, 'dd/MM/yyyy HH:mm', { locale: es });
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
+      return 'Fecha inválida';
+    }
+  };
 
-    // Actualizar localmente los mensajes
-    setMessages(prev => [...prev, newMessage]);
+  // Preparar los mensajes a partir del ticket
+  const getTicketMessages = () => {
+    const messages = [];
 
-    // Actualizar el estado del ticket si ha cambiado
-    if (replyData.status !== ticketStatus) {
-      setTicketStatus(replyData.status);
+    // Mensaje inicial (el contenido del ticket)
+    if (ticket) {
+      messages.push({
+        id: `initial-${ticket.id}`,
+        content: ticket.content,
+        date: ticket.date,
+        author: ticket.user,
+        isAdminReply: false
+      });
+
+      // Respuestas si existen
+      if (Array.isArray(ticket.responses)) {
+        ticket.responses.forEach(response => {
+          messages.push({
+            id:
+              response.id ||
+              `resp-${Math.random().toString(36).substring(2, 9)}`,
+            content: response.content,
+            date: response.date,
+            author: response.user,
+            isAdminReply: response.isAdmin
+          });
+        });
+      }
     }
 
-    setIsReplyModalOpen(false);
+    return messages.sort((a, b) => new Date(a.date) - new Date(b.date));
   };
+
+  const messages = getTicketMessages();
+
+  const handleReplySubmit = async replyData => {
+    try {
+      setIsSubmitting(true);
+
+      // Preparar los datos para actualizar
+      const updateData = {
+        ...ticket,
+        status: replyData.status,
+        response: replyData.message
+      };
+
+      // Llamar al método de actualización
+      if (onUpdate) {
+        await onUpdate(updateData);
+      }
+
+      // Actualizar el estado local
+      setTicketStatus(replyData.status);
+      setIsReplyModalOpen(false);
+    } catch (error) {
+      console.error('Error al enviar respuesta:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!ticket) {
+    return (
+      <div className='flex justify-center items-center py-20'>
+        <LoadingSpinner text='Cargando detalles del ticket' />
+      </div>
+    );
+  }
 
   return (
     <div className='space-y-6'>
@@ -124,20 +160,14 @@ export default function TicketDetail({ ticket, onBack }) {
               <Calendar className='h-4 w-4 text-muted-foreground' />
               <span className='text-sm'>
                 <span className='font-medium'>Fecha:</span>{' '}
-                {ticket?.date
-                  ? format(new Date(ticket.date), 'dd/MM/yyyy', { locale: es })
-                  : 'N/A'}
+                {ticket?.date ? formatDateTime(ticket.date) : 'N/A'}
               </span>
             </div>
             <div className='flex items-center gap-2'>
               <Clock className='h-4 w-4 text-muted-foreground' />
               <span className='text-sm'>
                 <span className='font-medium'>Última actualización:</span>{' '}
-                {ticket?.updated
-                  ? format(new Date(ticket.updated), 'dd/MM/yyyy', {
-                      locale: es
-                    })
-                  : 'N/A'}
+                {ticket?.updated ? formatDateTime(ticket.updated) : 'N/A'}
               </span>
             </div>
           </div>
@@ -156,7 +186,12 @@ export default function TicketDetail({ ticket, onBack }) {
             <Button variant='outline' onClick={onBack}>
               Volver a la lista
             </Button>
-            <Button onClick={() => setIsReplyModalOpen(true)}>Responder</Button>
+            <Button
+              onClick={() => setIsReplyModalOpen(true)}
+              disabled={ticketStatus === 'cerrado'}
+            >
+              Responder
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -167,6 +202,7 @@ export default function TicketDetail({ ticket, onBack }) {
         ticketId={ticket?.id}
         currentStatus={ticketStatus}
         onSubmit={handleReplySubmit}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
