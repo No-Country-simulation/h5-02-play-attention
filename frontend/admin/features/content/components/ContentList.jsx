@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -25,6 +25,7 @@ import { FaYoutube } from 'react-icons/fa';
 import { Button } from '@/shared/ui/button';
 import DeleteConfirmationModal from '@/shared/ui/modals/DeleteConfirmationModal';
 import { useContents, useDeleteContent } from '../lib/hooks';
+import ContentPagination from './ContentPagination';
 
 /**
  * Genera un nombre de archivo significativo basado en el tipo y título del contenido
@@ -354,6 +355,9 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
   const [contentToDelete, setContentToDelete] = useState(null);
   const [previewContent, setPreviewContent] = useState(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  // Estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5; // Número de elementos por página
 
   // Obtener contenidos desde la API
   const { data: contents = [], isLoading, error } = useContents();
@@ -424,6 +428,35 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
     return true;
   });
 
+  // Calcular total de páginas
+  const totalPages = Math.max(1, Math.ceil(filteredContent.length / pageSize));
+
+  // Ajustar currentPage si el valor actual no es válido
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  // Obtener contenido para la página actual
+  const paginatedContent = filteredContent.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Manejadores de navegación
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
   // Función para manejar la intención de eliminar
   const handleDeleteClick = content => {
     setContentToDelete(content);
@@ -473,8 +506,8 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredContent.length > 0 ? (
-              filteredContent.map(content => (
+            {paginatedContent.length > 0 ? (
+              paginatedContent.map(content => (
                 <TableRow key={content.id}>
                   <TableCell>
                     <ContentThumbnail
@@ -575,8 +608,8 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
 
       {/* Vista de tarjetas para dispositivos móviles */}
       <div className='md:hidden space-y-4'>
-        {filteredContent.length > 0 ? (
-          filteredContent.map(content => (
+        {paginatedContent.length > 0 ? (
+          paginatedContent.map(content => (
             <div
               key={content.id}
               className='bg-white p-4 rounded-lg border shadow-sm'
@@ -692,6 +725,19 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
         title='Eliminar contenido'
         message={`¿Estás seguro que deseas eliminar "${contentToDelete?.title}"? Esta acción no se puede deshacer.`}
       />
+
+      {/* Paginación - Solo mostrar cuando hay contenido */}
+      {filteredContent.length > 0 && (
+        <ContentPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          currentCount={paginatedContent.length}
+          totalCount={filteredContent.length}
+          pageSize={pageSize}
+          onPrevious={goToPreviousPage}
+          onNext={goToNextPage}
+        />
+      )}
     </div>
   );
 }
