@@ -1,43 +1,57 @@
 import { Button } from "@/shared/ui/button";
-import { MessageCircle } from "lucide-react";
-import { CalendarDays } from "lucide-react";
+import { MessageCircle, CalendarDays, Phone, Mail, MapPin } from "lucide-react";
+
+const contactItems = [
+  {
+    icon: Phone,
+    title: "Teléfono:",
+    details: ["+54 11 1234-5678", "Lunes a Viernes, 9:00 - 18:00"],
+  },
+  {
+    icon: Mail,
+    title: "Email:",
+    details: ["info@playattention.com.ar", "soporte@playattention.com.ar"],
+  },
+  {
+    icon: MapPin,
+    title: "Dirección:",
+    details: ["Av. Corrientes 1234, Piso 5", "Buenos Aires, Argentina"],
+  },
+];
+
+const iconClasses =
+  "bg-[#cfcfe0] rounded-full w-7 h-7 p-1 text-[#5C3983] mx-2 stroke-[2px] ";
 
 export const StaticContact = () => {
   return (
-    <div className=" max-h-[75%] h-[75%] w-[29%] flex flex-col justify-between items-start">
-      <div className=" w-[73.99%] h-[73.30%] flex flex-col">
-        <div className=" flex-1 flex flex-col justify-evenly">
-          <div className="flex items-center ">
-            <div className="rounded-full bg-[#CFCFE0] h-[20px] w-[20px] mx-[10px]"></div>
-            <b>Teléfono:</b>
+    <div className="max-h-[75%] h-[75%] w-[29%] flex flex-col justify-between">
+      <div className="w-[74%] h-[73%] space-y-6">
+        {contactItems.map((item, index) => (
+          <div key={index} className="space-y-1">
+            <div className="flex items-center">
+              <item.icon className={iconClasses} />
+              <b>{item.title}</b>
+            </div>
+            {item.details.map((detail, i) => (
+              <small key={i} className="block pl-10">
+                {detail}
+              </small>
+            ))}
           </div>
-          <small className=" pl-[40px]">+54 11 1234-5678</small>
-          <small className="pl-[40px]">Lunes a Viernes, 9:00 - 18:00</small>
-        </div>
-        <div className=" flex-1 flex flex-col justify-evenly">
-          <div className="flex items-center ">
-            <div className="rounded-full bg-[#CFCFE0] h-[20px] w-[20px] mx-[10px]"></div>
-            <b>Email:</b>
-          </div>
-          <small className=" pl-[40px]">info@playattention.com.ar</small>
-          <small className="pl-[40px]">soporte@playattention.com.ar</small>
-        </div>{" "}
-        <div className=" flex-1 flex flex-col justify-evenly">
-          <div className="flex items-center ">
-            <div className="rounded-full bg-[#CFCFE0] h-[20px] w-[20px] mx-[10px]"></div>
-            <b>Dirección:</b>
-          </div>
-          <small className=" pl-[40px]">Av. Corrientes 1234, Piso 5</small>
-          <small className="pl-[40px]">Buenos Aires, Argentina</small>
-        </div>
+        ))}
       </div>
-      <div className=" w-full  flex justify-between">
-        <Button className="w-[46.24%] h-full">
-          <MessageCircle className=" size-6" />
+
+      <div className="w-full flex justify-between gap-4">
+        <Button className="w-[46.24%] h-12">
+          <MessageCircle className="size-6 mr-2" />
           Whatsapp
         </Button>
-        <Button className="w-[46.24%] h-full bg-[transparent] border-2 border-[#330764] text-[#330764]">
-          <CalendarDays className=" size-6" /> Agendar un reunión
+        <Button
+          variant="outline"
+          className="w-[46.24%] h-12 border-2 border-[#330764] text-[#330764] hover:bg-[#330764]/10"
+        >
+          <CalendarDays className="size-6 mr-2" />
+          Agendar reunión
         </Button>
       </div>
     </div>
