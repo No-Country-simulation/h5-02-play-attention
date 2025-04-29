@@ -401,7 +401,9 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
       const matchesSearch =
         item.title.toLowerCase().includes(searchTermLower) ||
         item.type.toLowerCase().includes(searchTermLower) ||
-        item.category.toLowerCase().includes(searchTermLower) ||
+        (typeof item.category === 'object'
+          ? item.category.name.toLowerCase().includes(searchTermLower)
+          : item.category.toLowerCase().includes(searchTermLower)) ||
         item.status.toLowerCase().includes(searchTermLower);
 
       if (!matchesSearch) {
@@ -410,11 +412,13 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
     }
 
     // Filtrar por categoría
-    if (
-      searchFilters.category !== 'Todos' &&
-      item.category !== searchFilters.category
-    ) {
-      return false;
+    if (searchFilters.category !== 'Todos') {
+      const itemCategory =
+        typeof item.category === 'object' ? item.category.name : item.category;
+
+      if (itemCategory !== searchFilters.category) {
+        return false;
+      }
     }
 
     // Filtrar por estado

@@ -143,7 +143,8 @@ export default function CategoriesList() {
           />
         </div>
 
-        <div className='border rounded-lg overflow-hidden'>
+        {/* Vista de tabla para pantallas grandes */}
+        <div className='hidden lg:block border rounded-lg overflow-hidden'>
           <Table>
             <TableHeader>
               <TableRow>
@@ -201,6 +202,67 @@ export default function CategoriesList() {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Vista de tarjetas para dispositivos móviles y tablets */}
+        <div className='lg:hidden space-y-4'>
+          {filteredCategories.length > 0 ? (
+            filteredCategories.map(category => (
+              <div
+                key={category.id}
+                className='bg-white p-4 rounded-lg border shadow-sm'
+              >
+                <div className='flex flex-col'>
+                  <div className='flex items-center mb-2'>
+                    <Tag className='h-5 w-5 mr-2 text-purple-500' />
+                    <h3 className='font-medium text-lg'>{category.name}</h3>
+                  </div>
+
+                  <div className='space-y-2 text-sm text-gray-600 mb-3'>
+                    <div>
+                      <span className='font-medium'>Descripción:</span>
+                      <p className='mt-1'>
+                        {category.description || 'Sin descripción'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className='font-medium'>Contenidos asociados:</span>{' '}
+                      {category.resourceCount || 0}
+                    </div>
+                  </div>
+                </div>
+
+                <div className='flex justify-end space-x-2 mt-2'>
+                  <Button
+                    onClick={() => handleEditCategory(category)}
+                    variant='outline'
+                    size='sm'
+                    className='h-9'
+                  >
+                    <Edit className='h-4 w-4 mr-1' />
+                    Editar
+                  </Button>
+                  <Button
+                    onClick={() => handleDeleteClick(category)}
+                    variant='outline'
+                    size='sm'
+                    className='h-9 text-gray-800 hover:bg-gray-100'
+                  >
+                    <Trash2 className='h-4 w-4 mr-1' />
+                    Eliminar
+                  </Button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className='text-center py-10 bg-white rounded-lg border'>
+              <p className='text-gray-500'>
+                {searchTerm
+                  ? 'No se encontraron categorías que coincidan con la búsqueda'
+                  : 'No hay categorías disponibles. ¡Crea la primera!'}
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
 

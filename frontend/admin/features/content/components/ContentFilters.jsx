@@ -56,7 +56,7 @@ export default function ContentFilters({ onFiltersChange }) {
       category: selectedCategory,
       status: selectedStatus
     });
-  }, [searchTerm, selectedCategory, selectedStatus]);
+  }, [searchTerm, selectedCategory, selectedStatus, onFiltersChange]);
 
   const handleSearchChange = e => {
     setSearchTerm(e.target.value);
