@@ -1,12 +1,9 @@
-'use client';
-
-import Dashboard from '@/features/dashboard/Dashboard';
+import { redirect } from 'next/navigation';
 
 /**
- * Página principal - Dashboard Admin
- * Siguiendo el principio de Responsabilidad Única (SRP), esta página solo se encarga
- * de renderizar el componente principal del dashboard
+ * Página de inicio
+ * Redirige automáticamente al dashboard
  */
-export default function HomePage() {
-  return <Dashboard />;
+export default function Home() {
+  redirect('/dashboard');
 }

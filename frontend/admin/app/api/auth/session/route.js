@@ -3,62 +3,84 @@ import { cookies } from 'next/headers';
 import { API_ENDPOINTS } from '@/shared/lib/api/config';
 
 /**
- * Endpoint para obtener la sesión actual
- * Verifica que el token sea válido y devuelve la información del usuario
+ * Endpoint para obtener la sesión actual del usuario
+ * Utiliza las cookies de autenticación para verificar el estado de sesión
  */
 export async function GET() {
-  const cookieStore = cookies();
-
-  // Obtener el token de la cookie
-  const token =
-    cookieStore.get('auth_token')?.value ||
-    cookieStore.get('playAttentionToken')?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      {
-        authenticated: false,
-        message: 'No hay sesión activa'
-      },
-      { status: 401 }
-    );
-  }
-
   try {
-    // Llamar al endpoint del backend para verificar el token
-    const response = await fetch(`${API_ENDPOINTS.auth.profile}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // Obtener las cookies
+    const cookieStore = cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    const userInfoCookie = cookieStore.get('user_info')?.value;
 
-    if (!response.ok) {
-      // Si el token no es válido, eliminar las cookies
-      cookieStore.delete('auth_token');
-      cookieStore.delete('playAttentionToken');
-      cookieStore.delete('user_info');
-
+    // Si no hay token, no hay sesión
+    if (!token) {
       return NextResponse.json(
-        {
-          authenticated: false,
-          message: 'Sesión inválida o expirada'
-        },
-        { status: 401 }
+        { isAuthenticated: false, user: null },
+        { status: 200 }
       );
     }
 
+    // Si tenemos la cookie de user_info, usamos esa información
+    if (userInfoCookie) {
+      try {
+        const userInfo = JSON.parse(userInfoCookie);
+        return NextResponse.json(
+          {
+            isAuthenticated: true,
+            user: userInfo
+          },
+          { status: 200 }
+        );
+      } catch (error) {
+        console.error('Error al parsear cookie de usuario:', error);
+        // Si hay error al parsear, continuamos con el flujo normal
+      }
+    }
+
+    // Si no tenemos la cookie o hubo error, decodificamos el token para obtener el ID
+    let userId;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(Buffer.from(payload, 'base64').toString());
+      userId = decoded.user;
+    } catch (error) {
+      console.error('Error decodificando token:', error);
+      return NextResponse.json(
+        { isAuthenticated: false, user: null },
+        { status: 200 }
+      );
+    }
+
+    // Obtener datos del usuario desde el backend
+    const response = await fetch(API_ENDPOINTS.users.getById(userId), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // Si no se puede obtener los datos del usuario, la sesión no es válida
+    if (!response.ok) {
+      return NextResponse.json(
+        { isAuthenticated: false, user: null },
+        { status: 200 }
+      );
+    }
+
+    // Extraer datos del usuario
     const userData = await response.json();
 
-    // Actualizar la cookie de user_info con los datos más recientes
+    // Preparar datos de usuario
     const userInfo = {
       id: userData.id || userData._id,
-      name: userData.name || userData.fullname,
       email: userData.email,
+      name: userData.name || userData.fullname || '',
       role: userData.role || 'user'
     };
 
+    // Actualizar la cookie con la información más reciente
     cookieStore.set('user_info', JSON.stringify(userInfo), {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
@@ -67,17 +89,21 @@ export async function GET() {
       maxAge: 7 * 24 * 60 * 60 // 7 días
     });
 
-    return NextResponse.json({
-      authenticated: true,
-      user: userInfo
-    });
-  } catch (error) {
-    console.error('Error verificando sesión:', error);
-
+    // Devolver datos de sesión
     return NextResponse.json(
       {
-        authenticated: false,
-        message: 'Error al verificar sesión'
+        isAuthenticated: true,
+        user: userInfo
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error al obtener la sesión:', error);
+    return NextResponse.json(
+      {
+        isAuthenticated: false,
+        user: null,
+        error: 'Error al verificar sesión'
       },
       { status: 500 }
     );

@@ -13,9 +13,33 @@ import { Sheet, SheetContent, SheetTrigger } from '@/shared/ui/sheet';
  * Componente SidebarMobile separado que utiliza Sheet para una mejor experiencia en móvil
  * Sigue el principio de Responsabilidad Única (SRP)
  */
-export default function SidebarMobile() {
+export default function SidebarMobile({ userRole }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [role, setRole] = useState(userRole || '');
+
+  // Obtener el rol del usuario si no se pasó como prop
+  useEffect(() => {
+    if (!userRole) {
+      // Leer la cookie user_info
+      const userCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('user_info='));
+
+      if (userCookie) {
+        try {
+          const userInfo = JSON.parse(
+            decodeURIComponent(userCookie.split('=')[1])
+          );
+          if (userInfo?.role) {
+            setRole(userInfo.role);
+          }
+        } catch (error) {
+          console.error('Error al leer la cookie user_info:', error);
+        }
+      }
+    }
+  }, [userRole]);
 
   // Agrupar elementos del menú por categoría
   const groupedMenuItems = menuItems.reduce((acc, item) => {
@@ -36,6 +60,12 @@ export default function SidebarMobile() {
     'soporte',
     'otros'
   ];
+
+  // Filtrar las categorías según el rol del usuario
+  const visibleCategories =
+    role === 'Comercial'
+      ? ['crm_destacado'] // Comercial solo ve CRM
+      : categoryOrder; // Admin ve todo
 
   // Cerrar el sidebar al cambiar de ruta
   useEffect(() => {
@@ -66,7 +96,7 @@ export default function SidebarMobile() {
             {/* Navigation menu */}
             <nav className='flex-1 overflow-y-auto py-4 scrollbar-thin'>
               <div className='space-y-1 px-2'>
-                {categoryOrder.map(category => {
+                {visibleCategories.map(category => {
                   const items = groupedMenuItems[category];
                   if (!items || items.length === 0) return null;
 

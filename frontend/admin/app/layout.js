@@ -35,15 +35,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang='es'>
       <body className={`${roboto.variable} font-sans antialiased`}>
-        <QueryProvider>
-          <div className='flex min-h-screen flex-col md:flex-row'>
-            <Sidebar />
-            <main className='flex-1 overflow-auto px-4 pt-16 md:pt-6 pb-6 relative'>
-              {children}
-            </main>
-          </div>
-          <Toaster />
-        </QueryProvider>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
