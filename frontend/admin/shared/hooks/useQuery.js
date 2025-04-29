@@ -4,7 +4,7 @@ import {
   useQuery as useTanstackQuery,
   useMutation
 } from '@tanstack/react-query';
-import { fetchApi } from '@/shared/lib/api';
+import { fetchApi } from '@/lib/api';
 
 /**
  * Custom hook for data fetching with TanStack Query

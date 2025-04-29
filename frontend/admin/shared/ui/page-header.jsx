@@ -1,14 +1,8 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 
 // Cargamos el UserMenu dinámicamente para evitar problemas de hidratación
-const UserMenu = dynamic(() => import('@/features/auth/components/UserMenu'), {
-  ssr: false,
-  loading: () => (
-    <div className='w-32 h-10 bg-accent/20 animate-pulse rounded-lg' />
-  )
-});
+
 
 /**
  * Componente reutilizable para el encabezado de páginas
@@ -32,7 +26,6 @@ export default function PageHeader({
         </div>
         <div className='flex-shrink-0 flex items-center gap-4'>
           {children}
-          <UserMenu />
         </div>
       </div>
     </header>
