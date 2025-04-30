@@ -32,7 +32,7 @@ export const metadata = {
       "Herramientas validadas científicamente para instituciones educativas, empresas y organizaciones deportivas. Mejorá atención, enfoque y rendimiento.",
     images: [
       {
-        url: "/corporativo/hero.png",
+        url: "/companies/hero.png",
         width: 1200,
         height: 630,
         alt: "Equipo de trabajo usando Play Attention",
@@ -44,10 +44,10 @@ export const metadata = {
     card: "summary_large_image",
     title: "Soluciones para Empresas y Educación | Play Attention Argentina",
     description:
-      "Neuroentrenamiento con tecnología de la NASA para mejorar atención y funciones ejecutivas en equipos corporativos, docentes y deportistas.",
+      "Neuroentrenamiento con tecnología de la NASA para mejorar atención y funciones ejecutivas en equipos companiess, docentes y deportistas.",
     images: [
       {
-        url: "/corporativo/hero.png",
+        url: "/companies/hero.png",
         alt: "Colaboradores potenciando su enfoque con Play Attention",
       },
     ],
