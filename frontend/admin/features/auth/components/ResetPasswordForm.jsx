@@ -38,6 +38,8 @@ export default function ResetPasswordForm() {
 
   // Verificar si hay un token en la URL
   useEffect(() => {
+    if (!searchParams) return;
+
     const tokenFromUrl = searchParams.get('token');
     if (tokenFromUrl) {
       // Establecer el token y actualizar los dígitos individuales

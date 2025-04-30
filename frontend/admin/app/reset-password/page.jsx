@@ -2,7 +2,7 @@
 
 import { ResetPasswordForm } from '@/features/auth/components';
 import { useSession } from '@/features/auth/hooks';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -43,7 +43,13 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className='mt-8 bg-white p-8 shadow sm:rounded-lg'>
-          <ResetPasswordForm />
+          <Suspense
+            fallback={
+              <div className='text-center py-4'>Cargando formulario...</div>
+            }
+          >
+            <ResetPasswordForm />
+          </Suspense>
         </div>
 
         <div className='text-center mt-4 text-sm text-gray-500'>
@@ -55,4 +61,4 @@ export default function ResetPasswordPage() {
       </div>
     </div>
   );
-} 
+}
