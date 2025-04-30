@@ -26,7 +26,7 @@ export class UsersController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   findAll(@Query() query: QueryUsersDto) {
     const pageNumber = query.page ? Number(query.page) : 1;
-    const limitNumber = query.limit ? Number(query.limit) : 10;
+    const limitNumber = query.limit ? Number(query.limit) : 100;
     return this.usersService.findAll(pageNumber, limitNumber);
   }
 
