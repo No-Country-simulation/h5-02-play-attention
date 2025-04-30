@@ -8,6 +8,7 @@ import { Label } from '@/shared/ui/label';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import AccessDeniedModal from './AccessDeniedModal';
+import Link from 'next/link';
 
 /**
  * Componente de formulario de login
@@ -44,38 +45,46 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
   return (
     <>
       <form onSubmit={handleSubmit} className='space-y-6'>
-        <div className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='email' className='text-sm font-medium'>
-              Email
-            </Label>
-            <div className='relative'>
-              <Input
-                id='email'
-                name='email'
-                type='email'
-                autoComplete='email'
-                required
-                placeholder='tu@email.com'
-                value={credentials.email}
-                onChange={handleChange}
-                className='border-purple-200 focus:border-purple-500 focus:ring-purple-500'
-              />
-            </div>
+        <div>
+          <Label
+            htmlFor='email'
+            className='block text-sm font-medium text-gray-700'
+          >
+            Correo electrónico
+          </Label>
+          <div className='mt-1'>
+            <Input
+              id='email'
+              name='email'
+              type='email'
+              autoComplete='email'
+              required
+              placeholder='nombre@ejemplo.com'
+              value={credentials.email}
+              onChange={handleChange}
+              className='border-purple-200 focus:border-purple-500 focus:ring-purple-500'
+            />
           </div>
+        </div>
 
-          <div className='space-y-2'>
-            <div className='flex items-center justify-between'>
-              <Label htmlFor='password' className='text-sm font-medium'>
-                Contraseña
-              </Label>
-              <a
-                href='#'
-                className='text-xs font-medium text-purple-600 hover:text-purple-500'
+        <div>
+          <div className='flex items-center justify-between'>
+            <Label
+              htmlFor='password'
+              className='block text-sm font-medium text-gray-700'
+            >
+              Contraseña
+            </Label>
+            <div className='text-sm'>
+              <Link
+                href='/forgot-password'
+                className='font-medium text-purple-600 hover:text-purple-500'
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </Link>
             </div>
+          </div>
+          <div className='mt-1'>
             <div className='relative'>
               <Input
                 id='password'
