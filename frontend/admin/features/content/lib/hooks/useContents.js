@@ -17,8 +17,16 @@ export function useContents(options = {}) {
   return useQuery({
     queryKey: ['contents'],
     queryFn: async () => {
-      const contents = await contentsApi.getContents();
-      return contentsAdapter(contents);
+      try {
+        const contents = await contentsApi.getContents();
+        console.log('Contenidos obtenidos de API:', contents);
+        const adaptedContents = contentsAdapter(contents);
+        console.log('Contenidos adaptados:', adaptedContents);
+        return adaptedContents;
+      } catch (error) {
+        console.error('Error en useContents:', error);
+        throw error;
+      }
     },
     ...options
   });

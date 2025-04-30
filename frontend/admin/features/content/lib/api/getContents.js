@@ -25,10 +25,21 @@ export async function getContents() {
     }
 
     const data = await response.json();
-
-    // La API devuelve {resources: [...]} pero necesitamos el array directamente
     console.log('Respuesta API:', data);
-    return data.resources || [];
+
+    // Asegurarnos de que data es un array o extraer el array de resources
+    let contents = Array.isArray(data) ? data : data.resources;
+
+    // Si aún no es un array, devolver array vacío
+    if (!Array.isArray(contents)) {
+      console.error(
+        'Error: La respuesta no contiene un array de contenidos:',
+        data
+      );
+      contents = [];
+    }
+
+    return contents;
   } catch (error) {
     console.error('Error fetching contents:', error);
     throw error;

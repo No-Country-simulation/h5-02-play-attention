@@ -24,11 +24,9 @@ export const ESTADOS_USUARIO = [
  * Separa la lógica de UI permitiendo la reutilización
  */
 const useUserManagement = () => {
-  const { data: usersData, isLoading, error } = useUsers();
-  const createUserMutation = useCreateUser();
-  const updateUserRoleMutation = useUpdateUserRole();
-  const updateUserStatusMutation = useUpdateUserStatus();
-  const updateUserMutation = useUpdateUser();
+  // Estado para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Limitado por el backend a 10
 
   // Estados
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,15 +37,35 @@ const useUserManagement = () => {
   const [viewLayout, setViewLayout] = useState('list');
   const [updatingRoles, setUpdatingRoles] = useState({});
   const [updatingStatuses, setUpdatingStatuses] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 4;
+
+  // Obtener datos paginados desde el servidor
+  const {
+    data: usersData,
+    isLoading,
+    error
+  } = useUsers({
+    page: currentPage,
+    limit: pageSize,
+    status: selectedStatus,
+    search: searchTerm
+  });
+
+  const createUserMutation = useCreateUser();
+  const updateUserRoleMutation = useUpdateUserRole();
+  const updateUserStatusMutation = useUpdateUserStatus();
+  const updateUserMutation = useUpdateUser();
 
   const [editFormData, setEditFormData] = useState({
     name: '',
     email: '',
     role: 'Usuario'
   });
-  console.log(usersData);
+
+  // Extraer información de paginación del servidor
+  const totalUsers = usersData?.total || 0;
+  const serverPage = usersData?.page || 1;
+  const totalPages = usersData?.totalPages || 1;
+
   // Transformar datos del API al formato esperado
   const users = usersData?.data
     ? usersData.data.map(user => ({
@@ -62,33 +80,13 @@ const useUserManagement = () => {
       }))
     : [];
 
-  // Filtrar usuarios por término de búsqueda y estado
-  const filteredUsers = users.filter(user => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+  // Todos los filtrados ahora se harán en el servidor
+  // Esto es solo para compatibilidad con la interfaz actual
+  const filteredUsers = users;
+  const currentPageUsers = users;
+  const currentUsersCount = users.length;
 
-    const matchesStatus =
-      selectedStatus === 'all' || user.status === selectedStatus;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // Calcular datos de paginación
-  const totalUsers = filteredUsers.length;
-  const totalPages = Math.ceil(totalUsers / pageSize);
-
-  // Obtener usuarios para la página actual
-  const getCurrentPageUsers = () => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredUsers.slice(startIndex, endIndex);
-  };
-
-  const currentPageUsers = getCurrentPageUsers();
-  const currentUsersCount = currentPageUsers.length;
-
-  // Agrupar usuarios por roles
+  // Agrupar usuarios por roles (mantenemos esto en el cliente por ahora)
   const getGroupedUsers = () => {
     const team = filteredUsers.filter(
       user => user.role === 'Admin' || user.role === 'Comercial'
@@ -104,11 +102,11 @@ const useUserManagement = () => {
 
   const groupedUsers = getGroupedUsers();
 
-  // Calcular estadísticas de usuarios
+  // Calcular estadísticas de usuarios (también se puede mover al servidor en el futuro)
   const calculateUserStats = () => {
     if (!users.length) {
       return {
-        total: 0,
+        total: totalUsers, // Usamos el total del servidor
         active: 0,
         inactive: 0,
         pending: 0,
@@ -120,7 +118,6 @@ const useUserManagement = () => {
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    const total = users.length;
     const active = users.filter(user => user.status === 'active').length;
     const inactive = users.filter(user => user.status === 'inactive').length;
     const pending = users.filter(user => user.status === 'pending').length;
@@ -134,7 +131,7 @@ const useUserManagement = () => {
     }).length;
 
     return {
-      total,
+      total: totalUsers, // Usamos el total del servidor
       active,
       inactive,
       pending,
@@ -291,7 +288,7 @@ const useUserManagement = () => {
         stats: userStats,
         selectedStatus,
         searchTerm,
-        totalUsers: filteredUsers.length
+        totalUsers: totalUsers // Usamos el total del servidor
       });
     } catch (error) {
       console.error('Error al exportar usuarios:', error);
@@ -311,19 +308,39 @@ const useUserManagement = () => {
     }
   };
 
+  // Manejo de filtros - resetear paginación cuando cambian
+  const handleFilterChange = (type, value) => {
+    if (type === 'status') {
+      setSelectedStatus(value);
+    } else if (type === 'search') {
+      setSearchTerm(value);
+    }
+    // Volver a la primera página al cambiar cualquier filtro
+    setCurrentPage(1);
+  };
+
+  // Reemplazo de setSearchTerm y setSelectedStatus
+  const handleSearchChange = value => {
+    handleFilterChange('search', value);
+  };
+
+  const handleStatusFilterChange = value => {
+    handleFilterChange('status', value);
+  };
+
   return {
     // Estado
     isLoading,
     error,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: handleSearchChange,
     isCreateModalOpen,
     setIsCreateModalOpen,
     isEditModalOpen,
     setIsEditModalOpen,
     currentUser,
     selectedStatus,
-    setSelectedStatus,
+    setSelectedStatus: handleStatusFilterChange,
     viewLayout,
     setViewLayout,
     updatingRoles,

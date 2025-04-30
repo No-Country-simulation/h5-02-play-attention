@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -352,102 +352,130 @@ function ContentThumbnail({ content, onClick }) {
  * Sigue el principio de Responsabilidad Única (SRP) al encargarse solo de mostrar y gestionar la lista
  */
 export default function ContentList({ contentType, searchFilters, onEdit }) {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [contentToDelete, setContentToDelete] = useState(null);
-  const [previewContent, setPreviewContent] = useState(null);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  // Estado para paginación
+  const { data: contents = [], isLoading, isError, error } = useContents();
+
+  console.log('ContentList - contents:', contents);
+  console.log('ContentList - contentType:', contentType);
+  console.log('ContentList - searchFilters:', searchFilters);
+
+  // Estado para paginación y modales
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5; // Número de elementos por página
+  const [itemsPerPage] = useState(10);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedContent, setSelectedContent] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState(null);
+  const deleteContent = useDeleteContent();
 
-  // Obtener contenidos desde la API
-  const { data: contents = [], isLoading, error } = useContents();
+  // Filtrar contenidos según el tipo seleccionado y los filtros de búsqueda
+  const filteredContents = useMemo(() => {
+    if (!Array.isArray(contents)) {
+      console.error('contents no es un array:', contents);
+      return [];
+    }
 
-  // Debug: imprimir contenidos para diagnóstico con más detalle
-  console.log('Contenidos recibidos en componente:', contents);
+    console.log('Filtrando contenidos:', {
+      contents,
+      contentType,
+      searchFilters
+    });
 
-  // Imprimir específicamente los youtubeId para verificar
-  contents.forEach(content => {
-    console.log(
-      `Contenido ${content.id}: title=${content.title}, type=${content.type}, youtubeId=${content.youtubeId}, url=${content.url}, fileUrl=${content.fileUrl}`
+    return contents.filter(content => {
+      // Filtrar por tipo de contenido
+      if (contentType !== 'all' && content.type !== contentType) {
+        return false;
+      }
+
+      // Filtrar por término de búsqueda
+      if (
+        searchFilters.searchTerm &&
+        !content.title
+          .toLowerCase()
+          .includes(searchFilters.searchTerm.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Filtrar por categoría
+      if (
+        searchFilters.category !== 'Todos' &&
+        content.category !== searchFilters.category
+      ) {
+        return false;
+      }
+
+      // Filtrar por estado
+      if (
+        searchFilters.status !== 'Todos' &&
+        content.status !== searchFilters.status
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [contents, contentType, searchFilters]);
+
+  // Calcular contenidos paginados
+  const paginatedContents = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredContents.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredContents, currentPage, itemsPerPage]);
+
+  // Si está cargando, mostrar spinner
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center p-8'>
+        <LoadingSpinner />
+      </div>
     );
-  });
+  }
 
-  const deleteMutation = useDeleteContent();
+  // Si hay error, mostrar mensaje
+  if (isError) {
+    return (
+      <div className='text-center p-8 text-red-500'>
+        Error al cargar los contenidos: {error?.message || 'Error desconocido'}
+      </div>
+    );
+  }
+
+  // Si no hay contenidos después de filtrar, mostrar mensaje
+  if (filteredContents.length === 0) {
+    return (
+      <div className='text-center p-8 text-gray-500'>
+        No se encontró contenido para mostrar
+      </div>
+    );
+  }
 
   // Función para mostrar la vista previa
   const handlePreviewClick = content => {
-    setPreviewContent(content);
-    setPreviewModalOpen(true);
+    setSelectedContent(content);
+    setShowPreviewModal(true);
   };
 
   // Función para cerrar la vista previa
   const closePreviewModal = () => {
-    setPreviewModalOpen(false);
+    setShowPreviewModal(false);
   };
 
-  // Función para filtrar contenido con todos los criterios
-  const filteredContent = contents.filter(item => {
-    // Filtrar por tipo de contenido (selector superior)
-    if (
-      contentType !== 'all' &&
-      item.type.toLowerCase() !== contentType.toLowerCase()
-    ) {
-      return false;
+  // Función para manejar la intención de eliminar
+  const handleDeleteClick = content => {
+    setContentToDelete(content);
+    setShowDeleteModal(true);
+  };
+
+  // Función para confirmar eliminación
+  const confirmDelete = async () => {
+    try {
+      await deleteContent.mutateAsync(contentToDelete.id);
+      setShowDeleteModal(false);
+      setContentToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar:', error);
     }
-
-    // Filtrar por término de búsqueda (busca en todos los campos)
-    if (searchFilters.searchTerm) {
-      const searchTermLower = searchFilters.searchTerm.toLowerCase();
-      const matchesSearch =
-        item.title.toLowerCase().includes(searchTermLower) ||
-        item.type.toLowerCase().includes(searchTermLower) ||
-        (typeof item.category === 'object'
-          ? item.category.name.toLowerCase().includes(searchTermLower)
-          : item.category.toLowerCase().includes(searchTermLower)) ||
-        item.status.toLowerCase().includes(searchTermLower);
-
-      if (!matchesSearch) {
-        return false;
-      }
-    }
-
-    // Filtrar por categoría
-    if (searchFilters.category !== 'Todos') {
-      const itemCategory =
-        typeof item.category === 'object' ? item.category.name : item.category;
-
-      if (itemCategory !== searchFilters.category) {
-        return false;
-      }
-    }
-
-    // Filtrar por estado
-    if (
-      searchFilters.status !== 'Todos' &&
-      item.status !== searchFilters.status
-    ) {
-      return false;
-    }
-
-    return true;
-  });
-
-  // Calcular total de páginas
-  const totalPages = Math.max(1, Math.ceil(filteredContent.length / pageSize));
-
-  // Ajustar currentPage si el valor actual no es válido
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [totalPages, currentPage]);
-
-  // Obtener contenido para la página actual
-  const paginatedContent = filteredContent.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  };
 
   // Manejadores de navegación
   const goToPreviousPage = () => {
@@ -457,45 +485,10 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
   };
 
   const goToNextPage = () => {
-    if (currentPage < totalPages) {
+    if (currentPage < Math.ceil(filteredContents.length / itemsPerPage)) {
       setCurrentPage(prev => prev + 1);
     }
   };
-
-  // Función para manejar la intención de eliminar
-  const handleDeleteClick = content => {
-    setContentToDelete(content);
-    setDeleteModalOpen(true);
-  };
-
-  // Función para confirmar eliminación
-  const confirmDelete = async () => {
-    try {
-      await deleteMutation.mutateAsync(contentToDelete.id);
-      setDeleteModalOpen(false);
-      setContentToDelete(null);
-    } catch (error) {
-      console.error('Error al eliminar:', error);
-    }
-  };
-
-  // Mostrar estado de carga
-  if (isLoading) {
-    return (
-      <div className='flex justify-center items-center py-20'>
-        <LoadingSpinner text='Cargando contenidos' size={40} />
-      </div>
-    );
-  }
-
-  // Mostrar error si ocurre
-  if (error) {
-    return (
-      <div className='text-center py-10 text-red-500'>
-        Error al cargar contenidos: {error.message}
-      </div>
-    );
-  }
 
   return (
     <div className='mt-4'>
@@ -515,8 +508,8 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedContent.length > 0 ? (
-              paginatedContent.map(content => (
+            {paginatedContents.length > 0 ? (
+              paginatedContents.map(content => (
                 <TableRow key={content.id}>
                   <TableCell>
                     <ContentThumbnail
@@ -617,8 +610,8 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
 
       {/* Vista de tarjetas para dispositivos móviles */}
       <div className='md:hidden space-y-4'>
-        {paginatedContent.length > 0 ? (
-          paginatedContent.map(content => (
+        {paginatedContents.length > 0 ? (
+          paginatedContents.map(content => (
             <div
               key={content.id}
               className='bg-white p-4 rounded-lg border shadow-sm'
@@ -721,28 +714,28 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
 
       {/* Modal de vista previa */}
       <PreviewModal
-        content={previewContent}
-        isOpen={previewModalOpen}
+        content={selectedContent}
+        isOpen={showPreviewModal}
         onClose={closePreviewModal}
       />
 
       {/* Modal de confirmación de eliminación */}
       <DeleteConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
         title='Eliminar contenido'
         message={`¿Estás seguro que deseas eliminar "${contentToDelete?.title}"? Esta acción no se puede deshacer.`}
       />
 
       {/* Paginación - Solo mostrar cuando hay contenido */}
-      {filteredContent.length > 0 && (
+      {filteredContents.length > 0 && (
         <ContentPagination
           currentPage={currentPage}
-          totalPages={totalPages}
-          currentCount={paginatedContent.length}
-          totalCount={filteredContent.length}
-          pageSize={pageSize}
+          totalPages={Math.ceil(filteredContents.length / itemsPerPage)}
+          currentCount={paginatedContents.length}
+          totalCount={filteredContents.length}
+          pageSize={itemsPerPage}
           onPrevious={goToPreviousPage}
           onNext={goToNextPage}
         />
