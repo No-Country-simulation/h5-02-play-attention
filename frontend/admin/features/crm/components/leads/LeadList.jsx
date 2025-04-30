@@ -62,19 +62,8 @@ export default function LeadList({
 }) {
   const [leadStatuses, setLeadStatuses] = useState({});
 
-  // Ordenar los leads según el criterio seleccionado
-  const sortedLeads = [...leads].sort((a, b) => {
-    if (sortOrder === 'alphabetical') {
-      // Ordenar alfabéticamente por nombre
-      return a.name.localeCompare(b.name);
-    } else if (sortOrder === 'oldest') {
-      // Ordenar por fecha de creación (más antiguo primero)
-      return new Date(a.createdAt) - new Date(b.createdAt);
-    } else {
-      // Por defecto, ordenar por fecha de creación (más reciente primero)
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    }
-  });
+  // Los leads ya vienen ordenados del componente padre
+  const sortedLeads = leads;
 
   // Verificar estado de carga y mostrar mensajes apropiados
   if (loading) {

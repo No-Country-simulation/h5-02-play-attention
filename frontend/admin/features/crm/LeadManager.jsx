@@ -68,27 +68,41 @@ export default function LeadManager() {
   const adaptedLeads = adaptLeadsForComponents(leadsFromApi);
 
   // Aplicar filtros de forma local
-  const filteredLeads = adaptedLeads.filter(lead => {
-    // Filtro por estado
-    if (filters.status !== 'all' && lead.status !== filters.status) {
-      return false;
-    }
+  const filteredLeads = adaptedLeads
+    .filter(lead => {
+      // Filtro por estado
+      if (filters.status !== 'all' && lead.status !== filters.status) {
+        return false;
+      }
 
-    // Filtro por tipo de usuario
-    if (filters.userType !== 'all' && lead.userType !== filters.userType) {
-      return false;
-    }
+      // Filtro por tipo de usuario
+      if (filters.userType !== 'all' && lead.userType !== filters.userType) {
+        return false;
+      }
 
-    // Filtro por búsqueda
-    if (
-      filters.search &&
-      !lead.name?.toLowerCase().includes(filters.search.toLowerCase())
-    ) {
-      return false;
-    }
+      // Filtro por búsqueda
+      if (
+        filters.search &&
+        !lead.name?.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    })
+    // Ordenar los leads según el criterio seleccionado
+    .sort((a, b) => {
+      if (filters.sortOrder === 'alphabetical') {
+        // Ordenar alfabéticamente por nombre
+        return a.name.localeCompare(b.name);
+      } else if (filters.sortOrder === 'oldest') {
+        // Ordenar por fecha de creación (más antiguo primero)
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else {
+        // Por defecto, ordenar por fecha de creación (más reciente primero)
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    });
 
   // Aplicar paginación localmente
   const startIndex = (pagination.page - 1) * pagination.pageSize;

@@ -32,7 +32,7 @@ export const menuItems = [
 
   // Sección de contenidos
   {
-    name: 'Contenido',
+    name: 'Gestion de Contenido',
     icon: FileText,
     path: '/content',
     category: 'contenido'
