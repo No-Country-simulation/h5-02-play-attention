@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, Loader2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
 import { useCategories } from '../lib/hooks';
@@ -111,7 +111,8 @@ export default function ContentFilters({ onFiltersChange }) {
               {categoryOpen && (
                 <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto'>
                   {loadingCategories ? (
-                    <div className='px-3 py-3 text-center text-gray-500'>
+                    <div className='px-3 py-3 text-center text-gray-500 flex items-center justify-center'>
+                      <Loader2 className='h-4 w-4 mr-2 animate-spin text-primary' />
                       Cargando categorías...
                     </div>
                   ) : (

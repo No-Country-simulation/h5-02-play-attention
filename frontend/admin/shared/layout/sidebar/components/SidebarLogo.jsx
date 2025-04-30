@@ -13,7 +13,7 @@ export function SidebarLogo({ expanded, className }) {
       {expanded ? (
         // Logo completo para sidebar expandido
         <Image
-          src='/svgs/logowhiteadmin.svg'
+          src='/svgs/logoadmin.svg'
           alt='Play Attention Admin'
           width={160}
           height={40}

@@ -18,7 +18,7 @@ export const menuItems = [
   {
     name: 'Panel de Control',
     icon: LayoutDashboard,
-    path: '/',
+    path: '/dashboard',
     category: 'principal'
   },
 

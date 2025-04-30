@@ -1,5 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+// Cargamos el UserMenu dinámicamente para evitar problemas de hidratación
+const UserMenu = dynamic(() => import('@/features/auth/components/UserMenu'), {
+  ssr: false
+});
+
 /**
  * Componente reutilizable para el encabezado de páginas
  * Sigue el principio de Responsabilidad Única (SRP) al encargarse únicamente
@@ -11,6 +19,13 @@ export default function PageHeader({
   className = '',
   children
 }) {
+  // Debug en el cliente
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('PageHeader montado. Cookies disponibles:', document.cookie);
+    }
+  }, []);
+
   return (
     <header className={`mb-8 pb-4 border-b ${className}`}>
       <div className='flex justify-between items-center'>
@@ -20,7 +35,10 @@ export default function PageHeader({
           </div>
           {description && <p className='text-gray-500'>{description}</p>}
         </div>
-        {children && <div className='flex-shrink-0'>{children}</div>}
+        <div className='flex-shrink-0 flex items-center gap-4'>
+          {children}
+          <UserMenu />
+        </div>
       </div>
     </header>
   );

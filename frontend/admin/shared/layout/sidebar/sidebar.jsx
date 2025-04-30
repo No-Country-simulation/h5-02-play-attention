@@ -13,6 +13,7 @@ import { isItemActive } from './lib/utils/sidebarUtils';
 import SidebarItem from './components/SidebarItem';
 import SidebarLogo from './components/SidebarLogo';
 import SidebarMobile from './components/SidebarMobile';
+import SidebarCollapseButton from '@/shared/layout/sidebar/components/SidebarCollapseButton';
 
 /**
  * Componente Sidebar que sigue el principio de Responsabilidad Única (SRP)
@@ -21,6 +22,28 @@ import SidebarMobile from './components/SidebarMobile';
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState('');
+
+  // Obtener el rol del usuario desde la cookie al cargar el componente
+  useEffect(() => {
+    // Leer la cookie user_info usando la API nativa
+    const userCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('user_info='));
+
+    if (userCookie) {
+      try {
+        const userInfo = JSON.parse(
+          decodeURIComponent(userCookie.split('=')[1])
+        );
+        if (userInfo?.role) {
+          setUserRole(userInfo.role);
+        }
+      } catch (error) {
+        console.error('Error al leer la cookie user_info:', error);
+      }
+    }
+  }, []);
 
   // Estado para controlar qué secciones están expandidas
   const [expandedSections, setExpandedSections] = useState({
@@ -47,8 +70,8 @@ export default function Sidebar() {
     'principal',
     'crm_destacado',
     'administracion',
-    'soporte',
     'contenido',
+    'soporte',
     'otros'
   ];
 
@@ -62,131 +85,118 @@ export default function Sidebar() {
     }));
   };
 
+  // Filtrar las categorías según el rol del usuario
+  const visibleCategories =
+    userRole === 'Comercial'
+      ? ['crm_destacado'] // Comercial solo ve CRM
+      : categoryOrder; // Admin ve todo
+
   return (
     <>
       {/* Componente para móvil */}
-      <SidebarMobile />
+      <SidebarMobile userRole={userRole} />
 
       {/* Sidebar para desktop */}
-      <div className='hidden md:block'>
-        <div
-          className={`sticky top-0 left-0 h-screen bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out border-r border-sidebar-border/30 z-40 
-          ${expanded ? 'w-64' : 'w-16'}`}
-        >
-          <div className='flex flex-col h-full'>
-            {/* Logo and toggle */}
-            <div className='flex items-center justify-between py-4 px-4 border-b border-sidebar-border/30 bg-sidebar/95 backdrop-blur-sm'>
-              <div className='flex flex-col'>
-                <SidebarLogo expanded={expanded} />
-              </div>
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className='p-1.5 rounded-full hover:bg-sidebar-border/30 transition-colors duration-200'
-                aria-label={expanded ? 'Colapsar menú' : 'Expandir menú'}
-              >
-                {expanded ? (
-                  <ChevronLeft className='h-5 w-5 text-sidebar-foreground/70' />
-                ) : (
-                  <ChevronRight className='h-5 w-5 text-sidebar-foreground/70' />
-                )}
-              </button>
-            </div>
+      <aside
+        className={`fixed top-0 left-0 z-40 h-full border-r border-sidebar-border bg-sidebar hidden md:flex flex-col ${
+          expanded ? 'w-64' : 'w-[78px]'
+        } transition-width duration-300 ease-in-out`}
+      >
+        {/* Logo del sidebar */}
+        <div className='flex items-center justify-between h-16 border-b border-sidebar-border px-4'>
+          <SidebarLogo expanded={expanded} />
+          <SidebarCollapseButton
+            expanded={expanded}
+            onClick={() => setExpanded(!expanded)}
+          />
+        </div>
 
-            {/* Navigation menu */}
-            <nav className='flex-1 overflow-y-auto py-4 scrollbar-thin'>
-              <div className='space-y-1 px-2'>
-                {categoryOrder.map(category => {
-                  const items = groupedMenuItems[category];
-                  if (!items || items.length === 0) return null;
+        {/* Contenido del sidebar */}
+        <div className='flex flex-col h-full'>
+          {/* Navegación principal */}
+          <nav className='flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-sidebar-accent/50 scrollbar-track-sidebar/20 hover:scrollbar-thumb-sidebar-accent/70'>
+            <div className='space-y-1 px-2'>
+              {visibleCategories.map(category => {
+                const items = groupedMenuItems[category];
+                if (!items || items.length === 0) return null;
 
-                  // Para las categorías principales y CRM, mostrar sin título de sección
-                  if (
-                    category === 'principal' ||
-                    category === 'crm_destacado'
-                  ) {
-                    return (
-                      <div
-                        key={category}
-                        className={`space-y-0.5 ${
-                          category === 'crm_destacado' ? 'mt-4 mb-4' : 'mb-2'
-                        }`}
-                      >
-                        {category === 'crm_destacado' && expanded && (
-                          <div className='px-3 mb-1.5'>
-                            <div className='h-px w-full bg-sidebar-accent/40 mb-2'></div>
-                          </div>
-                        )}
-                        <ul className='space-y-0.5'>
-                          {items.map(item => (
-                            <SidebarItem
-                              key={item.name}
-                              item={item}
-                              active={isItemActive(item.path, pathname)}
-                              expanded={expanded}
-                              highlighted={category === 'crm_destacado'}
-                              isMobile={false}
-                            />
-                          ))}
-                        </ul>
-                        {category === 'crm_destacado' && expanded && (
-                          <div className='px-3 mt-1.5'>
-                            <div className='h-px w-full bg-sidebar-accent/40 mt-2'></div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-
+                // Para las categorías principales, mostrar sin título de sección
+                if (category === 'principal' || category === 'crm_destacado') {
                   return (
-                    <div key={category} className='space-y-0.5 mb-1'>
-                      {expanded && (
-                        <button
-                          onClick={() => toggleSection(category)}
-                          className='w-full flex items-center justify-between px-3 py-1.5 text-white/70 hover:text-white transition-colors'
-                          style={{ filter: 'brightness(0.85) saturate(1.2)' }}
-                        >
-                          <h3 className='text-[11px] font-medium uppercase tracking-wider'>
-                            {getCategoryTitle(category)}
-                          </h3>
-                          {expandedSections[category] ? (
-                            <ChevronUp className='h-3 w-3 text-white/60' />
-                          ) : (
-                            <ChevronDown className='h-3 w-3 text-white/60' />
-                          )}
-                        </button>
+                    <div
+                      key={category}
+                      className={`space-y-1 ${
+                        category === 'crm_destacado' ? 'mt-4 mb-4' : 'mb-2'
+                      }`}
+                    >
+                      {category === 'crm_destacado' && (
+                        <div className='px-3 mb-1.5'>
+                          <div className='h-px w-full bg-sidebar-accent/40 mb-2'></div>
+                        </div>
                       )}
-
-                      {/* Mostrar ítems solo si la sección está expandida o el sidebar colapsado */}
-                      {(!expanded || expandedSections[category]) && (
-                        <ul className='space-y-0.5'>
-                          {items.map(item => (
-                            <SidebarItem
-                              key={item.name}
-                              item={item}
-                              active={isItemActive(item.path, pathname)}
-                              expanded={expanded}
-                              isMobile={false}
-                            />
-                          ))}
-                        </ul>
+                      <ul className='space-y-1'>
+                        {items.map(item => (
+                          <SidebarItem
+                            key={item.name}
+                            item={item}
+                            active={isItemActive(item.path, pathname)}
+                            expanded={expanded}
+                            highlighted={category === 'crm_destacado'}
+                          />
+                        ))}
+                      </ul>
+                      {category === 'crm_destacado' && (
+                        <div className='px-3 mt-1.5'>
+                          <div className='h-px w-full bg-sidebar-accent/40 mt-2'></div>
+                        </div>
                       )}
                     </div>
                   );
-                })}
-              </div>
-            </nav>
+                }
 
-            {/* Footer */}
-            <div className='p-3 border-t border-sidebar-accent/30'>
-              <div className='flex justify-center'>
-                <span className='text-sidebar-accent/70 text-xs'>
-                  {appVersion}
-                </span>
-              </div>
+                // Categorías con título
+                return (
+                  <div key={category} className='space-y-1 mb-2'>
+                    {expanded && (
+                      <div className='px-3 py-1.5'>
+                        <h3 className='text-[11px] font-medium uppercase tracking-wider text-white/70'>
+                          {getCategoryTitle(category)}
+                        </h3>
+                      </div>
+                    )}
+                    <ul className='space-y-1'>
+                      {items.map(item => (
+                        <SidebarItem
+                          key={item.name}
+                          item={item}
+                          active={isItemActive(item.path, pathname)}
+                          expanded={expanded}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          </nav>
+
+          {/* Footer del sidebar */}
+          <div className='p-3 border-t border-sidebar-accent/30'>
+            <div className='flex justify-center'>
+              <span className='text-sidebar-accent/70 text-xs'>
+                {appVersion}
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </aside>
+
+      {/* Espaciador para mantener el contenido de la página correctamente posicionado */}
+      <div
+        className={`hidden md:block ${
+          expanded ? 'ml-64' : 'ml-[78px]'
+        } transition-[margin] duration-300 ease-in-out`}
+      ></div>
     </>
   );
 }
