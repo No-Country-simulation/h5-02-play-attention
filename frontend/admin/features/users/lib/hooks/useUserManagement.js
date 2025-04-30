@@ -38,6 +38,9 @@ const useUserManagement = () => {
   const [updatingRoles, setUpdatingRoles] = useState({});
   const [updatingStatuses, setUpdatingStatuses] = useState({});
 
+  // Agregar estado para ordenamiento
+  const [sortOrder, setSortOrder] = useState('newest');
+
   // Obtener datos paginados desde el servidor
   const {
     data: usersData,
@@ -47,7 +50,8 @@ const useUserManagement = () => {
     page: currentPage,
     limit: pageSize,
     status: selectedStatus,
-    search: searchTerm
+    search: searchTerm,
+    sort: sortOrder // Agregar parámetro de ordenamiento
   });
 
   const createUserMutation = useCreateUser();
@@ -83,8 +87,32 @@ const useUserManagement = () => {
   // Todos los filtrados ahora se harán en el servidor
   // Esto es solo para compatibilidad con la interfaz actual
   const filteredUsers = users;
-  const currentPageUsers = users;
-  const currentUsersCount = users.length;
+
+  // Ordenar usuarios según el criterio seleccionado
+  const sortUsers = users => {
+    if (!users) return [];
+
+    const sorted = [...users];
+
+    switch (sortOrder) {
+      case 'newest':
+        return sorted.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      case 'oldest':
+        return sorted.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+      case 'alphabetical':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      default:
+        return sorted;
+    }
+  };
+
+  // Aplicar ordenamiento a los usuarios filtrados
+  const currentPageUsers = sortUsers(users);
+  const currentUsersCount = currentPageUsers.length;
 
   // Agrupar usuarios por roles (mantenemos esto en el cliente por ahora)
   const getGroupedUsers = () => {
@@ -349,6 +377,8 @@ const useUserManagement = () => {
     currentPage,
     pageSize,
     totalPages,
+    sortOrder,
+    setSortOrder,
 
     // Datos
     users,

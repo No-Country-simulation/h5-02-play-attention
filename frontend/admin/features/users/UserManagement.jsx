@@ -45,6 +45,8 @@ export default function UserManagement() {
     currentPage,
     pageSize,
     totalPages,
+    sortOrder,
+    setSortOrder,
 
     // Datos
     currentPageUsers,
@@ -104,6 +106,8 @@ export default function UserManagement() {
         onExportClick={handleExportUsers}
         viewLayout={viewLayout}
         onViewLayoutChange={setViewLayout}
+        sortOrder={sortOrder}
+        onSortChange={setSortOrder}
       />
 
       {/* Filtros por estado */}

@@ -51,6 +51,9 @@ const UserTable = ({
     }));
   };
 
+  // Clase común para los selectores
+  const commonSelectClass = 'w-[140px] h-9';
+
   return (
     <div className='mb-6'>
       {/* Vista de tarjetas para móviles y tablets */}
@@ -101,7 +104,7 @@ const UserTable = ({
                           disabled={updatingRoles[user.id]}
                         >
                           <SelectTrigger
-                            className='h-8 w-full px-2 text-xs border'
+                            className={`${commonSelectClass} text-xs border`}
                             aria-label='Cambiar rol'
                           >
                             <SelectValue placeholder='Seleccionar rol' />
@@ -134,7 +137,7 @@ const UserTable = ({
                           disabled={updatingStatuses[user.id]}
                         >
                           <SelectTrigger
-                            className={`h-8 w-full px-2 text-xs border capitalize ${getStatusSelectClass(
+                            className={`${commonSelectClass} text-xs border ${getStatusSelectClass(
                               user.status
                             )}`}
                             aria-label='Cambiar estado'
@@ -230,7 +233,7 @@ const UserTable = ({
                         disabled={updatingRoles[user.id]}
                       >
                         <SelectTrigger
-                          className='h-8 px-2 text-xs sm:text-sm border'
+                          className={`${commonSelectClass} text-sm border`}
                           aria-label='Cambiar rol'
                         >
                           <SelectValue placeholder='Seleccionar rol' />
@@ -258,7 +261,7 @@ const UserTable = ({
                         disabled={updatingStatuses[user.id]}
                       >
                         <SelectTrigger
-                          className={`h-8 px-2 text-xs sm:text-sm border capitalize ${getStatusSelectClass(
+                          className={`${commonSelectClass} text-sm border ${getStatusSelectClass(
                             user.status
                           )}`}
                           aria-label='Cambiar estado'
@@ -288,35 +291,31 @@ const UserTable = ({
                       )}
                     </div>
                   </td>
-                  <td className='py-4 px-4 whitespace-nowrap'>
-                    <div className='text-sm text-gray-500'>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </div>
+                  <td className='py-4 px-4 whitespace-nowrap text-sm text-gray-500'>
+                    {new Date(user.createdAt).toLocaleDateString()}
                   </td>
-                  <td className='py-4 px-4 whitespace-nowrap text-sm font-medium'>
-                    <div className='flex justify-center'>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => onEditUser(user)}
-                              className='h-8 w-8 rounded-md flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors'
-                            >
-                              <Edit className='h-4 w-4 text-gray-600' />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Editar usuario</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
+                  <td className='py-4 px-4 whitespace-nowrap text-right text-sm font-medium'>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => onEditUser(user)}
+                            className='h-8 w-8 rounded-md flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors'
+                          >
+                            <Edit className='h-4 w-4 text-gray-600' />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Editar usuario</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan='6' className='py-4 px-4 text-center text-gray-500'>
+                <td colSpan='6' className='px-4 py-8 text-center text-gray-500'>
                   No se encontraron usuarios
                 </td>
               </tr>
