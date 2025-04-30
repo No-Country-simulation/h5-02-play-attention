@@ -73,6 +73,10 @@ export class ResourcesService {
     try {
       let url: string | undefined;
       
+      if ((file || updateResourceDto.url) && resource.url && resource.url.includes('cloudinary')) {
+        await this.uploadService.deleteFile(resource.url);
+      }
+
       if (file) {
         const uploadResult = await this.uploadService.uploadFile(file);
         url = uploadResult.secure_url;
@@ -119,14 +123,20 @@ export class ResourcesService {
   }
 
   async remove(id: string): Promise<Resource> {
-    const resource = await this.resourceModel.findByIdAndDelete(id).exec();
+    const resource = await this.resourceModel.findById(id);
     if (!resource) {
       throw new BadRequestException(`Recurso con ID ${id} no encontrado`);
     }
+
+    if (resource.url && resource.url.includes('cloudinary')) {
+      await this.uploadService.deleteFile(resource.url);
+    }
+
+    await this.resourceModel.deleteOne({ _id: id });
     return resource;
   }
 
-  async findAll () {
+  async findAll() {
     return this.resourceModel.find().exec();
   }
 }
