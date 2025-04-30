@@ -2,7 +2,7 @@
 
 import { LoginForm } from '@/features/auth';
 import { useSession } from '@/features/auth/hooks';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { BarChart3, Users, FileText, Briefcase } from 'lucide-react';
@@ -17,7 +17,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
 
   // Obtener la URL de redirección si existe
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
+  const redirectUrl = searchParams?.get('redirect') || '/dashboard';
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -102,7 +102,13 @@ export default function LoginPage() {
           </div>
 
           <div className='mt-8 bg-white p-8 shadow sm:rounded-lg'>
-            <LoginForm redirectUrl={redirectUrl} />
+            <Suspense
+              fallback={
+                <div className='text-center py-4'>Cargando formulario...</div>
+              }
+            >
+              <LoginForm redirectUrl={redirectUrl} />
+            </Suspense>
           </div>
 
           <div className='text-center mt-4 text-sm text-gray-500'>
