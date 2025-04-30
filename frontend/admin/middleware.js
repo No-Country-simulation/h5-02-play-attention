@@ -14,7 +14,12 @@ export function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Rutas públicas que no requieren autenticación
-  const publicPaths = ['/login', '/register', '/forgot-password'];
+  const publicPaths = [
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password'
+  ];
 
   // Si es una ruta pública, no hacer nada
   if (publicPaths.some(path => pathname.startsWith(path))) {
@@ -57,6 +62,6 @@ export function middleware(request) {
 export const config = {
   // Aplicar a todas las rutas excepto a los archivos estáticos, API, etc.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/auth|images|svgs|.*\\.png$|.*\\.svg$).*)'
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|api/reset-password|images|svgs|.*\\.png$|.*\\.svg$).*)'
   ]
 };

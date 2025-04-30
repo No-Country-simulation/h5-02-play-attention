@@ -26,8 +26,9 @@ export const API_ENDPOINTS = {
     register: `${API_URL}/api/auth/register`,
     forgotPassword: `${API_URL}/api/auth/forgot-password`,
     changePassword: `${API_URL}/api/auth/change-password`,
-    profile: `${API_URL}/api/auth/profile`,
-    confirmToken: `${API_URL}/api/auth/confirm-token`
+    resetPassword: `${API_URL}/api/auth/reset-password`,
+    confirmToken: `${API_URL}/api/auth/confirm-token`,
+    profile: `${API_URL}/api/auth/profile`
   },
   // Usuarios
   users: {
