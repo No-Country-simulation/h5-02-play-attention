@@ -7,6 +7,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { BarChart3, Users, FileText, Briefcase } from 'lucide-react';
 
+// Componente hijo que usa useSearchParams
+function LoginFormWrapper() {
+  const searchParams = useSearchParams();
+  // Obtener la URL de redirección si existe
+  const redirectUrl = searchParams?.get('redirect') || '/dashboard';
+
+  return <LoginForm redirectUrl={redirectUrl} />;
+}
+
 /**
  * Página de login
  * @returns {JSX.Element} Componente de React
@@ -14,17 +23,13 @@ import { BarChart3, Users, FileText, Briefcase } from 'lucide-react';
 export default function LoginPage() {
   const { data: session, isLoading } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Obtener la URL de redirección si existe
-  const redirectUrl = searchParams?.get('redirect') || '/dashboard';
 
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (!isLoading && session.isAuthenticated) {
-      router.push(redirectUrl);
+      router.push('/dashboard');
     }
-  }, [session, router, isLoading, redirectUrl]);
+  }, [session, router, isLoading]);
 
   return (
     <div className='min-h-screen grid md:grid-cols-2'>
@@ -107,7 +112,7 @@ export default function LoginPage() {
                 <div className='text-center py-4'>Cargando formulario...</div>
               }
             >
-              <LoginForm redirectUrl={redirectUrl} />
+              <LoginFormWrapper />
             </Suspense>
           </div>
 

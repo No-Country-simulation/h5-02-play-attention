@@ -6,6 +6,11 @@ import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+// Componente intermedio para aislar el uso de useSearchParams
+function ResetPasswordFormWrapper() {
+  return <ResetPasswordForm />;
+}
+
 /**
  * Página de restablecimiento de contraseña
  * @returns {JSX.Element} Componente de React
@@ -48,7 +53,7 @@ export default function ResetPasswordPage() {
               <div className='text-center py-4'>Cargando formulario...</div>
             }
           >
-            <ResetPasswordForm />
+            <ResetPasswordFormWrapper />
           </Suspense>
         </div>
 
