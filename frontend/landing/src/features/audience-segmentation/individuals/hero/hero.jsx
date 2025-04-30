@@ -17,7 +17,7 @@ export function HeroSection() {
           <div className="space-y-6">
             <h1 className="text-4xl font-bold text-primary-900 leading-tight">
               TDAH bajo tu control: Tecnología de la NASA para adultos,
-              adolescentes y padres              
+              adolescentes y padres
             </h1>
             <p className="text-2xl text-primary-400">
               Por fin, una solución que se adapta a tu ritmo de vida. Recupera
@@ -40,7 +40,7 @@ export function HeroSection() {
               alt="Persona usando el dispositivo Play Attention"
               width={500}
               height={600}
-              className="relative z-10 mx-auto"
+              className="relative z-10 mx-auto w-full max-w-[500px] h-[500px] sm:h-[600px] max-h-[600px]"
               priority
             />
           </div>
