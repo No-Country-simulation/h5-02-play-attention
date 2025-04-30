@@ -31,7 +31,7 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
       >
         Funcionamiento
       </Button>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="link"
@@ -45,10 +45,10 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
             ¿Para quién es? <ChevronDown size={16} />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="hidden lg:block">
           <DropdownMenuItem
             onSelect={(e) => {
-              e.preventDefault(); 
+              e.preventDefault();
               router.push("/personas");
             }}
           >
@@ -56,7 +56,7 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(e) => {
-              e.preventDefault(); 
+              e.preventDefault();
               router.push("/profesionales");
             }}
           >
@@ -64,8 +64,8 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(e) => {
-              e.preventDefault(); 
-              router.push("/profesionales");
+              e.preventDefault();
+              router.push("/empresas");
             }}
           >
             Empresas

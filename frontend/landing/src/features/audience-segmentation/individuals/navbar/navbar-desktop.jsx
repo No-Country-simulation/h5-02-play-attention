@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function NavbarDesktop({ scrollToSection, activeSection }) {
@@ -24,6 +31,47 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
       >
         Funcionamiento
       </Button>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="link"
+            className={cn(
+              "flex items-center gap-1",
+              activeSection === "audience-segmentation"
+                ? "underline"
+                : "underline-offset-4"
+            )}
+          >
+            Personas <ChevronDown size={16} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="hidden lg:block">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              router.push("/");
+            }}
+          >
+            Principal
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              router.push("/profesionales");
+            }}
+          >
+            Profesionales
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              router.push("/empresas");
+            }}
+          >
+            Empresas
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button
         onClick={() => scrollToSection("benefits")}
         variant="link"

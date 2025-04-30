@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/ui/button";
-import { Menu, X,  } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -55,7 +55,57 @@ export default function NavbarMobile({
           >
             Funcionamiento
           </button>
-
+          <div className="flex flex-col space-y-2">
+            <button
+              onClick={() => setSolutionsOpen(!solutionsOpen)}
+              className={cn(
+                "flex items-center justify-between font-medium",
+                activeSection === "audience-segmentation"
+                  ? "underline"
+                  : "underline-offset-4"
+              )}
+            >
+              Personas
+              <ChevronDown
+                size={16}
+                className={cn(
+                  "transition-transform",
+                  solutionsOpen ? "rotate-180" : ""
+                )}
+              />
+            </button>
+            {solutionsOpen && (
+              <div className="ml-4 flex flex-col space-y-2">
+                <button
+                  onClick={() => {
+                    router.push("/");
+                    setIsMenuOpen(false);
+                  }}
+                  className="text-left text-sm text-gray-700"
+                >
+                  Principal
+                </button>
+                <button
+                  onClick={() => {
+                    router.push("/profesionales");
+                    setIsMenuOpen(false);
+                  }}
+                  className="text-left text-sm text-gray-700"
+                >
+                  Profesionales
+                </button>
+                <button
+                  onClick={() => {
+                    router.push("/empresas");
+                    setIsMenuOpen(false);
+                  }}
+                  className="text-left text-sm text-gray-700"
+                >
+                  Empresas
+                </button>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => {
               scrollToSection("benefits");
@@ -63,9 +113,7 @@ export default function NavbarMobile({
             }}
             className={cn(
               "text-left font-medium",
-              activeSection === "benefits"
-                ? "underline"
-                : "underline-offset-4"
+              activeSection === "benefits" ? "underline" : "underline-offset-4"
             )}
           >
             Beneficios
