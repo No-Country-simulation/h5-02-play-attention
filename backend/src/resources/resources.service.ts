@@ -63,12 +63,12 @@ export class ResourcesService {
     return resource;
   }
 
-  async findAll(): Promise<Resource[]> {
-    return this.resourceModel.find().sort({ createdAt: -1 }).populate('category').exec();
+  async findAll(published: boolean): Promise<Resource[]> {
+    return this.resourceModel.find({ published }).sort({ createdAt: -1 }).populate('category').exec();
   }
 
   async findOne(id: string): Promise<Resource> {
-    const resource = await this.resourceModel.findById(id).exec();
+    const resource = await this.resourceModel.findById(id).populate('category').exec();
     if (!resource) {
       throw new BadRequestException(`Recurso con ID ${id} no encontrado`);
     }

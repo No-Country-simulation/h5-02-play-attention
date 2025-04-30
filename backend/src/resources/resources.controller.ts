@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Param, Delete, UploadedFile, UseInterceptors, ParseUUIDPipe, Body, NotFoundException, Put } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, UploadedFile, UseInterceptors, ParseUUIDPipe, Body, NotFoundException, Put, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcesService } from './resources.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { MongoIdValidationPipe } from 'src/common/pipes/isMongoIdValidation.pipe';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateResourceDto } from './dto/update-resource.dto';
 
 
@@ -58,8 +58,11 @@ export class ResourcesController {
   @ApiOperation({ summary: 'Obtener todos los recursos' })
   @ApiResponse({ status: 200, description: 'Recursos obtenidos correctamente' })
   @ApiResponse({ status: 404, description: 'Recursos no encontrados' })
-  async findAll() {
-    const resources = await this.resourcesService.findAll();
+  @ApiQuery({ name: 'published', type: 'boolean', required: false })
+  async findAll(
+    @Query('published') published: boolean=true
+  ) {
+    const resources = await this.resourcesService.findAll(published);
     if(!resources) {
       throw new NotFoundException('No se encontraron recursos');
     }

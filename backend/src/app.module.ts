@@ -17,6 +17,7 @@ import { DevToolsModule } from './dev-tools/dev-tools.module';
 import { ListenersModule } from './system-listeners/listeners.module';
 import { SupportMessagesModule } from './support-messages/support-messages.module';
 import { TokenModule } from './token/token.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -36,7 +37,9 @@ import { TokenModule } from './token/token.module';
     CategoriesModule,
     EngagementsModule,
     ListenersModule,
-    SupportMessagesModule
+    SupportMessagesModule,
+    ScheduleModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
