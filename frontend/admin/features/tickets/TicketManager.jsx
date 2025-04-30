@@ -12,6 +12,7 @@ import { getPageMetadata } from '@/shared/lib/utils/page-metadata';
 import { useTickets, useUpdateTicket, useDeleteTicket } from './lib/hooks';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 import { toast } from 'sonner';
+import { ServiceUnavailable, CorsError } from '@/shared/errors';
 
 /**
  * Componente principal para la gestión de tickets de soporte
@@ -149,6 +150,17 @@ export default function TicketManager() {
     setCurrentPage(1);
   };
 
+  // Función para detectar si un error es de tipo CORS
+  const isCorsError = error => {
+    if (!error) return false;
+    const errorMsg = error.message || String(error);
+    return (
+      errorMsg.includes('CORS') ||
+      errorMsg.includes('Access-Control-Allow-Origin') ||
+      errorMsg.includes('Access to fetch')
+    );
+  };
+
   // Mostrar loading spinner mientras se cargan los datos
   if (isLoading && tickets.length === 0) {
     return (
@@ -162,9 +174,23 @@ export default function TicketManager() {
   if (error) {
     return (
       <div className='p-6 max-w-7xl mx-auto'>
-        <div className='text-center text-red-500 py-10'>
-          Error al cargar tickets: {error.message}
-        </div>
+        <PageHeader title={title} description={description} />
+        {isCorsError(error) ? (
+          <CorsError
+            onRetry={() => refetch()}
+            homePath='/dashboard'
+            homeText='Volver al panel'
+            error={error}
+          />
+        ) : (
+          <ServiceUnavailable
+            featureName='sistema de tickets'
+            onRetry={() => refetch()}
+            homePath='/dashboard'
+            homeText='Volver al panel'
+            error={error}
+          />
+        )}
       </div>
     );
   }

@@ -6,11 +6,13 @@ import { es } from 'date-fns/locale';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Calendar, Clock, User, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, User, MessageSquare, ArrowLeft } from 'lucide-react';
 
 import TicketConversation from './TicketConversation';
 import TicketReplyModal from './TicketReplyModal';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
+import TicketMessages from './TicketMessages';
+import { ServiceErrorDisplay } from '@/shared/errors';
 
 // Funciones de utilidad para status y prioridad
 const getStatusBadge = status => {
@@ -116,8 +118,19 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
 
   if (!ticket) {
     return (
-      <div className='flex justify-center items-center py-20'>
-        <LoadingSpinner text='Cargando detalles del ticket' />
+      <div className='space-y-6'>
+        <Card>
+          <CardContent className='pt-6'>
+            <ServiceErrorDisplay
+              title='No se ha podido cargar el ticket'
+              message='Ha ocurrido un problema al intentar cargar la información del ticket. Por favor, vuelva a la lista e intente de nuevo.'
+              onBack={onBack}
+              backText='Volver a la lista'
+              variant='warning'
+              icon={MessageSquare}
+            />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -178,7 +191,7 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
               <MessageSquare className='h-5 w-5' />
               Conversación
             </h3>
-            <TicketConversation messages={messages} />
+            <TicketMessages ticketId={ticket.id} onTicketUpdate={onUpdate} />
           </div>
 
           {/* Acciones de respuesta */}
