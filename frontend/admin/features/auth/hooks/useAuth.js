@@ -37,8 +37,14 @@ export const useLogin = (redirectUrl = '/dashboard') => {
       // Invalidar la consulta del usuario para asegurar datos actualizados en futuros fetchs
       queryClient.invalidateQueries({ queryKey: ['session'] });
 
-      // Redirigir a la URL especificada después del login
-      router.push(redirectUrl);
+      // Redirigir según el rol del usuario
+      if (userRole === 'Comercial') {
+        // Si es Comercial, redirigir al CRM
+        router.push('/crm');
+      } else {
+        // Si es Admin o Administrador, redirigir a la URL especificada (por defecto dashboard)
+        router.push(redirectUrl);
+      }
     }
   });
 

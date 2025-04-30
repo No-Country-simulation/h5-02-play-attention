@@ -5,7 +5,7 @@ import { useLogin } from '../hooks';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { AtSign, Lock, Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import AccessDeniedModal from './AccessDeniedModal';
 
@@ -20,6 +20,7 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const login = useLogin(redirectUrl);
 
@@ -36,6 +37,10 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
     await login.mutate(credentials);
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit} className='space-y-6'>
@@ -45,9 +50,6 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
               Email
             </Label>
             <div className='relative'>
-              <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400'>
-                <AtSign className='h-5 w-5' />
-              </div>
               <Input
                 id='email'
                 name='email'
@@ -57,7 +59,7 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
                 placeholder='tu@email.com'
                 value={credentials.email}
                 onChange={handleChange}
-                className='pl-10'
+                className='border-purple-200 focus:border-purple-500 focus:ring-purple-500'
               />
             </div>
           </div>
@@ -69,26 +71,34 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
               </Label>
               <a
                 href='#'
-                className='text-xs font-medium text-indigo-600 hover:text-indigo-500'
+                className='text-xs font-medium text-purple-600 hover:text-purple-500'
               >
                 ¿Olvidaste tu contraseña?
               </a>
             </div>
             <div className='relative'>
-              <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400'>
-                <Lock className='h-5 w-5' />
-              </div>
               <Input
                 id='password'
                 name='password'
-                type='password'
+                type={showPassword ? 'text' : 'password'}
                 autoComplete='current-password'
                 required
                 placeholder='••••••••'
                 value={credentials.password}
                 onChange={handleChange}
-                className='pl-10'
+                className='pr-10 border-purple-200 focus:border-purple-500 focus:ring-purple-500'
               />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 flex items-center pr-3 text-purple-500 hover:text-purple-700'
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? (
+                  <EyeOff className='h-5 w-5' />
+                ) : (
+                  <Eye className='h-5 w-5' />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -101,7 +111,11 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
           </Alert>
         )}
 
-        <Button type='submit' disabled={login.isPending} className='w-full'>
+        <Button
+          type='submit'
+          disabled={login.isPending}
+          className='w-full bg-purple-600 hover:bg-purple-700 text-white'
+        >
           {login.isPending ? (
             <>
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />

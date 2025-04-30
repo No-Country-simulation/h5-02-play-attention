@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLogout } from '../hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import {
@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/ui/dropdown-menu';
-import { User, Settings, LogOut, HelpCircle, Bell } from 'lucide-react';
+import { User, Settings, LogOut, HelpCircle, Bell, Menu } from 'lucide-react';
 
 /**
  * Componente de menú de usuario para el header
@@ -38,9 +38,6 @@ function UserMenu() {
         const userInfoValue = userCookie.split('=')[1];
         const parsedUserInfo = JSON.parse(decodeURIComponent(userInfoValue));
         setUserData(parsedUserInfo);
-        console.log('UserMenu: datos de usuario cargados:', parsedUserInfo);
-      } else {
-        console.log('UserMenu: no se encontró la cookie user_info');
       }
     } catch (error) {
       console.error('Error al leer cookie user_info:', error);
@@ -69,69 +66,77 @@ function UserMenu() {
     logout.mutate();
   };
 
-  console.log('UserMenu: renderizando componente');
+  // Texto a mostrar para el rol
+  const roleText = role === 'Admin' ? 'Administrador' : role;
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <button className='flex items-center space-x-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'>
-          <Avatar className='h-8 w-8 cursor-pointer'>
-            <AvatarImage
-              src={`https://ui-avatars.com/api/?name=${
-                name || email
-              }&background=6366f1&color=fff`}
-              alt={name || email}
-            />
-            <AvatarFallback>{getInitials()}</AvatarFallback>
-          </Avatar>
-          <span className='text-sm font-medium hidden md:inline-block'>
-            {name || email}
-          </span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-56' align='end' forceMount>
-        <DropdownMenuLabel className='font-normal'>
-          <div className='flex flex-col space-y-1'>
-            <p className='text-sm font-medium leading-none'>
-              {name || 'Usuario'}
-            </p>
-            <p className='text-xs leading-none text-muted-foreground'>
-              {email}
-            </p>
-            <p className='text-xs leading-none text-muted-foreground'>
-              {role === 'Admin' ? 'Administrador' : role}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
+    // Solo mostrar en vista de escritorio
+    <div className='hidden md:block'>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <button className='flex items-center space-x-2 rounded-full focus:outline-none'>
+            <Avatar className='h-8 w-8 cursor-pointer'>
+              <AvatarImage
+                src={`https://ui-avatars.com/api/?name=${
+                  name || email
+                }&background=4a148c&color=fff`}
+                alt={name || email}
+              />
+              <AvatarFallback className='bg-sidebar text-white'>
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div className='flex flex-col items-start'>
+              <span className='text-sm font-medium leading-tight'>
+                {name || email}
+              </span>
+              <span className='text-xs text-gray-500 leading-tight'>
+                {roleText}
+              </span>
+            </div>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className='w-56' align='end' forceMount>
+          <DropdownMenuLabel className='font-normal'>
+            <div className='flex flex-col space-y-1'>
+              <p className='text-sm font-medium leading-none'>
+                {name || 'Usuario'}
+              </p>
+              <p className='text-xs leading-none text-muted-foreground'>
+                {email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem>
+              <User className='mr-2 h-4 w-4' />
+              <span>Perfil</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className='mr-2 h-4 w-4' />
+              <span>Configuración</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Bell className='mr-2 h-4 w-4' />
+              <span>Notificaciones</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <User className='mr-2 h-4 w-4' />
-            <span>Perfil</span>
+            <HelpCircle className='mr-2 h-4 w-4' />
+            <span>Ayuda</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className='mr-2 h-4 w-4' />
-            <span>Configuración</span>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout} disabled={logout.isPending}>
+            <LogOut className='mr-2 h-4 w-4' />
+            <span>
+              {logout.isPending ? 'Cerrando sesión...' : 'Cerrar sesión'}
+            </span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Bell className='mr-2 h-4 w-4' />
-            <span>Notificaciones</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <HelpCircle className='mr-2 h-4 w-4' />
-          <span>Ayuda</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} disabled={logout.isPending}>
-          <LogOut className='mr-2 h-4 w-4' />
-          <span>
-            {logout.isPending ? 'Cerrando sesión...' : 'Cerrar sesión'}
-          </span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
