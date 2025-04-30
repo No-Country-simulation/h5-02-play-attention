@@ -45,15 +45,36 @@ export class ResourcesController {
 
   @Put(":id")
   @ApiOperation({ summary: 'Actualizar un recurso por ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary'},
+        title: { type: 'string' },
+        description: { type: 'string' },
+        type: { type: 'string' },
+        published: { type: 'boolean' },
+        category: { type: 'string' },
+        url: { type: 'string' },
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: 'Recurso actualizado correctamente' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
-  async update(@Param('id', MongoIdValidationPipe) id: string, @Body() updateResourceDto: UpdateResourceDto) {
-    const resource = await this.resourcesService.update(id, updateResourceDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async update(
+    @Param('id', MongoIdValidationPipe) id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateResourceDto: UpdateResourceDto
+  ) {
+    const resource = await this.resourcesService.update(id, updateResourceDto, file);
     return {
       message: 'Recurso actualizado correctamente',
       resource
     };
   }
+  
   @Get()
   @ApiOperation({ summary: 'Obtener todos los recursos' })
   @ApiResponse({ status: 200, description: 'Recursos obtenidos correctamente' })

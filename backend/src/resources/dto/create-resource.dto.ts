@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsBoolean, IsOptional, IsMongoId, IsEnum } from 'class-validator';
 import { ResourceType } from '../schemas/resource.schema';
 import { Types } from 'mongoose';
-import { Type } from 'class-transformer';
+import {  Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateResourceDto {
@@ -28,7 +28,11 @@ export class CreateResourceDto {
 
   @ApiProperty({ name: 'published', required: true, type: Boolean, description: 'Si el recurso está publicado', example: true })
   @IsBoolean()
-  @Type(()=>Boolean)
+  @Transform(({ value }) => {
+    if (value === 'false') return false;
+    if (value === 'true') return true;
+    return value;
+  })
   @IsNotEmpty({ message: 'Debes seleccionar si el recurso está publicado' })
   published: boolean;
 
