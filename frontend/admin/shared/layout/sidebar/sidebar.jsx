@@ -49,9 +49,9 @@ export default function Sidebar() {
   const [expandedSections, setExpandedSections] = useState({
     principal: true,
     crm_destacado: true,
-    contenido: true,
-    soporte: true,
-    administracion: true,
+    contenido: false,
+    soporte: false,
+    administracion: false,
     otros: true
   });
 
@@ -70,8 +70,8 @@ export default function Sidebar() {
     'principal',
     'crm_destacado',
     'administracion',
-    'contenido',
     'soporte',
+    'contenido',
     'otros'
   ];
 
@@ -154,26 +154,34 @@ export default function Sidebar() {
                   );
                 }
 
-                // Categorías con título
+                // Categorías con título y comportamiento collapsible
                 return (
                   <div key={category} className='space-y-1 mb-2'>
                     {expanded && (
-                      <div className='px-3 py-1.5'>
-                        <h3 className='text-[11px] font-medium uppercase tracking-wider text-white/70'>
-                          {getCategoryTitle(category)}
-                        </h3>
-                      </div>
+                      <button
+                        onClick={() => toggleSection(category)}
+                        className='w-full px-3 py-1.5 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider text-white/70 hover:text-white'
+                      >
+                        <h3>{getCategoryTitle(category)}</h3>
+                        {expandedSections[category] ? (
+                          <ChevronUp size={14} />
+                        ) : (
+                          <ChevronDown size={14} />
+                        )}
+                      </button>
                     )}
-                    <ul className='space-y-1'>
-                      {items.map(item => (
-                        <SidebarItem
-                          key={item.name}
-                          item={item}
-                          active={isItemActive(item.path, pathname)}
-                          expanded={expanded}
-                        />
-                      ))}
-                    </ul>
+                    {(!expanded || expandedSections[category]) && (
+                      <ul className='space-y-1'>
+                        {items.map(item => (
+                          <SidebarItem
+                            key={item.name}
+                            item={item}
+                            active={isItemActive(item.path, pathname)}
+                            expanded={expanded}
+                          />
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 );
               })}
