@@ -16,12 +16,13 @@ export function HeroSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl font-bold text-primary-900 leading-tight">
-              TDAH bajo tu control: Tecnología de la NASA para adultos,
-              adolescentes y padres              
+              Soluciones Corporativas para Maximizar el Potencial de tus
+              Colaboradores
             </h1>
             <p className="text-2xl text-primary-400">
-              Por fin, una solución que se adapta a tu ritmo de vida. Recupera
-              el control de tu atención y disfruta lo que realmente importa.
+              Herramientas validadas científicamente para instituciones
+              educativas, empresas y organizaciones deportivas que buscan
+              resultados medibles.
             </p>
             <Button
               onClick={() => scrollToSection("contact")}
@@ -36,7 +37,7 @@ export function HeroSection() {
             </div>
 
             <Image
-              src="/individuals/hero.png"
+              src="/companies/hero.png"
               alt="Persona usando el dispositivo Play Attention"
               width={500}
               height={600}
