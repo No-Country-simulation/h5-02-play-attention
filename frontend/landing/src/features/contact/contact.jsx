@@ -51,6 +51,7 @@ const formSchema = z.object({
     .min(10, { message: "El mensaje debe tener al menos 10 caracteres." })
     .max(1100, { message: "El mensaje debe tener máximo 1100 carácteres" }),
   relation: z.string({ required_error: "Por favor ingresa tu relación" }),
+  terms: z.boolean().optional(),
 });
 
 const initialFormValues = {
@@ -62,6 +63,7 @@ const initialFormValues = {
   service: "",
   message: "",
   relation: "",
+  newsletter: false,
 };
 
 export const ContactSection = () => {
@@ -92,8 +94,9 @@ export const ContactSection = () => {
         email: data.email,
         service: data.service || "", // Ahora service es opcional
         relation: data.relation,
-        // institution se mapea según sea necesario
+        newsletter: data.newsletter,
       };
+      console.log(apiData);
 
       setContactUser(data.fullname.split(" ")[0]);
 
@@ -313,18 +316,18 @@ export const ContactSection = () => {
 
               <FormField
                 control={form.control}
-                name="terms"
+                name="newsletter"
                 render={({ field }) => (
                   <div className="flex items-center space-x-2 mt-4">
                     <Checkbox
-                      id="terms"
+                      id="newsletter"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       className="
                       border-[#929292]"
                     />
                     <label
-                      htmlFor="terms"
+                      htmlFor="newsletter"
                       className={`text-[0.7rem] font-small leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
                         field.value ? "text-[#6d28d9]" : "text-[#929292]"
                       }`}
