@@ -11,9 +11,17 @@ const useCreateUser = () => {
 
   return useMutation({
     mutationFn: createUser,
-    onSuccess: () => {
-      // Invalidar la caché de usuarios para forzar una recarga
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    onSuccess: async newUser => {
+      // Obtener los datos actuales de la caché
+      const queryKey = ['users'];
+      const currentData = queryClient.getQueryData(queryKey);
+
+      // Invalidar todas las queries de usuarios para forzar una recarga
+      await queryClient.invalidateQueries({
+        queryKey: queryKey,
+        refetchType: 'all' // Esto asegura que se recarguen todas las páginas
+      });
+
       toast.success('Usuario creado correctamente');
     },
     onError: error => {

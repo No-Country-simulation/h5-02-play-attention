@@ -39,7 +39,7 @@ const UserTable = ({
     }
     return '';
   };
-  console.log(users);
+
   // Estado para manejar qué tarjetas están expandidas en vista móvil
   const [expandedRows, setExpandedRows] = useState({});
 

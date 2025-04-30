@@ -19,12 +19,6 @@ export default function PageHeader({
   className = '',
   children
 }) {
-  // Debug en el cliente
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log('PageHeader montado. Cookies disponibles:', document.cookie);
-    }
-  }, []);
 
   return (
     <header className={`mb-8 pb-4 border-b ${className}`}>
