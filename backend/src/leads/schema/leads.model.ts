@@ -77,6 +77,12 @@ export class Leads {
         required: false
     })
     message: string;
+
+    @Prop({
+        type: Boolean,
+        required: false
+    })
+    newsletter: boolean;
 }
 
 export const LeadsSchema = SchemaFactory.createForClass(Leads);

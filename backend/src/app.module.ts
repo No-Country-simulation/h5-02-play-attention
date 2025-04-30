@@ -18,6 +18,7 @@ import { ListenersModule } from './system-listeners/listeners.module';
 import { SupportMessagesModule } from './support-messages/support-messages.module';
 import { TokenModule } from './token/token.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { SupportTicketModule } from './support-ticket/support-ticket.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ScheduleModule } from './schedule/schedule.module';
     SupportMessagesModule,
     ScheduleModule,
     TokenModule,
+    SupportTicketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -11,16 +11,20 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { UserForgotPasswordEvent, UserRegisteredEvent } from 'src/system-events/user.event';
-import { USER_EVENTS } from 'src/system-events/event-names';
+import {
+  UserForgotPasswordEvent,
+  UserRegisteredEvent,
+} from '../system-events/user.event';
+import { USER_EVENTS } from '../system-events/event-names';
 import * as generatePassword from 'generate-password';
 import { Services, UserRole } from './auth.enum';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { TokenService } from '../token/token.service';
 import { ConfirmTokenDto } from './dto/confirmToken.dto';
-import { ChangePasswordDto} from './dto/changePassword';
+import { ChangePasswordDto } from './dto/changePassword';
 
 import { Types } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -30,78 +34,84 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly tokenService:TokenService
+    private readonly tokenService: TokenService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async changePassword(token:string,changePasswordDto:ChangePasswordDto){
-    const tokenExist=await this.tokenService.findByToken(token)
-    if(!tokenExist){
-      throw new NotFoundException('Token incorrecto')
+  async changePassword(token: string, changePasswordDto: ChangePasswordDto) {
+    const tokenExist = await this.tokenService.findByToken(token);
+    if (!tokenExist) {
+      throw new NotFoundException('Token incorrecto');
     }
     const user = await this.userService.findById(tokenExist.user.toString());
-    if(!user){
-      throw new NotFoundException('Usuario no encontrado')
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
     try {
-      await Promise.all([ 
+      await Promise.all([
         this.tokenService.delete(tokenExist._id.toString()),
-        this.userService.update(user.id, {password:changePasswordDto.password})
-      ])
-    return {message:'Contraseña cambiada con éxito'}
+        this.userService.update(user.id, {
+          password: changePasswordDto.password,
+        }),
+      ]);
+      return { message: 'Contraseña cambiada con éxito' };
     } catch (error) {
-      throw new BadRequestException('Error al cambiar la contraseña')
+      throw new BadRequestException('Error al cambiar la contraseña');
     }
- 
   }
 
-  async confirmToken(confirmTokenDto:ConfirmTokenDto){
-    const token=await this.tokenService.findByToken(confirmTokenDto.token)
-    if(!token){
-      throw new NotFoundException('Token incorrecto')
+  async confirmToken(confirmTokenDto: ConfirmTokenDto) {
+    const token = await this.tokenService.findByToken(confirmTokenDto.token);
+    if (!token) {
+      throw new NotFoundException('Token incorrecto');
     }
     const user = await this.userService.findById(token.user.toString());
-    if(!user){
-      throw new NotFoundException('Usuario no encontrado')
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
-    const tokenExpired=new Date(token.expiresAt) < new Date()
-    if(tokenExpired){
-      throw new BadRequestException('Token expirado')
+    const tokenExpired = new Date(token.expiresAt) < new Date();
+    if (tokenExpired) {
+      throw new BadRequestException('Token expirado');
     }
 
-    return {message:'Token correcto,ya puedes cambiar tu contraseña'}
-    
+    return { message: 'Token correcto,ya puedes cambiar tu contraseña' };
   }
 
-  async forgotPassword(forgotPasswordDto:ForgotPasswordDto){
-    const user= await this.userService.findByEmail(forgotPasswordDto.email)
-    if(!user){
-      throw new NotFoundException('No se encontró el correo electrónico')
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const user = await this.userService.findByEmail(forgotPasswordDto.email);
+    if (!user) {
+      throw new NotFoundException('No se encontró el correo electrónico');
     }
 
-    const generatedToken=generatePassword.generate({
+    const generatedToken = generatePassword.generate({
       length: 6,
       numbers: true,
       uppercase: false,
       lowercase: false,
       symbols: false,
       excludeSimilarCharacters: false,
-      strict: false
-    })
+      strict: false,
+    });
     await Promise.all([
-       this.tokenService.create({
-      user:user._id,
-      token:generatedToken
-    }),this.eventEmitter.emit(
-      USER_EVENTS.FORGOT_PASSWORD,
-      new UserForgotPasswordEvent(user.email,generatedToken)
-    )
-    ])
-     
-    return {message:'Token enviado con éxito'}
+      this.tokenService.create({
+        user: user._id,
+        token: generatedToken,
+      }),
+      this.eventEmitter.emit(
+        USER_EVENTS.FORGOT_PASSWORD,
+        new UserForgotPasswordEvent(user.email, generatedToken),
+      ),
+    ]);
 
+    return { message: 'Token enviado con éxito' };
   }
 
-  async registerFromLead(fullname: string, email: string, role: UserRole, service: Services) {
+  async registerFromLead(
+    fullname: string,
+    email: string,
+    role: UserRole,
+    service: Services,
+  ) {
     const userExists = await this.userService.findByEmail(email);
     if (userExists) {
       return new BadRequestException('Email ya registrado');
@@ -114,7 +124,7 @@ export class AuthService {
       uppercase: false,
       lowercase: true,
       excludeSimilarCharacters: false,
-      strict: false
+      strict: false,
     });
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -125,12 +135,12 @@ export class AuthService {
         email,
         password: hashedPassword,
         role,
-        service
+        service,
       }),
       this.eventEmitter.emit(
         USER_EVENTS.USER_CREATED,
-        new UserRegisteredEvent(fullname, email, password)
-      )
+        new UserRegisteredEvent(fullname, email, password),
+      ),
     ]);
 
     return { message: 'Cuenta registrada con éxito', user };
@@ -148,14 +158,20 @@ export class AuthService {
         this.userService.create({
           ...registerDto,
           password: hashedPassword,
-        }), 
+        }),
         this.eventEmitter.emit(
           USER_EVENTS.USER_CREATED,
-          new UserRegisteredEvent(registerDto.fullname, registerDto.email, registerDto.password)
-        )
+          new UserRegisteredEvent(
+            registerDto.fullname,
+            registerDto.email,
+            registerDto.password,
+          ),
+        ),
       ]);
-      
-      this.logger.log(`Usuario registrado y evento emitido para ${registerDto.email}`);
+
+      this.logger.log(
+        `Usuario registrado y evento emitido para ${registerDto.email}`,
+      );
       return { message: 'Cuenta registrada con éxito', user };
     } catch (error) {
       this.logger.error(`Error en el registro: ${error.message}`, error.stack);
@@ -166,7 +182,7 @@ export class AuthService {
   async getProfile(id: string) {
     return this.userService.findById(id);
   }
-  
+
   async login(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
     if (!user) {
@@ -183,9 +199,9 @@ export class AuthService {
     }
     const payload = { user: user._id };
     return {
-      playAttentionToken: await this.jwtService.signAsync(payload),
+      playAttentionToken: await this.jwtService.signAsync(payload, {
+        secret: this.configService.get('jwt.secret'),
+      }),
     };
   }
-
-
 }

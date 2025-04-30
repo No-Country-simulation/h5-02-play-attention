@@ -39,7 +39,7 @@ export class SupportMessagesController {
     }
 
     @Get(':id')
-    @ApiOperation({ summary: 'Obtener mensaje por ID'})
+    @ApiOperation({ summary: 'Obtener mensaje por ID de Ticket'})
     @ApiParam({
         name: 'id',
         description: 'ID del mensaje a buscar',
@@ -55,7 +55,7 @@ export class SupportMessagesController {
         description: 'No se halló el mensaje'
     })
     findById(@Param('id') id: string) {
-        return this.supportMessagesService.getById(id);
+        return this.supportMessagesService.getByTicketId(id);
     }
 
     @Put(':id')

@@ -65,6 +65,7 @@ describe('Engagements Service', () => {
       lead_id: '1',
       subject: 'Subject',
       detail: 'asdasd',
+      created_by: 'system',
     };
     it('should successfully create a lead history item', async () => {
       const engagement = {
@@ -80,9 +81,9 @@ describe('Engagements Service', () => {
           service: '',
           message: '',
           status: '',
-          contact_id:[],
+          contact_id: [],
           origen: '',
-          relation:''
+          relation: '',
         },
         detail: 'asdasdp',
         created_by: 'system',

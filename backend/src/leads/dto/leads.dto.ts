@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional, IsMongoId, IsIn, MaxLength, MinLength } from "class-validator";
+import { IsString, IsEmail, IsNotEmpty, IsOptional, IsMongoId, IsIn, MaxLength, MinLength, IsBoolean } from "class-validator";
 import { PartialType } from "@nestjs/mapped-types";
 import { ApiProperty } from "@nestjs/swagger";
 import { LEAD_ORIGINS, LEAD_SERVICE_OPTIONS, LEAD_STATUS } from "../leads.constants";
@@ -97,4 +97,9 @@ export class CreateLeadFromLandingDto {
     @IsString()
     @IsNotEmpty()
     relation: string;
+
+    @ApiProperty({example: true, description: 'Campo opcional para que el usuario se suscriba a la newsletter'})
+    @IsBoolean()
+    @IsOptional()
+    newsletter: boolean;
 }

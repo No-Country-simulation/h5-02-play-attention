@@ -48,6 +48,7 @@ describe('MailService', () => {
       template: EmailTemplatesDefault[template].templateName,
       subject: EmailTemplatesDefault[template].defaultSubject,
       context: context,
+      bcc: []
     });
   });
 
@@ -55,7 +56,7 @@ describe('MailService', () => {
     const templateKey: EmailTemplates = 'CONFIRM_EMAIL';
     jest.spyOn(fileValidatorService, 'checkFileExists').mockReturnValue(false);
     try {
-      await mailService.sendTemplateEmail(templateKey, '', {
+      await mailService.sendTemplateEmail(templateKey, 'a@b.com', {
         name: '',
         url: '',
       });
