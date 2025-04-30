@@ -42,12 +42,12 @@ export class SupportMessagesController {
     @ApiOperation({ summary: 'Obtener mensaje por ID de Ticket'})
     @ApiParam({
         name: 'id',
-        description: 'ID del mensaje a buscar',
+        description: 'ID del tickets a buscar',
         type: String
     })
     @ApiResponse({
         status: 200,
-        description: 'Mensaje encontrado',
+        description: 'Mensajes encontrado',
         type: SupportMessages
     })
     @ApiResponse({

@@ -63,7 +63,7 @@ export class ResourcesService {
     return resource;
   }
 
-  async findAll(published: boolean): Promise<Resource[]> {
+  async findAllPublished(published: boolean): Promise<Resource[]> {
     return this.resourceModel.find({ published }).sort({ createdAt: -1 }).populate('category').exec();
   }
 
@@ -81,5 +81,9 @@ export class ResourcesService {
       throw new BadRequestException(`Recurso con ID ${id} no encontrado`);
     }
     return resource;
+  }
+
+  async findAll () {
+    return this.resourceModel.find().exec();
   }
 }

@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourcesService } from './resources.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { MongoIdValidationPipe } from 'src/common/pipes/isMongoIdValidation.pipe';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiProperty, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateResourceDto } from './dto/update-resource.dto';
 
 
@@ -54,15 +54,15 @@ export class ResourcesController {
       resource
     };
   }
-  @Get()
-  @ApiOperation({ summary: 'Obtener todos los recursos' })
+  @Get('/published')
+  @ApiOperation({ summary: 'Obtener todos los recursos  publicados' })
   @ApiResponse({ status: 200, description: 'Recursos obtenidos correctamente' })
   @ApiResponse({ status: 404, description: 'Recursos no encontrados' })
   @ApiQuery({ name: 'published', type: 'boolean', required: false })
   async findAll(
     @Query('published') published: boolean=true
   ) {
-    const resources = await this.resourcesService.findAll(published);
+    const resources = await this.resourcesService.findAllPublished(published);
     if(!resources) {
       throw new NotFoundException('No se encontraron recursos');
     }
@@ -80,6 +80,14 @@ export class ResourcesController {
     return {
       resource
     };
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Obtener todos los recursos'})
+  @ApiResponse({ status: 200, description: 'Lista de recursos obtenida' })
+  @ApiResponse({ status: 404, description: 'Lista no encontrada' })
+  async find() {
+    return this.resourcesService.findAll();
   }
   
   @Delete(':id')
