@@ -41,6 +41,7 @@ import Image from 'next/image';
 const ESTADOS_LEAD = [
   { value: 'nuevo', label: 'Nuevo', backend: 'Nuevo' },
   { value: 'proceso', label: 'Proceso', backend: 'Activo' },
+  { value: 'no_interesado', label: 'No interesado', backend: 'No interesado' },
   { value: 'cliente', label: 'Cliente', backend: 'Cliente' }
 ];
 
@@ -110,9 +111,12 @@ export default function LeadList({
     if (statusLower === 'activo') return 'proceso';
     if (statusLower === 'nuevo') return 'nuevo';
     if (statusLower === 'cliente') return 'cliente';
+    if (statusLower === 'no interesado') return 'no_interesado';
 
     // Si el estado ya es uno de los valores de UI, devolverlo tal cual
-    if (['nuevo', 'proceso', 'cliente'].includes(statusLower)) {
+    if (
+      ['nuevo', 'proceso', 'cliente', 'no_interesado'].includes(statusLower)
+    ) {
       return statusLower;
     }
 

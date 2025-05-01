@@ -96,9 +96,10 @@ const normalizeStatus = status => {
   if (statusLower === 'activo') return 'proceso';
   if (statusLower === 'nuevo') return 'nuevo';
   if (statusLower === 'cliente') return 'cliente';
+  if (statusLower === 'no interesado') return 'no_interesado';
 
   // Si el estado ya es uno de los valores de UI, devolverlo tal cual
-  if (['nuevo', 'proceso', 'cliente'].includes(statusLower)) {
+  if (['nuevo', 'proceso', 'cliente', 'no_interesado'].includes(statusLower)) {
     return statusLower;
   }
 

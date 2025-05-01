@@ -48,7 +48,8 @@ function determineStatus(status) {
   const statusMap = {
     active: 'activo',
     pending: 'pendiente',
-    completed: 'completado'
+    completed: 'completado',
+    'no interesado': 'no interesado'
   };
 
   return statusMap[status] || 'nuevo';

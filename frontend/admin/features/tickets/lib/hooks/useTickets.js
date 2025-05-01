@@ -10,23 +10,17 @@ import { toast } from 'sonner';
 
 /**
  * Hook para obtener todos los tickets de soporte
- * @param {Object} filters - Filtros para la consulta
  * @param {Object} options - Opciones adicionales para la consulta
  * @returns {Object} Resultado de useQuery con datos y estado
  */
-export function useTickets(filters = {}, options = {}) {
-  console.log('useTickets hook called with filters:', filters);
-
+export function useTickets(options = {}) {
   return useQuery({
-    queryKey: ['tickets', filters],
+    queryKey: ['tickets'],
     queryFn: async () => {
-      console.log('Executing fetch for tickets with filters:', filters);
-      const tickets = await ticketsApi.getTickets(filters);
-      console.log('Raw tickets data received:', tickets);
+      const tickets = await ticketsApi.getTickets();
 
       // Adaptamos los datos
       const adaptedData = ticketsAdapter(tickets);
-      console.log('Adapted tickets data:', adaptedData);
 
       // Nos aseguramos que la estructura sea exactamente la que espera TicketManager
       // Esto garantiza que aunque el adaptador cambie, siempre mantengamos esta estructura
