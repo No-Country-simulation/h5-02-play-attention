@@ -1,17 +1,8 @@
 'use client';
 
-import { Search, Filter, Sliders } from 'lucide-react';
+import { Search, Filter, Sliders, ArrowDownUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/shared/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/shared/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Badge } from '@/shared/ui/badge';
 
@@ -33,10 +24,13 @@ export default function TicketFilters({
   departmentFilter = 'all',
   onDepartmentChange = () => {},
   typeFilter = 'all',
-  onTypeChange = () => {}
+  onTypeChange = () => {},
+  sortOrder = 'newest',
+  onSortOrderChange = () => {}
 }) {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchQuery || '');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // Actualizar el término de búsqueda local cuando cambia el prop
@@ -50,18 +44,8 @@ export default function TicketFilters({
     if (statusFilter !== 'all') count++;
     if (dateFilter !== 'all') count++;
     if (priorityFilter !== 'all') count++;
-    if (assigneeFilter !== 'all') count++;
-    if (departmentFilter !== 'all') count++;
-    if (typeFilter !== 'all') count++;
     setActiveFilterCount(count);
-  }, [
-    statusFilter,
-    dateFilter,
-    priorityFilter,
-    assigneeFilter,
-    departmentFilter,
-    typeFilter
-  ]);
+  }, [statusFilter, dateFilter, priorityFilter]);
 
   // Aplicar filtro de búsqueda con un pequeño delay para no hacer muchas peticiones
   useEffect(() => {
@@ -87,13 +71,9 @@ export default function TicketFilters({
   const dateFilters = [
     { value: 'all', label: 'Cualquier fecha' },
     { value: 'today', label: 'Hoy' },
-    { value: 'yesterday', label: 'Ayer' },
     { value: 'week', label: 'Esta semana' },
-    { value: 'last_week', label: 'Semana pasada' },
     { value: 'month', label: 'Este mes' },
-    { value: 'last_month', label: 'Mes pasado' },
-    { value: 'quarter', label: 'Último trimestre' },
-    { value: 'custom', label: 'Personalizado' }
+    { value: 'last30', label: 'Últimos 30 días' }
   ];
 
   // Prioridades para filtrar
@@ -104,31 +84,11 @@ export default function TicketFilters({
     { value: 'baja', label: 'Baja' }
   ];
 
-  // Asignados a
-  const assignees = [
-    { value: 'all', label: 'Todos los agentes' },
-    { value: 'unassigned', label: 'Sin asignar' },
-    { value: 'current_user', label: 'Asignados a mí' },
-    { value: 'other', label: 'Otros agentes' }
-  ];
-
-  // Departamentos
-  const departments = [
-    { value: 'all', label: 'Todos los departamentos' },
-    { value: 'soporte', label: 'Soporte técnico' },
-    { value: 'ventas', label: 'Ventas' },
-    { value: 'facturacion', label: 'Facturación' },
-    { value: 'otro', label: 'Otro' }
-  ];
-
-  // Tipos de ticket
-  const ticketTypes = [
-    { value: 'all', label: 'Todos los tipos' },
-    { value: 'problema', label: 'Problema técnico' },
-    { value: 'pregunta', label: 'Pregunta' },
-    { value: 'solicitud', label: 'Solicitud de característica' },
-    { value: 'incidente', label: 'Incidente' },
-    { value: 'otro', label: 'Otro' }
+  // Opciones de ordenamiento
+  const sortOptions = [
+    { value: 'newest', label: 'Más recientes' },
+    { value: 'oldest', label: 'Más antiguos' },
+    { value: 'alphabetical', label: 'Alfabético' }
   ];
 
   // Manejar cambio en estado
@@ -146,19 +106,9 @@ export default function TicketFilters({
     onPriorityChange(e.target.value);
   };
 
-  // Manejar cambio en filtro de asignado
-  const handleAssigneeChange = e => {
-    onAssigneeChange(e.target.value);
-  };
-
-  // Manejar cambio en filtro de departamento
-  const handleDepartmentChange = e => {
-    onDepartmentChange(e.target.value);
-  };
-
-  // Manejar cambio en filtro de tipo
-  const handleTypeChange = e => {
-    onTypeChange(e.target.value);
+  // Manejar cambio en el orden
+  const handleSortOrderChange = e => {
+    onSortOrderChange(e.target.value);
   };
 
   // Limpiar los filtros
@@ -178,16 +128,13 @@ export default function TicketFilters({
     statusFilter !== 'all' ||
     dateFilter !== 'all' ||
     priorityFilter !== 'all' ||
-    assigneeFilter !== 'all' ||
-    departmentFilter !== 'all' ||
-    typeFilter !== 'all' ||
     (searchQuery && searchQuery.trim() !== '');
 
   return (
     <div className='bg-gray-50 p-4 rounded-lg mb-6'>
       <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mb-4'>
         {/* Buscador */}
-        <div className='relative col-span-1 md:col-span-5'>
+        <div className='relative col-span-1 md:col-span-7'>
           <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5' />
           <input
             type='text'
@@ -198,39 +145,42 @@ export default function TicketFilters({
           />
         </div>
 
-        {/* Filtro por estado */}
+        {/* Ordenamiento */}
         <div className='col-span-1 md:col-span-2'>
-          <select
-            className='w-full h-10 border border-gray-300 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-primary/40'
-            value={statusFilter}
-            onChange={handleStatusChange}
-            aria-label='Filtrar por estado'
-          >
-            {statuses.map(status => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
+          <Popover open={showSortOptions} onOpenChange={setShowSortOptions}>
+            <PopoverTrigger asChild>
+              <Button
+                variant='outline'
+                className='w-full flex items-center justify-between h-10'
+              >
+                <span>
+                  {sortOptions.find(option => option.value === sortOrder)
+                    ?.label || 'Ordenar'}
+                </span>
+                <ArrowDownUp className='w-4 h-4 ml-2' />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-48'>
+              <div className='grid gap-1'>
+                {sortOptions.map(option => (
+                  <Button
+                    key={option.value}
+                    variant={sortOrder === option.value ? 'secondary' : 'ghost'}
+                    className='justify-start h-9'
+                    onClick={() => {
+                      onSortOrderChange(option.value);
+                      setShowSortOptions(false);
+                    }}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
-        {/* Filtro por fecha */}
-        <div className='col-span-1 md:col-span-2'>
-          <select
-            className='w-full h-10 border border-gray-300 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-primary/40'
-            value={dateFilter}
-            onChange={handleDateFilterChange}
-            aria-label='Filtrar por fecha'
-          >
-            {dateFilters.map(filter => (
-              <option key={filter.value} value={filter.value}>
-                {filter.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Botón de filtros avanzados */}
+        {/* Botón de filtros */}
         <div className='col-span-1 md:col-span-2'>
           <Popover
             open={showAdvancedFilters}
@@ -241,7 +191,7 @@ export default function TicketFilters({
                 variant='outline'
                 className='w-full flex items-center justify-between h-10'
               >
-                <span>Más filtros</span>
+                <span>Filtros</span>
                 {activeFilterCount > 0 && (
                   <Badge className='ml-2 bg-primary'>{activeFilterCount}</Badge>
                 )}
@@ -250,6 +200,38 @@ export default function TicketFilters({
             </PopoverTrigger>
             <PopoverContent className='w-80'>
               <div className='grid gap-4'>
+                <div className='space-y-2'>
+                  <h4 className='font-medium text-sm'>Estado</h4>
+                  <select
+                    className='w-full h-9 border border-gray-300 rounded-lg px-3 text-sm'
+                    value={statusFilter}
+                    onChange={handleStatusChange}
+                    aria-label='Filtrar por estado'
+                  >
+                    {statuses.map(status => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className='space-y-2'>
+                  <h4 className='font-medium text-sm'>Fecha</h4>
+                  <select
+                    className='w-full h-9 border border-gray-300 rounded-lg px-3 text-sm'
+                    value={dateFilter}
+                    onChange={handleDateFilterChange}
+                    aria-label='Filtrar por fecha'
+                  >
+                    {dateFilters.map(filter => (
+                      <option key={filter.value} value={filter.value}>
+                        {filter.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className='space-y-2'>
                   <h4 className='font-medium text-sm'>Prioridad</h4>
                   <select
@@ -265,56 +247,22 @@ export default function TicketFilters({
                   </select>
                 </div>
 
-                <div className='space-y-2'>
-                  <h4 className='font-medium text-sm'>Asignado a</h4>
-                  <select
-                    className='w-full h-9 border border-gray-300 rounded-lg px-3 text-sm'
-                    value={assigneeFilter}
-                    onChange={handleAssigneeChange}
+                {hasActiveFilters && (
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={handleClearFilters}
+                    className='mt-2'
                   >
-                    {assignees.map(assignee => (
-                      <option key={assignee.value} value={assignee.value}>
-                        {assignee.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className='space-y-2'>
-                  <h4 className='font-medium text-sm'>Departamento</h4>
-                  <select
-                    className='w-full h-9 border border-gray-300 rounded-lg px-3 text-sm'
-                    value={departmentFilter}
-                    onChange={handleDepartmentChange}
-                  >
-                    {departments.map(dept => (
-                      <option key={dept.value} value={dept.value}>
-                        {dept.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className='space-y-2'>
-                  <h4 className='font-medium text-sm'>Tipo de ticket</h4>
-                  <select
-                    className='w-full h-9 border border-gray-300 rounded-lg px-3 text-sm'
-                    value={typeFilter}
-                    onChange={handleTypeChange}
-                  >
-                    {ticketTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    Limpiar filtros
+                  </Button>
+                )}
               </div>
             </PopoverContent>
           </Popover>
         </div>
 
-        {/* Botón de limpiar filtros */}
+        {/* Botón de limpiar filtros (fuera del menú) */}
         <div className='col-span-1 md:col-span-1'>
           {hasActiveFilters && (
             <Button
@@ -362,43 +310,6 @@ export default function TicketFilters({
               {priorities.find(p => p.value === priorityFilter)?.label}
               <button
                 onClick={() => onPriorityChange('all')}
-                className='ml-1 hover:text-gray-900'
-              >
-                ×
-              </button>
-            </Badge>
-          )}
-
-          {assigneeFilter !== 'all' && (
-            <Badge variant='outline' className='px-2 py-1 text-xs gap-1'>
-              Asignado: {assignees.find(a => a.value === assigneeFilter)?.label}
-              <button
-                onClick={() => onAssigneeChange('all')}
-                className='ml-1 hover:text-gray-900'
-              >
-                ×
-              </button>
-            </Badge>
-          )}
-
-          {departmentFilter !== 'all' && (
-            <Badge variant='outline' className='px-2 py-1 text-xs gap-1'>
-              Departamento:{' '}
-              {departments.find(d => d.value === departmentFilter)?.label}
-              <button
-                onClick={() => onDepartmentChange('all')}
-                className='ml-1 hover:text-gray-900'
-              >
-                ×
-              </button>
-            </Badge>
-          )}
-
-          {typeFilter !== 'all' && (
-            <Badge variant='outline' className='px-2 py-1 text-xs gap-1'>
-              Tipo: {ticketTypes.find(t => t.value === typeFilter)?.label}
-              <button
-                onClick={() => onTypeChange('all')}
                 className='ml-1 hover:text-gray-900'
               >
                 ×

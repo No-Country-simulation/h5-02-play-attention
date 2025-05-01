@@ -70,7 +70,7 @@ export default function TicketList({
   const [hoveredRow, setHoveredRow] = useState(null);
   const [ticketToDelete, setTicketToDelete] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  console.log('tickets', tickets);
+
   // Formatear la fecha para mostrarla en formato legible
   const formatDate = dateString => {
     try {
@@ -169,7 +169,7 @@ export default function TicketList({
       );
     }
 
-    // No hay tickets
+    // No hay tickets (sin filtros aplicados)
     if (!isLoading && tickets.length === 0 && totalTickets === 0) {
       return (
         <div className='bg-white h-full border rounded-lg p-8 text-center'>
@@ -194,7 +194,7 @@ export default function TicketList({
       );
     }
 
-    // No hay tickets en la página actual pero hay en otras páginas
+    // No hay tickets en la página actual pero hay en otras páginas (con filtros aplicados)
     if (!isLoading && tickets.length === 0 && totalTickets > 0) {
       return (
         <div className='bg-white border rounded-lg p-8 text-center'>
@@ -220,11 +220,11 @@ export default function TicketList({
       );
     }
 
-    // Lista de tickets
+    // Lista de tickets (con datos)
     return (
       <>
-        {/* Vista de tabla para pantallas medianas y grandes */}
-        <div className='overflow-x-auto hidden md:block'>
+        {/* Vista de tabla solo para pantallas grandes */}
+        <div className='overflow-x-auto hidden lg:block'>
           <table className='w-full'>
             <thead>
               <tr className='border-b'>
@@ -252,85 +252,97 @@ export default function TicketList({
               </tr>
             </thead>
             <tbody>
-              {tickets.map(ticket => (
-                <tr
-                  key={ticket.id}
-                  className='border-b hover:bg-gray-50 cursor-pointer'
-                  onClick={() => onSelectTicket(ticket)}
-                  onMouseEnter={() => setHoveredRow(ticket.id)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  <td className='py-3 px-4 text-sm font-medium'>
-                    {ticket.subject}
-                  </td>
-                  <td className='py-3 px-2 text-sm'>{ticket.user}</td>
-                  <td className='py-3 px-2 text-sm'>
-                    {ticket.assignedTo || 'Sin asignar'}
-                  </td>
-                  <td className='py-3 px-2 text-sm'>
-                    <Badge
-                      variant='outline'
-                      className='flex items-center gap-1 capitalize'
-                    >
-                      {renderStatusIcon(ticket.status)}
-                      {ticket.status}
-                    </Badge>
-                  </td>
-                  <td className='py-3 px-2 text-sm'>
-                    <Badge
-                      className={cn(
-                        'capitalize',
-                        getPriorityStyle(ticket.priority)
-                      )}
-                    >
-                      {ticket.priority}
-                    </Badge>
-                  </td>
-                  <td className='py-3 px-2 text-sm'>
-                    {formatDate(ticket.date)}
-                  </td>
-                  <td className='py-3 px-2 text-sm text-right'>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='h-8 w-8 rounded-full'
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <MoreVertical className='h-4 w-4' />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={e => {
-                            e.stopPropagation();
-                            onSelectTicket(ticket);
-                          }}
-                        >
-                          <Edit className='mr-2 h-4 w-4' />
-                          Ver detalle
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className='text-red-600 focus:text-red-600'
-                          onClick={e => handleDeleteClick(e, ticket)}
-                        >
-                          <Trash2 className='mr-2 h-4 w-4' />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {/* IMPORTANTE: Verificamos si tickets es un array antes de mapearlo */}
+              {Array.isArray(tickets) && tickets.length > 0 ? (
+                tickets.map(ticket => (
+                  <tr
+                    key={ticket.id}
+                    className={cn(
+                      'border-b cursor-pointer hover:bg-gray-50 transition duration-150',
+                      hoveredRow === ticket.id && 'bg-gray-50'
+                    )}
+                    onClick={() => onSelectTicket(ticket)}
+                    onMouseEnter={() => setHoveredRow(ticket.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                  >
+                    <td className='py-3 px-4 text-sm font-medium'>
+                      {ticket.subject}
+                    </td>
+                    <td className='py-3 px-2 text-sm'>{ticket.user}</td>
+                    <td className='py-3 px-2 text-sm'>
+                      {ticket.assignedTo || 'Sin asignar'}
+                    </td>
+                    <td className='py-3 px-2 text-sm'>
+                      <Badge
+                        variant='outline'
+                        className='flex items-center gap-1 capitalize'
+                      >
+                        {renderStatusIcon(ticket.status)}
+                        {ticket.status}
+                      </Badge>
+                    </td>
+                    <td className='py-3 px-2 text-sm'>
+                      <Badge
+                        className={cn(
+                          'capitalize',
+                          getPriorityStyle(ticket.priority)
+                        )}
+                      >
+                        {ticket.priority}
+                      </Badge>
+                    </td>
+                    <td className='py-3 px-2 text-sm'>
+                      {formatDate(ticket.date)}
+                    </td>
+                    <td className='py-3 px-2 text-sm text-right'>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='h-8 w-8 rounded-full'
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <MoreVertical className='h-4 w-4' />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align='end'>
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={e => {
+                              e.stopPropagation();
+                              onSelectTicket(ticket);
+                            }}
+                          >
+                            <Edit className='mr-2 h-4 w-4' />
+                            Ver detalle
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className='text-red-600 focus:text-red-600'
+                            onClick={e => handleDeleteClick(e, ticket)}
+                          >
+                            <Trash2 className='mr-2 h-4 w-4' />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className='text-center py-8 text-gray-500'>
+                    No se encontraron tickets que coincidan con los filtros.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Vista de tarjetas para dispositivos móviles */}
-        <div className='md:hidden space-y-4'>
+        {/* Vista de tarjetas para dispositivos móviles y tablets */}
+        <div className='lg:hidden space-y-4'>
           {tickets.map(ticket => (
             <div
               key={ticket.id}

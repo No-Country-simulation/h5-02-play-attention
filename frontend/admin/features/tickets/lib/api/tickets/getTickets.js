@@ -19,8 +19,6 @@ export async function getTickets() {
     // URL para obtener todos los tickets sin filtros
     const url = `${API_URL}/support-tickets`;
 
-    console.log('Fetching all tickets from URL:', url);
-
     // Realizar la petición
     const response = await fetch(url, {
       method: 'GET',
@@ -32,7 +30,6 @@ export async function getTickets() {
     }
 
     const data = await response.json();
-    console.log('Tickets API response:', data);
 
     // No transformamos los datos aquí, devolvemos la respuesta tal cual para que el adaptador la procese
     return data;

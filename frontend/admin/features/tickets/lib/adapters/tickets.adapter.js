@@ -122,7 +122,6 @@ export const ticketAdapter = (apiTicket = {}) => {
  * @returns {Object} - Datos formateados para el frontend con paginación si existe
  */
 export const ticketsAdapter = (apiResponse = []) => {
-  console.log('ticketsAdapter recibió:', apiResponse);
 
   // Caso para la nueva estructura con el array @tickets
   if (

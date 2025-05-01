@@ -17,13 +17,10 @@ export function useTickets(options = {}) {
   return useQuery({
     queryKey: ['tickets'],
     queryFn: async () => {
-      console.log('Executing fetch for all tickets');
       const tickets = await ticketsApi.getTickets();
-      console.log('Raw tickets data received:', tickets);
 
       // Adaptamos los datos
       const adaptedData = ticketsAdapter(tickets);
-      console.log('Adapted tickets data:', adaptedData);
 
       // Nos aseguramos que la estructura sea exactamente la que espera TicketManager
       // Esto garantiza que aunque el adaptador cambie, siempre mantengamos esta estructura

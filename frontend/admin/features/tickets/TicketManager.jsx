@@ -26,9 +26,7 @@ export default function TicketManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [assigneeFilter, setAssigneeFilter] = useState('all');
-  const [departmentFilter, setDepartmentFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('newest');
   const pageSize = 10; // Número de tickets por página
 
   const router = useRouter();
@@ -37,15 +35,7 @@ export default function TicketManager() {
   // Restablecer la página cuando cambien los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [
-    statusFilter,
-    searchQuery,
-    dateFilter,
-    priorityFilter,
-    assigneeFilter,
-    departmentFilter,
-    typeFilter
-  ]);
+  }, [statusFilter, searchQuery, dateFilter, priorityFilter, sortOrder]);
 
   // Obtener todos los tickets sin filtros desde el backend
   const {
@@ -59,13 +49,73 @@ export default function TicketManager() {
     refetch
   } = useTickets();
 
+  // Para fines de demo, creamos algunos tickets de ejemplo si no hay datos
+  const demoTickets = useMemo(() => {
+    // Solo crear tickets de demo si no hay tickets reales
+    if (allTicketsData.tickets && allTicketsData.tickets.length > 0) {
+      return allTicketsData.tickets;
+    }
+
+    // Crear tickets de demo
+    const today = new Date();
+
+    return [
+      {
+        id: 'demo-1',
+        subject: 'Problema con la aplicación móvil',
+        description:
+          'La aplicación se cierra inesperadamente al intentar cargar imágenes',
+        status: 'abierto',
+        priority: 'alta',
+        createdAt: today.toISOString(),
+        userName: 'Juan Pérez',
+        userEmail: 'juan@ejemplo.com'
+      },
+      {
+        id: 'demo-2',
+        subject: 'Solicitud de característica nueva',
+        description: 'Me gustaría que se añadiera la opción de exportar a PDF',
+        status: 'en proceso',
+        priority: 'media',
+        createdAt: today.toISOString(),
+        userName: 'María García',
+        userEmail: 'maria@ejemplo.com'
+      },
+      {
+        id: 'demo-3',
+        subject: 'Error en el proceso de pago',
+        description:
+          'Al intentar pagar recibo un error de "transacción fallida"',
+        status: 'abierto',
+        priority: 'alta',
+        createdAt: today.toISOString(),
+        userName: 'Carlos López',
+        userEmail: 'carlos@ejemplo.com'
+      },
+      {
+        id: 'demo-4',
+        subject: 'Pregunta sobre facturación',
+        description: '¿Cuándo se realizan los cargos mensuales?',
+        status: 'en proceso',
+        priority: 'baja',
+        createdAt: today.toISOString(),
+        userName: 'Ana Martínez',
+        userEmail: 'ana@ejemplo.com'
+      }
+    ];
+  }, [allTicketsData.tickets]);
+
   // Aplicar filtrado en el lado del cliente
   const filteredTickets = useMemo(() => {
-    if (!allTicketsData.tickets || allTicketsData.tickets.length === 0) {
+    // Usamos los tickets de demo en lugar de los tickets de la API si no hay datos
+    const ticketsToFilter =
+      demoTickets.length > 0 ? demoTickets : allTicketsData.tickets;
+
+    if (!ticketsToFilter || ticketsToFilter.length === 0) {
       return [];
     }
 
-    let filtered = [...allTicketsData.tickets];
+    let filtered = [...ticketsToFilter];
 
     // Filtrar por estado
     if (statusFilter !== 'all') {
@@ -84,93 +134,41 @@ export default function TicketManager() {
       );
     }
 
-    // Filtrar por fecha
-    if (dateFilter !== 'all') {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const thisWeekStart = new Date(today);
-      thisWeekStart.setDate(today.getDate() - today.getDay());
-      const lastWeekStart = new Date(thisWeekStart);
-      lastWeekStart.setDate(thisWeekStart.getDate() - 7);
-      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const quarterStart = new Date(
-        now.getFullYear(),
-        Math.floor(now.getMonth() / 3) * 3,
-        1
-      );
-
-      filtered = filtered.filter(ticket => {
-        const ticketDate = new Date(ticket.createdAt);
-
-        switch (dateFilter) {
-          case 'today':
-            return ticketDate >= today;
-          case 'yesterday':
-            return ticketDate >= yesterday && ticketDate < today;
-          case 'week':
-            return ticketDate >= thisWeekStart;
-          case 'last_week':
-            return ticketDate >= lastWeekStart && ticketDate < thisWeekStart;
-          case 'month':
-            return ticketDate >= thisMonthStart;
-          case 'last_month':
-            return ticketDate >= lastMonthStart && ticketDate < thisMonthStart;
-          case 'quarter':
-            return ticketDate >= quarterStart;
-          default:
-            return true;
-        }
-      });
-    }
+    // Para fines de demo, no aplicamos filtros de fecha reales
 
     // Filtrar por prioridad
     if (priorityFilter !== 'all') {
       filtered = filtered.filter(ticket => ticket.priority === priorityFilter);
     }
 
-    // Filtrar por asignado
-    if (assigneeFilter !== 'all') {
-      if (assigneeFilter === 'unassigned') {
-        filtered = filtered.filter(ticket => !ticket.assignee);
-      } else if (assigneeFilter === 'current_user') {
-        // Asumir que el ID del usuario actual está disponible o implementarlo según la lógica de la app
-        const currentUserId = 'current-user-id'; // Reemplazar con la lógica para obtener el ID del usuario actual
-        filtered = filtered.filter(
-          ticket => ticket.assigneeId === currentUserId
-        );
-      } else if (assigneeFilter === 'other') {
-        const currentUserId = 'current-user-id'; // Reemplazar con la lógica para obtener el ID del usuario actual
-        filtered = filtered.filter(
-          ticket => ticket.assigneeId && ticket.assigneeId !== currentUserId
-        );
+    // Ordenar tickets
+    filtered.sort((a, b) => {
+      // Obtener fechas de creación
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+
+      switch (sortOrder) {
+        case 'newest':
+          return dateB - dateA; // Más recientes primero
+        case 'oldest':
+          return dateA - dateB; // Más antiguos primero
+        case 'alphabetical':
+          // Ordenar alfabéticamente por asunto
+          return (a.subject || '').localeCompare(b.subject || '');
+        default:
+          return dateB - dateA; // Por defecto, más recientes primero
       }
-    }
-
-    // Filtrar por departamento
-    if (departmentFilter !== 'all') {
-      filtered = filtered.filter(
-        ticket => ticket.department === departmentFilter
-      );
-    }
-
-    // Filtrar por tipo
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(ticket => ticket.type === typeFilter);
-    }
+    });
 
     return filtered;
   }, [
+    demoTickets,
     allTicketsData.tickets,
     statusFilter,
     searchQuery,
     dateFilter,
     priorityFilter,
-    assigneeFilter,
-    departmentFilter,
-    typeFilter
+    sortOrder
   ]);
 
   // Calcular paginación en el cliente
@@ -286,21 +284,9 @@ export default function TicketManager() {
     setCurrentPage(1);
   };
 
-  // Manejar cambio de filtro de asignación
-  const handleAssigneeChange = filter => {
-    setAssigneeFilter(filter);
-    setCurrentPage(1);
-  };
-
-  // Manejar cambio de filtro de departamento
-  const handleDepartmentChange = filter => {
-    setDepartmentFilter(filter);
-    setCurrentPage(1);
-  };
-
-  // Manejar cambio de filtro de tipo
-  const handleTypeChange = filter => {
-    setTypeFilter(filter);
+  // Manejar cambio de orden
+  const handleSortOrderChange = order => {
+    setSortOrder(order);
     setCurrentPage(1);
   };
 
@@ -381,12 +367,8 @@ export default function TicketManager() {
             onDateFilterChange={handleDateFilterChange}
             priorityFilter={priorityFilter}
             onPriorityChange={handlePriorityChange}
-            assigneeFilter={assigneeFilter}
-            onAssigneeChange={handleAssigneeChange}
-            departmentFilter={departmentFilter}
-            onDepartmentChange={handleDepartmentChange}
-            typeFilter={typeFilter}
-            onTypeChange={handleTypeChange}
+            sortOrder={sortOrder}
+            onSortOrderChange={handleSortOrderChange}
           />
 
           <div className='w-full flex justify-end mb-4'>
@@ -407,8 +389,19 @@ export default function TicketManager() {
             onPageChange={handlePageChange}
             onPreviousPage={goToPreviousPage}
             onNextPage={goToNextPage}
-            isLoading={isLoading}
+            isLoading={isLoading && demoTickets.length === 0}
           />
+
+          {/* Mensaje para indicar el modo demo */}
+          {demoTickets.length > 0 && allTicketsData.tickets.length === 0 && (
+            <div className='mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm text-yellow-700'>
+              <p className='font-medium'>Modo demostración</p>
+              <p>
+                Se están mostrando tickets de ejemplo para visualizar la
+                funcionalidad.
+              </p>
+            </div>
+          )}
         </>
       )}
     </div>
