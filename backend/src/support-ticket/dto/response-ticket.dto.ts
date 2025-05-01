@@ -5,8 +5,9 @@ import {
   TicketStatuses,
 } from '../support-ticket.constants';
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Transform } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { PaginationResponseDto } from 'src/common/dtos/pagination.dto';
+import { UserMinimalDto } from 'src/users/dto/return-user.dto';
 
 export class ResponseSupportTicketDto {
   @ApiProperty()
@@ -38,17 +39,15 @@ export class ResponseSupportTicketDto {
   @Expose()
   ticket_origin: TicketOrigin;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ type: UserMinimalDto })
   @Expose({ name: 'user_id' })
-  @Transform(({ obj }) => (obj.user_id ? obj.user_id.toString() : undefined))
-  user_id?: string;
+  @Type(() => UserMinimalDto)
+  user_id: UserMinimalDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: UserMinimalDto })
   @Expose({ name: 'assigned_to' })
-  @Transform(({ obj }) =>
-    obj.assigned_to ? obj.assigned_to.toString() : undefined,
-  )
-  assigned_to: string;
+  @Type(() => UserMinimalDto)
+  assigned_to: UserMinimalDto;
 
   @ApiProperty()
   @Expose({ name: 'created_by' })

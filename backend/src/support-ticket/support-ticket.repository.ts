@@ -22,7 +22,9 @@ export class SupportTicketRepository implements ISupportTicketsRepository {
   }
 
   async findSupportTicket(id: string): Promise<SupportTickets> {
-    return await this.model.findOne({ _id: id }).populate('messages');
+    return await this.model
+      .findOne({ _id: id })
+      .populate([{ path: 'assigned_to' }, { path: 'user_id' }]);
   }
 
   async findFilteredTickets(
@@ -44,6 +46,7 @@ export class SupportTicketRepository implements ISupportTicketsRepository {
       .skip((_query.page - 1) * _query.take)
       .sort({ [_query.sort_by]: _query.order === 'asc' ? 1 : -1 })
       .limit(_query.take)
+      .populate([{ path: 'assigned_to' }, { path: 'user_id' }])
       .exec();
   }
 
