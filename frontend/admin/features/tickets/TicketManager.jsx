@@ -56,7 +56,12 @@ export default function TicketManager() {
     refetch
   } = useTickets(filters);
 
+  console.log('ticketsData completo:', ticketsData);
+
+  // Desestructurar correctamente los datos
   const { tickets = [], total: totalTickets = 0, totalPages = 0 } = ticketsData;
+
+  console.log('tickets manager', tickets);
 
   // Hooks para operaciones de actualización y eliminación
   const updateTicketMutation = useUpdateTicket();

@@ -70,7 +70,7 @@ export default function TicketList({
   const [hoveredRow, setHoveredRow] = useState(null);
   const [ticketToDelete, setTicketToDelete] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
+  console.log('tickets',tickets)
   // Formatear la fecha para mostrarla en formato legible
   const formatDate = dateString => {
     try {

@@ -22,8 +22,9 @@ export const ticketAdapter = (apiTicket = {}) => {
 
   return {
     id: apiTicket._id || apiTicket.id || '',
-    subject: apiTicket.subject || 'Sin asunto',
-    content: apiTicket.content || apiTicket.message || '',
+    subject: apiTicket.title || apiTicket.subject || 'Sin asunto',
+    content:
+      apiTicket.content || apiTicket.description || apiTicket.message || '',
     user:
       typeof apiTicket.user === 'object'
         ? apiTicket.user.name || apiTicket.user.email || 'Usuario desconocido'
@@ -31,11 +32,11 @@ export const ticketAdapter = (apiTicket = {}) => {
     userId:
       typeof apiTicket.user === 'object'
         ? apiTicket.user._id || apiTicket.user.id || ''
-        : apiTicket.userId || '',
+        : apiTicket.userId || apiTicket.user_id || '',
     status: mapTicketStatusToFrontend(apiTicket.status),
     priority: mapTicketPriority(apiTicket.priority || 'media'),
-    date: formatDate(apiTicket.createdAt),
-    updated: formatDate(apiTicket.updatedAt),
+    date: formatDate(apiTicket.createdAt || apiTicket.created_at),
+    updated: formatDate(apiTicket.updatedAt || apiTicket.updated_at),
     responses: Array.isArray(apiTicket.responses)
       ? apiTicket.responses.map(response => ({
           id: response._id || response.id || '',
@@ -50,7 +51,8 @@ export const ticketAdapter = (apiTicket = {}) => {
           isAdmin: response.isAdmin || false
         }))
       : [],
-    attachments: apiTicket.attachments || []
+    attachments: apiTicket.attachments || [],
+    category: apiTicket.category || 'general'
   };
 };
 
@@ -60,8 +62,74 @@ export const ticketAdapter = (apiTicket = {}) => {
  * @returns {Object} - Datos formateados para el frontend con paginación si existe
  */
 export const ticketsAdapter = (apiResponse = []) => {
+  console.log('ticketsAdapter recibió:', apiResponse);
+
+  // CASO ESPECÍFICO: para la estructura exacta que tenemos en la API
+  // data: Array(2), current_page: 1, page_records: 2, total_records: 2
+  if (
+    apiResponse &&
+    apiResponse.data &&
+    Array.isArray(apiResponse.data) &&
+    typeof apiResponse.current_page === 'number' &&
+    typeof apiResponse.page_records === 'number' &&
+    typeof apiResponse.total_records === 'number'
+  ) {
+    console.log(
+      'FORMATO DETECTADO: API Play Attention',
+      apiResponse.data.length
+    );
+
+    // Adaptar cada ticket en el array de datos
+    const adaptedTickets = apiResponse.data.map(ticket =>
+      ticketAdapter(ticket)
+    );
+    console.log('Tickets adaptados:', adaptedTickets.length, adaptedTickets);
+
+    // Devolver objeto estructurado con paginación
+    return {
+      tickets: adaptedTickets,
+      total: apiResponse.total_records,
+      totalPages:
+        Math.ceil(apiResponse.total_records / apiResponse.page_records) || 1,
+      page: apiResponse.current_page,
+      limit: apiResponse.page_records
+    };
+  }
+
+  // Caso específico para la estructura "data, current_page, page_records, total_records"
+  if (
+    apiResponse &&
+    apiResponse.data &&
+    Array.isArray(apiResponse.data) &&
+    'current_page' in apiResponse &&
+    'page_records' in apiResponse &&
+    'total_records' in apiResponse
+  ) {
+    console.log('Procesando formato específico con data y current_page');
+    const adaptedTickets = apiResponse.data.map(ticket =>
+      ticketAdapter(ticket)
+    );
+
+    return {
+      tickets: adaptedTickets,
+      total:
+        apiResponse.total_records ||
+        apiResponse.page_records ||
+        adaptedTickets.length,
+      page: apiResponse.current_page || 1,
+      limit: apiResponse.page_records || adaptedTickets.length,
+      totalPages:
+        apiResponse.last_page ||
+        Math.ceil(
+          (apiResponse.total_records || adaptedTickets.length) /
+            (apiResponse.page_records || 10)
+        )
+    };
+  }
+
   // Si la respuesta es un objeto con estructura de paginación
   if (apiResponse && !Array.isArray(apiResponse) && apiResponse.data) {
+    console.log('Procesando formato con data en objeto');
     const { data, total, page, limit, totalPages } = apiResponse;
 
     // Adaptar cada ticket en el array de datos
@@ -79,8 +147,24 @@ export const ticketsAdapter = (apiResponse = []) => {
     };
   }
 
+  // Si la respuesta tiene la estructura con array de "data" dentro de un objeto
+  if (apiResponse && apiResponse.data && Array.isArray(apiResponse.data)) {
+    console.log('Procesando formato con data en array');
+    const adaptedTickets = apiResponse.data.map(ticket =>
+      ticketAdapter(ticket)
+    );
+    return {
+      tickets: adaptedTickets,
+      total: apiResponse.totalTickets || adaptedTickets.length,
+      page: apiResponse.currentPage || 1,
+      limit: apiResponse.limit || adaptedTickets.length,
+      totalPages: apiResponse.totalPages || 1
+    };
+  }
+
   // Si la respuesta es simplemente un array de tickets (formato antiguo)
   if (Array.isArray(apiResponse)) {
+    console.log('Procesando array simple');
     const adaptedTickets = apiResponse.map(ticket => ticketAdapter(ticket));
     return {
       tickets: adaptedTickets,
@@ -88,6 +172,25 @@ export const ticketsAdapter = (apiResponse = []) => {
       page: 1,
       limit: adaptedTickets.length,
       totalPages: 1
+    };
+  }
+
+  // Manejar el caso donde la estructura tiene un array en "tickets" (como en tu captura)
+  if (
+    apiResponse &&
+    apiResponse.tickets &&
+    Array.isArray(apiResponse.tickets)
+  ) {
+    console.log('Procesando formato con tickets en array');
+    const adaptedTickets = apiResponse.tickets.map(ticket =>
+      ticketAdapter(ticket)
+    );
+    return {
+      tickets: adaptedTickets,
+      total: apiResponse.totalTickets || adaptedTickets.length,
+      page: apiResponse.currentPage || 1,
+      limit: apiResponse.limit || adaptedTickets.length,
+      totalPages: apiResponse.totalPages || 1
     };
   }
 

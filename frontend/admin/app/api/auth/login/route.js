@@ -56,7 +56,7 @@ export async function POST(request) {
 
     // Establecer cookie con el token
     cookieStore.set('auth_token', token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
@@ -66,7 +66,7 @@ export async function POST(request) {
     // Si hay un playAttentionToken específico, también guardarlo
     if (data.playAttentionToken && data.playAttentionToken !== token) {
       cookieStore.set('playAttentionToken', data.playAttentionToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',

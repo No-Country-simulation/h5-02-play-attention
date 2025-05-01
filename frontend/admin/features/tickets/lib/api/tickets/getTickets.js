@@ -51,11 +51,12 @@ export async function getTickets(filters = {}) {
       queryString ? `?${queryString}` : ''
     }`;
 
+    console.log('Fetching tickets from URL:', url);
+
     // Realizar la petición
     const response = await fetch(url, {
       method: 'GET',
-      headers: commonHeaders,
-      credentials: 'include'
+      headers: commonHeaders
     });
 
     if (!response.ok) {
@@ -63,14 +64,10 @@ export async function getTickets(filters = {}) {
     }
 
     const data = await response.json();
+    console.log('Tickets API response:', data);
 
-    // Transformar y devolver los datos
-    return {
-      tickets: data.tickets || [],
-      total: data.totalTickets || 0,
-      totalPages: data.totalPages || 1,
-      currentPage: data.currentPage || 1
-    };
+    // No transformamos los datos aquí, devolvemos la respuesta tal cual para que el adaptador la procese
+    return data;
   } catch (error) {
     console.error('Error al obtener tickets:', error);
     throw new Error(`Error al obtener tickets: ${error.message}`);
