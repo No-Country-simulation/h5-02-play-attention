@@ -10,18 +10,15 @@ import { toast } from 'sonner';
 
 /**
  * Hook para obtener todos los tickets de soporte
- * @param {Object} filters - Filtros para la consulta
  * @param {Object} options - Opciones adicionales para la consulta
  * @returns {Object} Resultado de useQuery con datos y estado
  */
-export function useTickets(filters = {}, options = {}) {
-  console.log('useTickets hook called with filters:', filters);
-
+export function useTickets(options = {}) {
   return useQuery({
-    queryKey: ['tickets', filters],
+    queryKey: ['tickets'],
     queryFn: async () => {
-      console.log('Executing fetch for tickets with filters:', filters);
-      const tickets = await ticketsApi.getTickets(filters);
+      console.log('Executing fetch for all tickets');
+      const tickets = await ticketsApi.getTickets();
       console.log('Raw tickets data received:', tickets);
 
       // Adaptamos los datos

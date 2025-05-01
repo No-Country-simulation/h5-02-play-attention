@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TicketList from './components/TicketList';
 import TicketDetail from './components/TicketDetail';
 import TicketFilters from './components/TicketFilters';
@@ -25,6 +25,10 @@ export default function TicketManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const pageSize = 10; // Número de tickets por página
 
   const router = useRouter();
@@ -33,20 +37,19 @@ export default function TicketManager() {
   // Restablecer la página cuando cambien los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, searchQuery, dateFilter]);
+  }, [
+    statusFilter,
+    searchQuery,
+    dateFilter,
+    priorityFilter,
+    assigneeFilter,
+    departmentFilter,
+    typeFilter
+  ]);
 
-  // Filtros para la consulta de tickets
-  const filters = {
-    ...(statusFilter !== 'all' && { status: statusFilter }),
-    ...(searchQuery && { query: searchQuery }),
-    ...(dateFilter !== 'all' && { dateFilter }),
-    page: currentPage,
-    limit: pageSize
-  };
-
-  // Obtener tickets desde la API
+  // Obtener todos los tickets sin filtros desde el backend
   const {
-    data: ticketsData = {
+    data: allTicketsData = {
       tickets: [],
       total: 0,
       totalPages: 0
@@ -54,14 +57,136 @@ export default function TicketManager() {
     isLoading,
     error,
     refetch
-  } = useTickets(filters);
+  } = useTickets();
 
-  console.log('ticketsData completo:', ticketsData);
+  // Aplicar filtrado en el lado del cliente
+  const filteredTickets = useMemo(() => {
+    if (!allTicketsData.tickets || allTicketsData.tickets.length === 0) {
+      return [];
+    }
 
-  // Desestructurar correctamente los datos
-  const { tickets = [], total: totalTickets = 0, totalPages = 0 } = ticketsData;
+    let filtered = [...allTicketsData.tickets];
 
-  console.log('tickets manager', tickets);
+    // Filtrar por estado
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(ticket => ticket.status === statusFilter);
+    }
+
+    // Filtrar por búsqueda
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        ticket =>
+          ticket.id?.toString().includes(query) ||
+          ticket.subject?.toLowerCase().includes(query) ||
+          ticket.userName?.toLowerCase().includes(query) ||
+          ticket.description?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filtrar por fecha
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const thisWeekStart = new Date(today);
+      thisWeekStart.setDate(today.getDate() - today.getDay());
+      const lastWeekStart = new Date(thisWeekStart);
+      lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const quarterStart = new Date(
+        now.getFullYear(),
+        Math.floor(now.getMonth() / 3) * 3,
+        1
+      );
+
+      filtered = filtered.filter(ticket => {
+        const ticketDate = new Date(ticket.createdAt);
+
+        switch (dateFilter) {
+          case 'today':
+            return ticketDate >= today;
+          case 'yesterday':
+            return ticketDate >= yesterday && ticketDate < today;
+          case 'week':
+            return ticketDate >= thisWeekStart;
+          case 'last_week':
+            return ticketDate >= lastWeekStart && ticketDate < thisWeekStart;
+          case 'month':
+            return ticketDate >= thisMonthStart;
+          case 'last_month':
+            return ticketDate >= lastMonthStart && ticketDate < thisMonthStart;
+          case 'quarter':
+            return ticketDate >= quarterStart;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filtrar por prioridad
+    if (priorityFilter !== 'all') {
+      filtered = filtered.filter(ticket => ticket.priority === priorityFilter);
+    }
+
+    // Filtrar por asignado
+    if (assigneeFilter !== 'all') {
+      if (assigneeFilter === 'unassigned') {
+        filtered = filtered.filter(ticket => !ticket.assignee);
+      } else if (assigneeFilter === 'current_user') {
+        // Asumir que el ID del usuario actual está disponible o implementarlo según la lógica de la app
+        const currentUserId = 'current-user-id'; // Reemplazar con la lógica para obtener el ID del usuario actual
+        filtered = filtered.filter(
+          ticket => ticket.assigneeId === currentUserId
+        );
+      } else if (assigneeFilter === 'other') {
+        const currentUserId = 'current-user-id'; // Reemplazar con la lógica para obtener el ID del usuario actual
+        filtered = filtered.filter(
+          ticket => ticket.assigneeId && ticket.assigneeId !== currentUserId
+        );
+      }
+    }
+
+    // Filtrar por departamento
+    if (departmentFilter !== 'all') {
+      filtered = filtered.filter(
+        ticket => ticket.department === departmentFilter
+      );
+    }
+
+    // Filtrar por tipo
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(ticket => ticket.type === typeFilter);
+    }
+
+    return filtered;
+  }, [
+    allTicketsData.tickets,
+    statusFilter,
+    searchQuery,
+    dateFilter,
+    priorityFilter,
+    assigneeFilter,
+    departmentFilter,
+    typeFilter
+  ]);
+
+  // Calcular paginación en el cliente
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedTickets = filteredTickets.slice(startIndex, endIndex);
+    const totalFilteredTickets = filteredTickets.length;
+    const totalFilteredPages = Math.ceil(totalFilteredTickets / pageSize);
+
+    return {
+      tickets: paginatedTickets,
+      total: totalFilteredTickets,
+      totalPages: totalFilteredPages
+    };
+  }, [filteredTickets, currentPage, pageSize]);
 
   // Hooks para operaciones de actualización y eliminación
   const updateTicketMutation = useUpdateTicket();
@@ -138,7 +263,7 @@ export default function TicketManager() {
   };
 
   const goToNextPage = () => {
-    if (currentPage < totalPages) {
+    if (currentPage < paginatedData.totalPages) {
       handlePageChange(currentPage + 1);
     }
   };
@@ -155,6 +280,30 @@ export default function TicketManager() {
     setCurrentPage(1);
   };
 
+  // Manejar cambio de filtro de prioridad
+  const handlePriorityChange = filter => {
+    setPriorityFilter(filter);
+    setCurrentPage(1);
+  };
+
+  // Manejar cambio de filtro de asignación
+  const handleAssigneeChange = filter => {
+    setAssigneeFilter(filter);
+    setCurrentPage(1);
+  };
+
+  // Manejar cambio de filtro de departamento
+  const handleDepartmentChange = filter => {
+    setDepartmentFilter(filter);
+    setCurrentPage(1);
+  };
+
+  // Manejar cambio de filtro de tipo
+  const handleTypeChange = filter => {
+    setTypeFilter(filter);
+    setCurrentPage(1);
+  };
+
   // Función para detectar si un error es de tipo CORS
   const isCorsError = error => {
     if (!error) return false;
@@ -167,7 +316,7 @@ export default function TicketManager() {
   };
 
   // Mostrar loading spinner mientras se cargan los datos
-  if (isLoading && tickets.length === 0) {
+  if (isLoading && allTicketsData.tickets.length === 0) {
     return (
       <div className='flex justify-center items-center h-full py-20'>
         <LoadingSpinner text='Cargando tickets de soporte' size={40} />
@@ -230,6 +379,14 @@ export default function TicketManager() {
             onSearchChange={handleSearchChange}
             dateFilter={dateFilter}
             onDateFilterChange={handleDateFilterChange}
+            priorityFilter={priorityFilter}
+            onPriorityChange={handlePriorityChange}
+            assigneeFilter={assigneeFilter}
+            onAssigneeChange={handleAssigneeChange}
+            departmentFilter={departmentFilter}
+            onDepartmentChange={handleDepartmentChange}
+            typeFilter={typeFilter}
+            onTypeChange={handleTypeChange}
           />
 
           <div className='w-full flex justify-end mb-4'>
@@ -240,17 +397,17 @@ export default function TicketManager() {
           </div>
 
           <TicketList
-            tickets={tickets}
+            tickets={paginatedData.tickets}
             onSelectTicket={handleSelectTicket}
             onDeleteTicket={handleDeleteTicket}
             currentPage={currentPage}
             pageSize={pageSize}
-            totalPages={totalPages}
-            totalTickets={totalTickets}
+            totalPages={paginatedData.totalPages}
+            totalTickets={paginatedData.total}
             onPageChange={handlePageChange}
-            isLoading={isLoading}
             onPreviousPage={goToPreviousPage}
             onNextPage={goToNextPage}
+            isLoading={isLoading}
           />
         </>
       )}

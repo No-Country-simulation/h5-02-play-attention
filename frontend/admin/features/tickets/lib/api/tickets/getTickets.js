@@ -11,47 +11,15 @@ import {
 } from '../config';
 
 /**
- * Obtiene la lista de tickets de soporte con filtros opcionales
- * @param {Object} filters - Filtros para la consulta
- * @param {string} filters.status - Filtrar por estado (abierto, en proceso, etc.)
- * @param {string} filters.query - Búsqueda de texto
- * @param {string} filters.dateFilter - Filtro de fecha
- * @param {number} filters.page - Página actual para paginación
- * @param {number} filters.limit - Límite de resultados por página
+ * Obtiene la lista completa de tickets de soporte
  * @returns {Promise<Object>} - Tickets y metadatos de paginación
  */
-export async function getTickets(filters = {}) {
+export async function getTickets() {
   try {
-    // Construir los parámetros de consulta
-    const queryParams = new URLSearchParams();
+    // URL para obtener todos los tickets sin filtros
+    const url = `${API_URL}/support-tickets`;
 
-    if (filters.status) {
-      queryParams.append('status', mapTicketStatusToFrontend(filters.status));
-    }
-
-    if (filters.query) {
-      queryParams.append('query', filters.query);
-    }
-
-    if (filters.dateFilter) {
-      queryParams.append('dateFilter', filters.dateFilter);
-    }
-
-    if (filters.page) {
-      queryParams.append('page', filters.page.toString());
-    }
-
-    if (filters.limit) {
-      queryParams.append('limit', filters.limit.toString());
-    }
-
-    // Construir la URL con los parámetros
-    const queryString = queryParams.toString();
-    const url = `${API_URL}/support-tickets${
-      queryString ? `?${queryString}` : ''
-    }`;
-
-    console.log('Fetching tickets from URL:', url);
+    console.log('Fetching all tickets from URL:', url);
 
     // Realizar la petición
     const response = await fetch(url, {
