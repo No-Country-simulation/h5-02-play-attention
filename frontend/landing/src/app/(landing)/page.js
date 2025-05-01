@@ -1,43 +1,45 @@
 import { AudienceSegmentationSection } from "@/features/audience-segmentation/audience-segmentation";
 import { ContactSection } from "@/features/contact/contact";
-import { DemoVideosSection } from "@/features/demo-videos/demo-videos";
 import { HeroSection } from "@/features/hero/hero";
-import { PricingPlansSection } from "@/features/pricing-plans/pricing-plans";
 import { TestimonialsSection } from "@/features/testimonials/testimonials";
-import { AboutUsSection } from "@/shared/components/about-us/about-us";
+/* import { DemoVideosSection } from "@/features/demo-videos/demo-videos"; */
+/* import { AboutUsSection } from "@/shared/components/about-us/about-us"; */
+/* import { PricingPlansSection } from "@/features/pricing-plans/pricing-plans"; */
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main>
       {/* Hero */}
-      <section id="hero" className="min-h-screen">
+      <section id="hero">
         <HeroSection />
       </section>
 
       {/* Demo Videos */}
-      <section id="demo-videos" className="min-h-screen">
+      {/* <section id="demo-videos">
         <DemoVideosSection />
-      </section>
+      </section> */}
 
       {/* Contact */}
-      <section id="contact" className="min-h-screen">
-        <ContactSection />
-      </section>
 
-      {/* Pricing-plans */}
-      <section id="pricing-plans" className="min-h-screen">
-        <PricingPlansSection />
+      {/* Benefits and pricing plans */}
+      <section id="pricing-plans">
+        <AudienceSegmentationSection />
+        {/* <PricingPlansSection /> */}
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="min-h-screen">
+      <section id="testimonials">
         <TestimonialsSection />
       </section>
 
-      {/* About Us */}
-      <section id="about-us" className="min-h-screen">
-        <AboutUsSection />
+      <section id="contact">
+        <ContactSection />
       </section>
+
+      {/* About Us */}
+      {/*  <section id="about-us">
+        <AboutUsSection />
+      </section> */}
     </main>
   );
 }
