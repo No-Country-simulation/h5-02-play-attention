@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent } from '@/shared/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import ContentForm from './ContentForm';
 
 /**
@@ -26,6 +26,9 @@ export default function ContentFormModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='sm:max-w-md md:max-w-xl max-h-[95vh] p-0 overflow-hidden'>
+        <DialogTitle className='sr-only'>
+          {initialData ? 'Editar Contenido' : 'Crear Contenido'}
+        </DialogTitle>
         <div className='h-full overflow-y-auto'>
           {/* Usar el formulario original sin modificaciones */}
           <ContentForm
