@@ -34,8 +34,29 @@ export function useTicketMessages(ticketId, options = {}) {
   return useQuery({
     queryKey: ['ticketMessages', ticketId],
     queryFn: async () => {
-      const messages = await messagesApi.getSupportMessages({ ticketId });
-      return messagesAdapter(messages);
+      try {
+        const messages = await messagesApi.getSupportMessages({ ticketId });
+        return messagesAdapter(messages);
+      } catch (error) {
+        // Si el error es 404 "Aún no hay mensajes", devolvemos un objeto vacío válido
+        if (
+          error.message?.includes('404') &&
+          (error.message?.includes('Aún no hay mensajes') ||
+            error.message?.includes('Not Found'))
+        ) {
+          console.log(
+            'No hay mensajes para este ticket todavía. Esto es normal para tickets nuevos.'
+          );
+          return {
+            messages: [],
+            total: 0,
+            currentPage: 1,
+            totalPages: 0
+          };
+        }
+        // Cualquier otro error se propaga
+        throw error;
+      }
     },
     enabled: !!ticketId,
     ...options
@@ -70,16 +91,16 @@ export function useCreateSupportMessage() {
   return useMutation({
     mutationFn: messagesApi.createSupportMessage,
     onSuccess: data => {
-      // Invalidar la caché de mensajes para recargar la lista
-      queryClient.invalidateQueries({ queryKey: ['supportMessages'] });
+      // Sólo invalidamos la caché de mensajes, no de tickets
       queryClient.invalidateQueries({
         queryKey: ['ticketMessages', data.ticketId]
       });
-      toast.success('Mensaje enviado correctamente');
+      // Evitamos cualquier otra operación que pueda requerir permisos
       return data;
     },
     onError: error => {
-      toast.error(`Error al enviar mensaje: ${error.message}`);
+      // Dejamos el manejo de errores al componente para más control
+      console.error('[ERROR] Error en mutación de creación de mensaje:', error);
     }
   });
 }

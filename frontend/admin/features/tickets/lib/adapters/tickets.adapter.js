@@ -20,23 +20,82 @@ export const ticketAdapter = (apiTicket = {}) => {
     return new Date(dateString).toISOString();
   };
 
+  // Extraer información del usuario que emitió el ticket (user_id)
+  const getTicketCreator = () => {
+    // Nueva estructura con user_id
+    if (apiTicket.user_id) {
+      return {
+        userId: apiTicket.user_id.id || '',
+        userName:
+          apiTicket.user_id.fullname ||
+          apiTicket.user_id.email ||
+          'Usuario desconocido',
+        userEmail: apiTicket.user_id.email || ''
+      };
+    }
+
+    // Estructura anterior
+    if (typeof apiTicket.user === 'object') {
+      return {
+        userId: apiTicket.user._id || apiTicket.user.id || '',
+        userName:
+          apiTicket.user.name || apiTicket.user.email || 'Usuario desconocido',
+        userEmail: apiTicket.user.email || ''
+      };
+    }
+
+    return {
+      userId: apiTicket.userId || '',
+      userName: apiTicket.user || 'Usuario desconocido',
+      userEmail: ''
+    };
+  };
+
+  // Extraer información del usuario asignado (assigned_to)
+  const getAssignedUser = () => {
+    // Nueva estructura con assigned_to
+    if (apiTicket.assigned_to) {
+      return {
+        assignedId: apiTicket.assigned_to.id || '',
+        assignedName:
+          apiTicket.assigned_to.fullname ||
+          apiTicket.assigned_to.email ||
+          'Sin asignar',
+        assignedEmail: apiTicket.assigned_to.email || ''
+      };
+    }
+
+    // Si no hay información de usuario asignado
+    return {
+      assignedId: '',
+      assignedName: 'Sin asignar',
+      assignedEmail: ''
+    };
+  };
+
+  // Obtener información de los usuarios
+  const ticketCreator = getTicketCreator();
+  const assignedUser = getAssignedUser();
+
   return {
     id: apiTicket._id || apiTicket.id || '',
     subject: apiTicket.title || apiTicket.subject || 'Sin asunto',
     content:
       apiTicket.content || apiTicket.description || apiTicket.message || '',
-    user:
-      typeof apiTicket.user === 'object'
-        ? apiTicket.user.name || apiTicket.user.email || 'Usuario desconocido'
-        : apiTicket.user || 'Usuario desconocido',
-    userId:
-      typeof apiTicket.user === 'object'
-        ? apiTicket.user._id || apiTicket.user.id || ''
-        : apiTicket.userId || apiTicket.user_id || '',
+    user: ticketCreator.userName,
+    userId: ticketCreator.userId,
+    userEmail: ticketCreator.userEmail,
+    assignedTo: assignedUser.assignedName,
+    assignedId: assignedUser.assignedId,
+    assignedEmail: assignedUser.assignedEmail,
     status: mapTicketStatusToFrontend(apiTicket.status),
     priority: mapTicketPriority(apiTicket.priority || 'media'),
-    date: formatDate(apiTicket.createdAt || apiTicket.created_at),
-    updated: formatDate(apiTicket.updatedAt || apiTicket.updated_at),
+    date: formatDate(
+      apiTicket.createdAt || apiTicket.created_at || apiTicket.created_at
+    ),
+    updated: formatDate(
+      apiTicket.updatedAt || apiTicket.updated_at || apiTicket.updated_at
+    ),
     responses: Array.isArray(apiTicket.responses)
       ? apiTicket.responses.map(response => ({
           id: response._id || response.id || '',
@@ -52,7 +111,8 @@ export const ticketAdapter = (apiTicket = {}) => {
         }))
       : [],
     attachments: apiTicket.attachments || [],
-    category: apiTicket.category || 'general'
+    category: apiTicket.category || 'general',
+    ticketOrigin: apiTicket.ticket_origin || 'web'
   };
 };
 
@@ -63,6 +123,30 @@ export const ticketAdapter = (apiTicket = {}) => {
  */
 export const ticketsAdapter = (apiResponse = []) => {
   console.log('ticketsAdapter recibió:', apiResponse);
+
+  // Caso para la nueva estructura con el array @tickets
+  if (
+    apiResponse &&
+    apiResponse['@tickets'] &&
+    Array.isArray(apiResponse['@tickets'])
+  ) {
+    console.log('FORMATO DETECTADO: Nueva API con @tickets');
+
+    // Adaptar cada ticket en el array de datos
+    const adaptedTickets = apiResponse['@tickets'].map(ticket =>
+      ticketAdapter(ticket)
+    );
+    console.log('Tickets adaptados:', adaptedTickets.length, adaptedTickets);
+
+    // Devolver objeto estructurado
+    return {
+      tickets: adaptedTickets,
+      total: adaptedTickets.length,
+      totalPages: 1,
+      page: 1,
+      limit: adaptedTickets.length
+    };
+  }
 
   // CASO ESPECÍFICO: para la estructura exacta que tenemos en la API
   // data: Array(2), current_page: 1, page_records: 2, total_records: 2

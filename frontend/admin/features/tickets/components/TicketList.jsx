@@ -70,7 +70,7 @@ export default function TicketList({
   const [hoveredRow, setHoveredRow] = useState(null);
   const [ticketToDelete, setTicketToDelete] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  console.log('tickets',tickets)
+  console.log('tickets', tickets);
   // Formatear la fecha para mostrarla en formato legible
   const formatDate = dateString => {
     try {
@@ -113,6 +113,22 @@ export default function TicketList({
         return 'text-green-600 bg-green-50';
       default:
         return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  // Aplicar estilos según el estado del ticket
+  const getStatusStyle = status => {
+    switch (status) {
+      case 'abierto':
+        return 'text-red-600 border-red-200';
+      case 'en proceso':
+        return 'text-amber-600 border-amber-200';
+      case 'resuelto':
+        return 'text-green-600 border-green-200';
+      case 'cerrado':
+        return 'text-gray-600 border-gray-200';
+      default:
+        return 'text-gray-600 border-gray-200';
     }
   };
 
@@ -216,7 +232,10 @@ export default function TicketList({
                   Asunto
                 </th>
                 <th className='py-3 px-2 text-left font-medium text-sm'>
-                  Usuario
+                  Creado por
+                </th>
+                <th className='py-3 px-2 text-left font-medium text-sm'>
+                  Asignado a
                 </th>
                 <th className='py-3 px-2 text-left font-medium text-sm'>
                   Estado
@@ -245,6 +264,9 @@ export default function TicketList({
                     {ticket.subject}
                   </td>
                   <td className='py-3 px-2 text-sm'>{ticket.user}</td>
+                  <td className='py-3 px-2 text-sm'>
+                    {ticket.assignedTo || 'Sin asignar'}
+                  </td>
                   <td className='py-3 px-2 text-sm'>
                     <Badge
                       variant='outline'
@@ -307,40 +329,60 @@ export default function TicketList({
           </table>
         </div>
 
-        {/* Vista de tarjetas para móvil */}
-        <div className='md:hidden space-y-3 px-3 py-2'>
+        {/* Vista de tarjetas para dispositivos móviles */}
+        <div className='md:hidden space-y-4'>
           {tickets.map(ticket => (
             <div
               key={ticket.id}
-              className='bg-white border rounded-lg p-3 shadow-sm relative cursor-pointer hover:bg-gray-50 transition-colors duration-150'
+              className='bg-white border rounded-lg p-4 hover:shadow-md cursor-pointer'
               onClick={() => onSelectTicket(ticket)}
             >
-              <div className='flex justify-between items-start mb-2'>
+              <h3 className='font-medium text-base mb-2 line-clamp-2'>
+                {ticket.subject}
+              </h3>
+
+              <div className='grid grid-cols-2 gap-2 mt-3 text-sm'>
                 <div>
-                  <h3 className='font-medium text-sm'>{ticket.subject}</h3>
-                  <p className='text-xs text-muted-foreground'>{ticket.user}</p>
+                  <p className='text-gray-500 text-xs'>Creado por</p>
+                  <p className='truncate'>{ticket.user}</p>
                 </div>
-                <div className='flex flex-col space-y-1 items-end'>
+
+                <div>
+                  <p className='text-gray-500 text-xs'>Asignado a</p>
+                  <p className='truncate'>
+                    {ticket.assignedTo || 'Sin asignar'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-gray-500 text-xs'>Estado</p>
                   <Badge
                     variant='outline'
-                    className='flex items-center gap-1 capitalize text-xs'
+                    className={cn('mt-1', getStatusStyle(ticket.status))}
                   >
-                    {renderStatusIcon(ticket.status)}
-                    <span className='hidden sm:inline'>{ticket.status}</span>
+                    <span className='mr-1'>
+                      {renderStatusIcon(ticket.status)}
+                    </span>
+                    {ticket.status}
                   </Badge>
+                </div>
+
+                <div>
+                  <p className='text-gray-500 text-xs'>Prioridad</p>
                   <Badge
-                    className={cn(
-                      'capitalize text-xs',
-                      getPriorityStyle(ticket.priority)
-                    )}
+                    variant='outline'
+                    className={cn('mt-1', getPriorityStyle(ticket.priority))}
                   >
                     {ticket.priority}
                   </Badge>
                 </div>
-              </div>
 
-              <div className='text-xs text-muted-foreground mt-2'>
-                {formatDate(ticket.date)}
+                <div className='col-span-2'>
+                  <p className='text-gray-500 text-xs'>Fecha</p>
+                  <p className='text-sm text-gray-600'>
+                    {formatDate(ticket.date)}
+                  </p>
+                </div>
               </div>
 
               <div className='absolute bottom-2 right-2 text-xs text-primary flex items-center opacity-70'>

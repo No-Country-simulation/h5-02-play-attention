@@ -6,30 +6,19 @@ import { getUsers } from '@/features/users/lib/api/getUsers';
  * Solo retorna usuarios con roles admin o comercial
  */
 export function useAssignableUsers() {
-  const {
-    data: users = [],
-    isLoading,
-    error
-  } = useQuery({
+  return useQuery({
     queryKey: ['assignableUsers'],
     queryFn: async () => {
       const allUsers = await getUsers();
-      // Para debug
-
       // Filtramos usuarios que NO sean del tipo 'User'
       const filteredUsers = allUsers.filter(
         user => user.role?.toLowerCase() !== 'user'
       );
 
-      console.log('Usuarios filtrados:', filteredUsers); // Para debug
+      console.log('Usuarios asignables:', filteredUsers);
 
       return filteredUsers;
-    }
+    },
+    staleTime: 5 * 60 * 1000 // 5 minutos
   });
-
-  return {
-    users,
-    isLoading,
-    error
-  };
 }

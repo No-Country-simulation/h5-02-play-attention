@@ -6,13 +6,28 @@ import { es } from 'date-fns/locale';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Calendar, Clock, User, MessageSquare, ArrowLeft } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  User,
+  MessageSquare,
+  ArrowLeft,
+  UserCheck,
+  Info,
+  MessageCircle,
+  Briefcase,
+  Tag,
+  Globe,
+  Edit
+} from 'lucide-react';
 
 import TicketConversation from './TicketConversation';
 import TicketReplyModal from './TicketReplyModal';
+import TicketEditModal from './TicketEditModal';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 import TicketMessages from './TicketMessages';
 import { ServiceErrorDisplay } from '@/shared/errors';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 // Funciones de utilidad para status y prioridad
 const getStatusBadge = status => {
@@ -38,8 +53,10 @@ const getPriorityBadge = priority => {
 
 export default function TicketDetail({ ticket, onBack, onUpdate }) {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [ticketStatus, setTicketStatus] = useState(ticket?.status || 'abierto');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('informacion');
 
   // Formatear la fecha para mostrarla en formato legible
   const formatDateTime = dateString => {
@@ -109,8 +126,30 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
       // Actualizar el estado local
       setTicketStatus(replyData.status);
       setIsReplyModalOpen(false);
+
+      // Cambiar a la pestaña de conversación después de enviar una respuesta
+      setActiveTab('conversacion');
     } catch (error) {
       console.error('Error al enviar respuesta:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async updatedData => {
+    try {
+      setIsSubmitting(true);
+
+      // Llamar al método de actualización
+      if (onUpdate) {
+        await onUpdate(updatedData);
+      }
+
+      // Actualizar el estado local
+      setTicketStatus(updatedData.status);
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error al actualizar ticket:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -137,14 +176,24 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
 
   return (
     <div className='space-y-6'>
-      <Card>
-        <CardHeader>
+      <Card className='shadow-sm'>
+        <CardHeader className='pb-2'>
           <div className='flex justify-between items-start'>
             <div>
-              <CardTitle className='text-xl font-bold'>
-                {ticket?.subject || 'Detalle del ticket'}
-              </CardTitle>
-              <div className='text-sm text-muted-foreground mt-1'>
+              <div className='flex items-center gap-2'>
+                <Button
+                  onClick={onBack}
+                  variant='ghost'
+                  size='icon'
+                  className='mr-2'
+                >
+                  <ArrowLeft className='h-4 w-4' />
+                </Button>
+                <CardTitle className='text-xl font-bold'>
+                  {ticket?.subject || 'Detalle del ticket'}
+                </CardTitle>
+              </div>
+              <div className='text-sm text-muted-foreground mt-1 ml-10'>
                 Ticket #{ticket?.id}
               </div>
             </div>
@@ -160,50 +209,164 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-            <div className='flex items-center gap-2'>
-              <User className='h-4 w-4 text-muted-foreground' />
-              <span className='text-sm'>
-                <span className='font-medium'>Usuario:</span>{' '}
-                {ticket?.user || 'Anónimo'}
-              </span>
-            </div>
-            <div className='flex items-center gap-2'>
-              <Calendar className='h-4 w-4 text-muted-foreground' />
-              <span className='text-sm'>
-                <span className='font-medium'>Fecha:</span>{' '}
-                {ticket?.date ? formatDateTime(ticket.date) : 'N/A'}
-              </span>
-            </div>
-            <div className='flex items-center gap-2'>
-              <Clock className='h-4 w-4 text-muted-foreground' />
-              <span className='text-sm'>
-                <span className='font-medium'>Última actualización:</span>{' '}
-                {ticket?.updated ? formatDateTime(ticket.updated) : 'N/A'}
-              </span>
-            </div>
-          </div>
 
-          {/* Conversación del ticket */}
-          <div className='mb-6'>
-            <h3 className='text-lg font-medium mb-4 flex items-center gap-2'>
-              <MessageSquare className='h-5 w-5' />
-              Conversación
-            </h3>
-            <TicketMessages ticketId={ticket.id} onTicketUpdate={onUpdate} />
-          </div>
+        <CardContent className='pt-4'>
+          <Tabs
+            defaultValue='informacion'
+            className='w-full'
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <TabsList className='mb-6 w-full justify-start border-b'>
+              <TabsTrigger
+                value='informacion'
+                className='flex items-center gap-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary'
+              >
+                <Info className='h-4 w-4' />
+                Información
+              </TabsTrigger>
+              <TabsTrigger
+                value='conversacion'
+                className='flex items-center gap-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary'
+              >
+                <MessageCircle className='h-4 w-4' />
+                Conversación
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Acciones de respuesta */}
+            <TabsContent value='informacion' className='mt-0'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div className='bg-gray-50 rounded-lg p-4 space-y-4'>
+                  <h3 className='font-medium text-lg mb-3'>
+                    Información del ticket
+                  </h3>
+
+                  <div className='grid gap-3'>
+                    <div className='flex items-center gap-2'>
+                      <User className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Creado por
+                        </span>
+                        <span className='text-sm font-medium'>
+                          {ticket?.user || 'Anónimo'}
+                        </span>
+                        {ticket?.userEmail && (
+                          <span className='text-xs text-muted-foreground'>
+                            {ticket.userEmail}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                      <UserCheck className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Asignado a
+                        </span>
+                        <span className='text-sm font-medium'>
+                          {ticket?.assignedTo || 'Sin asignar'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                      <Tag className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Categoría
+                        </span>
+                        <span className='text-sm font-medium'>
+                          {ticket?.category || 'General'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                      <Globe className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Origen
+                        </span>
+                        <span className='text-sm font-medium'>
+                          {ticket?.ticketOrigin || 'Web'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='bg-gray-50 rounded-lg p-4 space-y-4'>
+                  <h3 className='font-medium text-lg mb-3'>
+                    Detalles y fechas
+                  </h3>
+
+                  <div className='grid gap-3'>
+                    <div className='flex items-center gap-2'>
+                      <Calendar className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Fecha de creación
+                        </span>
+                        <span className='text-sm font-medium'>
+                          {ticket?.date ? formatDateTime(ticket.date) : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                      <Clock className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Última actualización
+                        </span>
+                        <span className='text-sm font-medium'>
+                          {ticket?.updated
+                            ? formatDateTime(ticket.updated)
+                            : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className='flex items-start gap-2 mt-4'>
+                      <MessageSquare className='h-4 w-4 text-muted-foreground mt-0.5' />
+                      <div className='flex flex-col'>
+                        <span className='text-xs text-muted-foreground'>
+                          Descripción original
+                        </span>
+                        <p className='text-sm mt-1 whitespace-pre-wrap'>
+                          {ticket?.content || 'Sin descripción'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value='conversacion' className='mt-0'>
+              <div className='bg-gray-50 rounded-lg p-4'>
+                <TicketMessages
+                  ticketId={ticket.id}
+                  onTicketUpdate={onUpdate}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Acciones de respuesta - Reemplazar por Editar */}
           <div className='flex justify-end space-x-3 mt-6'>
             <Button variant='outline' onClick={onBack}>
               Volver a la lista
             </Button>
             <Button
-              onClick={() => setIsReplyModalOpen(true)}
+              onClick={() => setIsEditModalOpen(true)}
               disabled={ticketStatus === 'cerrado'}
+              variant='default'
             >
-              Responder
+              <Edit className='mr-2 h-4 w-4' />
+              Editar
             </Button>
           </div>
         </CardContent>
@@ -215,6 +378,14 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
         ticketId={ticket?.id}
         currentStatus={ticketStatus}
         onSubmit={handleReplySubmit}
+        isSubmitting={isSubmitting}
+      />
+
+      <TicketEditModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        ticket={ticket}
+        onSubmit={handleEditSubmit}
         isSubmitting={isSubmitting}
       />
     </div>
