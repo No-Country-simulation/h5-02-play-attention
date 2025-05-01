@@ -21,6 +21,12 @@ export const leadStatusConfig = {
     icon: 'message-square',
     label: 'Proceso'
   },
+  no_interesado: {
+    variant: 'outline',
+    className: 'bg-red-50 text-red-700 border-red-200',
+    icon: 'x-circle',
+    label: 'No interesado'
+  },
   cliente: {
     variant: 'outline',
     className: 'bg-success-light text-success border-success',
@@ -68,6 +74,7 @@ export const statusOptions = [
   { value: 'all', label: 'Todos los estados' },
   { value: 'nuevo', label: 'Nuevos' },
   { value: 'proceso', label: 'Proceso' },
+  { value: 'no_interesado', label: 'No interesado' },
   { value: 'cliente', label: 'Clientes' }
 ];
 
