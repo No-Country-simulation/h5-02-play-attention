@@ -15,12 +15,29 @@ import { toast } from 'sonner';
  * @returns {Object} Resultado de useQuery con datos y estado
  */
 export function useTickets(filters = {}, options = {}) {
+  console.log('useTickets hook called with filters:', filters);
+
   return useQuery({
     queryKey: ['tickets', filters],
     queryFn: async () => {
+      console.log('Executing fetch for tickets with filters:', filters);
       const tickets = await ticketsApi.getTickets(filters);
-      return ticketsAdapter(tickets);
+      console.log('Raw tickets data received:', tickets);
+
+      // Adaptamos los datos
+      const adaptedData = ticketsAdapter(tickets);
+      console.log('Adapted tickets data:', adaptedData);
+
+      // Nos aseguramos que la estructura sea exactamente la que espera TicketManager
+      // Esto garantiza que aunque el adaptador cambie, siempre mantengamos esta estructura
+      return {
+        tickets: adaptedData.tickets || [],
+        total: adaptedData.total || 0,
+        totalPages: adaptedData.totalPages || 1
+      };
     },
+    refetchOnWindowFocus: false, // Evitar refetch automático al cambiar de ventana
+    staleTime: 5 * 60 * 1000, // Datos frescos por 5 minutos
     ...options
   });
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -22,14 +22,85 @@ import {
 import { Textarea } from '@/shared/ui/textarea';
 import { Label } from '@/shared/ui/label';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
+import { createTicket } from '../lib/api/tickets/createTicket';
+import { useAssignableUsers } from '../lib/hooks/useAssignableUsers';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 export default function CreateTicket() {
   const router = useRouter();
+  const {
+    users,
+    isLoading: isLoadingUsers,
+    error: usersError
+  } = useAssignableUsers();
+  const [userInfo, setUserInfo] = useState(null);
+  const [authToken, setAuthToken] = useState(null);
+
+  useEffect(() => {
+    // Extraer token directamente - con mejor manejo de errores
+    try {
+      // Imprimir todas las cookies para debug
+      console.log('Todas las cookies:', document.cookie);
+
+      const tokenCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('auth_token='));
+
+      console.log('Cookie auth_token encontrada:', tokenCookie);
+
+      if (tokenCookie) {
+        // Verificar el formato exacto
+        console.log('Cookie completa:', tokenCookie);
+
+        const token = tokenCookie.split('=')[1];
+        console.log('Token extraído:', token);
+
+        // En caso de que esté codificado
+        try {
+          const decodedToken = decodeURIComponent(token);
+          console.log('Token decodificado:', decodedToken);
+          setAuthToken(decodedToken);
+        } catch (decodeError) {
+          console.log(
+            'El token no necesita decodificación, usando valor original'
+          );
+          setAuthToken(token);
+        }
+
+        console.log('Token final guardado en estado:', token);
+      } else {
+        console.warn('No se encontró la cookie auth_token');
+      }
+
+      // Si tenés una cookie separada con la info del usuario
+      const userInfoCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('user_info='));
+
+      if (userInfoCookie) {
+        try {
+          const userInfoData = JSON.parse(
+            decodeURIComponent(userInfoCookie.split('=')[1])
+          );
+          setUserInfo(userInfoData);
+        } catch (error) {
+          console.error('Error al parsear user_info:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error al procesar cookies:', error);
+      console.error('Error al procesar cookies:', error);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
-    subject: '',
-    message: '',
-    priority: 'media',
-    category: 'tecnico'
+    title: '',
+    description: '',
+    category: 'bug',
+    priority: 'medium',
+    assigned_to: '',
+    ticket_origin: 'crm'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -53,16 +124,24 @@ export default function CreateTicket() {
     setIsSubmitting(true);
 
     try {
-      // Aquí iría la lógica para enviar el formulario a la API
-      console.log('Enviando ticket:', formData);
+      // Agregamos el user_id del usuario logueado
+      const ticketData = {
+        ...formData,
+        user_id: userInfo?.id
+      };
 
-      // Simulamos un tiempo de procesamiento
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Ya no necesitamos pasar el token como parámetro
+      const response = await createTicket(ticketData);
+      console.log('Ticket creado:', response);
 
       // Redirigimos al listado de tickets
       router.push('/tickets');
+
+      // Mostrar mensaje de éxito
+      toast.success('Ticket creado exitosamente');
     } catch (error) {
       console.error('Error al crear el ticket:', error);
+      toast.error(error.message || 'Error al crear el ticket');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,13 +168,13 @@ export default function CreateTicket() {
         <form onSubmit={handleSubmit}>
           <CardContent className='space-y-4'>
             <div className='space-y-2'>
-              <Label htmlFor='subject'>Asunto</Label>
+              <Label htmlFor='title'>Título</Label>
               <Input
-                id='subject'
-                name='subject'
-                value={formData.subject}
+                id='title'
+                name='title'
+                value={formData.title}
                 onChange={handleChange}
-                placeholder='Ingrese un asunto descriptivo'
+                placeholder='Ingrese un título descriptivo'
                 required
               />
             </div>
@@ -112,10 +191,10 @@ export default function CreateTicket() {
                     <SelectValue placeholder='Seleccione prioridad' />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='baja'>Baja</SelectItem>
-                    <SelectItem value='media'>Media</SelectItem>
-                    <SelectItem value='alta'>Alta</SelectItem>
-                    <SelectItem value='urgente'>Urgente</SelectItem>
+                    <SelectItem value='low'>Baja</SelectItem>
+                    <SelectItem value='medium'>Media</SelectItem>
+                    <SelectItem value='high'>Alta</SelectItem>
+                    <SelectItem value='critical'>Crítica</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -131,23 +210,82 @@ export default function CreateTicket() {
                     <SelectValue placeholder='Seleccione categoría' />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='tecnico'>Problema técnico</SelectItem>
-                    <SelectItem value='facturacion'>Facturación</SelectItem>
-                    <SelectItem value='cuenta'>Cuenta</SelectItem>
-                    <SelectItem value='otro'>Otro</SelectItem>
+                    <SelectItem value='bug'>Error técnico</SelectItem>
+                    <SelectItem value='feature_request'>
+                      Nueva funcionalidad
+                    </SelectItem>
+                    <SelectItem value='billing'>Facturación</SelectItem>
+                    <SelectItem value='technical'>Soporte técnico</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='message'>Mensaje</Label>
+              <Label htmlFor='assigned_to'>Asignar a</Label>
+              {isLoadingUsers ? (
+                <div className='flex items-center justify-center py-2'>
+                  <LoadingSpinner className='h-6 w-6' />
+                </div>
+              ) : usersError ? (
+                <div className='text-sm text-red-500'>
+                  Error al cargar usuarios: {usersError.message}
+                </div>
+              ) : (
+                <Select
+                  name='assigned_to'
+                  value={formData.assigned_to}
+                  onValueChange={value =>
+                    handleSelectChange('assigned_to', value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder='Seleccione agente' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users?.map(user => (
+                      <SelectItem
+                        key={user._id || user.id}
+                        value={user._id || user.id}
+                      >
+                        {user.fullname || user.name || user.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='ticket_origin'>Origen del Ticket</Label>
+              <Select
+                name='ticket_origin'
+                value={formData.ticket_origin}
+                onValueChange={value =>
+                  handleSelectChange('ticket_origin', value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='Seleccione origen' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='crm'>CRM</SelectItem>
+                  <SelectItem value='user_platform'>
+                    Plataforma de Usuario
+                  </SelectItem>
+                  <SelectItem value='external'>Externo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='description'>Descripción</Label>
               <Textarea
-                id='message'
-                name='message'
-                value={formData.message}
+                id='description'
+                name='description'
+                value={formData.description}
                 onChange={handleChange}
-                placeholder='Describa su consulta o problema en detalle'
+                placeholder='Describa el problema o solicitud en detalle'
                 rows={5}
                 required
               />

@@ -99,7 +99,7 @@ function VideoPreview({ url, youtubeId, title }) {
   if (!url && !youtubeId) return null;
 
   return (
-    <div className='mt-4 border rounded-lg overflow-hidden'>
+    <div className='mt-4 border rounded-lg overflow-hidden max-w-[30%] mx-auto'>
       {youtubeId ? (
         <div className='relative pb-[56.25%] h-0'>
           <iframe
@@ -143,6 +143,9 @@ export default function ContentForm({ initialData, onCancel }) {
   // Estado para controlar envío
   const isSubmitting =
     createMutation.isPending || updateMutation?.isPending || false;
+
+  // Estado para controlar drag and drop
+  const [isDragging, setIsDragging] = useState(false);
 
   // Estado inicial del formulario
   const [formData, setFormData] = useState({
@@ -270,7 +273,77 @@ export default function ContentForm({ initialData, onCancel }) {
     }
   };
 
-  // Manejar cambios en el archivo
+  // Manejadores para drag and drop
+  const handleDragEnter = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDrop = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const fileType = file.type.toLowerCase();
+
+      // Validar tipo de archivo según el tipo de contenido seleccionado
+      if (formData.type === 'PDF' && !fileType.includes('pdf')) {
+        alert('Por favor selecciona un archivo PDF');
+        return;
+      }
+
+      if (formData.type === 'Video' && !fileType.includes('video/')) {
+        alert('Por favor selecciona un archivo de video');
+        return;
+      }
+
+      if (formData.type === 'Imagen' && !fileType.includes('image/')) {
+        alert('Por favor selecciona un archivo de imagen');
+        return;
+      }
+
+      if (
+        formData.type === 'Presentación' &&
+        !(
+          fileType.includes('presentation') ||
+          file.name.endsWith('.ppt') ||
+          file.name.endsWith('.pptx') ||
+          file.name.endsWith('.odp')
+        )
+      ) {
+        alert(
+          'Por favor selecciona un archivo de presentación (PPT, PPTX o ODP)'
+        );
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        file: file,
+        url: createObjectURL(file),
+        youtubeId: null
+      }));
+    }
+  };
+
+  // Manejar cambios en el archivo para la entrada de archivo estándar
   const handleFileChange = e => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -284,6 +357,26 @@ export default function ContentForm({ initialData, onCancel }) {
 
       if (formData.type === 'Video' && !fileType.includes('video/')) {
         alert('Por favor selecciona un archivo de video');
+        return;
+      }
+
+      if (formData.type === 'Imagen' && !fileType.includes('image/')) {
+        alert('Por favor selecciona un archivo de imagen');
+        return;
+      }
+
+      if (
+        formData.type === 'Presentación' &&
+        !(
+          fileType.includes('presentation') ||
+          file.name.endsWith('.ppt') ||
+          file.name.endsWith('.pptx') ||
+          file.name.endsWith('.odp')
+        )
+      ) {
+        alert(
+          'Por favor selecciona un archivo de presentación (PPT, PPTX o ODP)'
+        );
         return;
       }
 
@@ -408,8 +501,33 @@ export default function ContentForm({ initialData, onCancel }) {
       newErrors.category = 'La categoría es obligatoria';
     }
 
-    // La descripción es requerida si no hay archivo o video de YouTube
-    if (!formData.content.trim() && !formData.file && !formData.youtubeId) {
+    // Validación específica según el tipo de contenido
+    if (formData.type === 'PDF' && !formData.file && !formData.url) {
+      newErrors.content = 'Debes subir un archivo PDF o proporcionar un enlace';
+    } else if (
+      formData.type === 'Video' &&
+      !formData.file &&
+      !formData.url &&
+      !formData.youtubeId
+    ) {
+      newErrors.content =
+        'Debes subir un video, proporcionar un enlace o agregar un video de YouTube';
+    } else if (formData.type === 'Imagen' && !formData.file && !formData.url) {
+      newErrors.content = 'Debes subir una imagen o proporcionar un enlace';
+    } else if (
+      formData.type === 'Presentación' &&
+      !formData.file &&
+      !formData.url
+    ) {
+      newErrors.content =
+        'Debes subir una presentación o proporcionar un enlace';
+    } else if (
+      formData.type === 'Artículo' &&
+      !formData.content.trim() &&
+      !formData.file &&
+      !formData.url &&
+      !formData.youtubeId
+    ) {
       newErrors.content = 'Debes proporcionar contenido, un archivo o un video';
     }
 
@@ -431,6 +549,12 @@ export default function ContentForm({ initialData, onCancel }) {
       description: formData.content, // Mapear content a description
       category: formData.categoryId
     };
+
+    // Si hay un archivo adjunto, no enviamos la URL generada localmente
+    if (contentData.file) {
+      // Si estamos enviando un archivo, no enviar la url temporal creada con createObjectURL
+      contentData.url = null;
+    }
 
     try {
       if (isEditing) {
@@ -593,127 +717,228 @@ export default function ContentForm({ initialData, onCancel }) {
         </div>
 
         {/* Subir archivo */}
-        <div className='space-y-4'>
-          {/* Mostrar previsualización según el tipo */}
-          {formData.type === 'PDF' && (
-            <>
-              <PDFPreview
-                url={!formData.file ? formData.url || initialData?.url : null}
-                title={formData.title}
-                newFile={formData.file}
-              />
-              <div className='flex gap-4 mt-4'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={handleFileUploadClick}
-                >
-                  <Upload className='w-4 h-4 mr-2' />
-                  {formData.file
-                    ? 'Cambiar PDF'
-                    : initialData?.url
-                    ? 'Cambiar PDF'
-                    : 'Subir PDF'}
-                </Button>
-                {!formData.file && !formData.url && (
-                  <Button
-                    type='button'
-                    variant='outline'
-                    onClick={handleLinkClick}
-                  >
-                    <Link2 className='w-4 h-4 mr-2' />
-                    Agregar enlace a PDF
-                  </Button>
-                )}
+        <div className='space-y-5 mt-6'>
+          <div
+            className={`border border-dashed ${
+              isDragging
+                ? 'border-purple-500 bg-purple-50'
+                : 'border-gray-300 bg-gray-50'
+            } rounded-lg p-6 transition-colors duration-300`}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className='flex flex-col items-center justify-center space-y-4'>
+              <div
+                className={`p-4 rounded-full ${
+                  isDragging ? 'bg-purple-100' : 'bg-purple-50'
+                }`}
+              >
+                <Upload className='h-8 w-8 text-purple-600' />
               </div>
-            </>
-          )}
-
-          {formData.type === 'Video' && (
-            <>
-              <VideoPreview
-                url={
-                  !formData.file
-                    ? formData.url || initialData?.url
-                    : formData.file
-                    ? URL.createObjectURL(formData.file)
-                    : null
-                }
-                youtubeId={formData.youtubeId || initialData?.youtubeId}
-                title={formData.title}
-              />
-              {formData.file && (
-                <div className='p-4 border-2 border-purple-200 rounded-lg bg-purple-50 mt-4'>
-                  <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-2'>
-                      <Video className='w-5 h-5 text-purple-500' />
-                      <span className='font-medium'>
-                        Nuevo video seleccionado:
-                      </span>
-                      <span className='text-purple-600'>
-                        {formData.file.name}
-                      </span>
-                    </div>
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => {
-                        document.getElementById('file').value = '';
-                        setFormData(prev => ({
-                          ...prev,
-                          file: null,
-                          url: prev.url || initialData?.url // Restaurar URL anterior
-                        }));
-                      }}
-                      className='text-purple-600 hover:text-purple-700'
-                    >
-                      <X className='h-4 w-4' />
-                    </Button>
-                  </div>
-                </div>
-              )}
-              <div className='flex gap-4 mt-4'>
+              <div className='text-center'>
+                <h3 className='font-medium text-gray-900'>
+                  Arrastra y suelta archivos aquí
+                </h3>
+                <p className='text-sm text-gray-500 mt-1'>
+                  o selecciona una opción para agregar contenido
+                </p>
+              </div>
+              <div className='flex flex-wrap gap-3 justify-center'>
                 <Button
                   type='button'
                   variant='outline'
                   onClick={handleFileUploadClick}
+                  className='h-10'
                 >
                   <Upload className='w-4 h-4 mr-2' />
-                  {formData.file
-                    ? 'Cambiar video'
-                    : initialData?.url
-                    ? 'Cambiar video'
-                    : 'Subir video'}
+                  Subir archivo
                 </Button>
-                {!formData.file && !formData.url && !formData.youtubeId && (
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={handleLinkClick}
+                  className='h-10'
+                >
+                  <Link2 className='w-4 h-4 mr-2' />
+                  Agregar enlace externo
+                </Button>
+                {(formData.type === 'Video' ||
+                  formData.type === 'Artículo') && (
                   <Button
                     type='button'
                     variant='outline'
                     onClick={handleYouTubeClick}
+                    className='h-10'
                   >
                     <Globe className='w-4 h-4 mr-2' />
                     Agregar video de YouTube
                   </Button>
                 )}
               </div>
-            </>
-          )}
+            </div>
+            <input
+              type='file'
+              id='file'
+              className='hidden'
+              onChange={handleFileChange}
+              accept={
+                formData.type === 'PDF'
+                  ? '.pdf'
+                  : formData.type === 'Video'
+                  ? 'video/*'
+                  : formData.type === 'Imagen'
+                  ? 'image/*'
+                  : formData.type === 'Presentación'
+                  ? '.ppt,.pptx,.odp'
+                  : undefined
+              }
+            />
+          </div>
 
-          {/* Input oculto para subida de archivos */}
-          <input
-            type='file'
-            id='file'
-            className='hidden'
-            onChange={handleFileChange}
-            accept={
-              formData.type === 'PDF'
-                ? '.pdf'
-                : formData.type === 'Video'
-                ? 'video/*'
-                : undefined
-            }
-          />
+          {/* Previsualización de archivos y contenido */}
+          {(formData.file || formData.url || formData.youtubeId) && (
+            <div className='mt-6 p-4 border rounded-lg bg-white'>
+              <h3 className='font-medium text-gray-900 mb-3'>Vista previa</h3>
+
+              {/* Vista previa de PDF */}
+              {formData.type === 'PDF' && (
+                <PDFPreview
+                  url={!formData.file ? formData.url || initialData?.url : null}
+                  title={formData.title}
+                  newFile={formData.file}
+                />
+              )}
+
+              {/* Vista previa de Video */}
+              {formData.type === 'Video' && (
+                <>
+                  <VideoPreview
+                    url={
+                      !formData.file
+                        ? formData.url || initialData?.url
+                        : formData.file
+                        ? URL.createObjectURL(formData.file)
+                        : null
+                    }
+                    youtubeId={formData.youtubeId || initialData?.youtubeId}
+                    title={formData.title}
+                  />
+                  {formData.file && (
+                    <div className='p-4 border-2 border-purple-200 rounded-lg bg-purple-50 mt-4'>
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center gap-2'>
+                          <Video className='w-5 h-5 text-purple-500' />
+                          <span className='font-medium'>
+                            Nuevo video seleccionado:
+                          </span>
+                          <span className='text-purple-600'>
+                            {formData.file.name}
+                          </span>
+                        </div>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => {
+                            document.getElementById('file').value = '';
+                            setFormData(prev => ({
+                              ...prev,
+                              file: null,
+                              url: prev.url || initialData?.url // Restaurar URL anterior
+                            }));
+                          }}
+                          className='text-purple-600 hover:text-purple-700'
+                        >
+                          <X className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Vista previa de otros tipos de contenido */}
+              {(formData.type === 'Imagen' ||
+                formData.type === 'Presentación' ||
+                formData.type === 'Artículo') && (
+                <>
+                  {/* Mostrar archivo actual si existe */}
+                  {formData.url && !formData.file && (
+                    <div className='flex items-center justify-between p-3 border rounded-lg bg-gray-50'>
+                      <div className='flex items-center gap-2'>
+                        <FileText className='w-5 h-5 text-blue-500' />
+                        <a
+                          href={formData.url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-blue-600 hover:underline truncate max-w-[80%]'
+                        >
+                          {formData.title || 'Ver archivo actual'}
+                        </a>
+                      </div>
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            url: null
+                          }));
+                        }}
+                        className='text-gray-500 hover:text-gray-700'
+                      >
+                        <X className='h-4 w-4' />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Mostrar nuevo archivo si se ha seleccionado */}
+                  {formData.file && (
+                    <div className='p-3 border-2 border-purple-200 rounded-lg bg-purple-50'>
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center gap-2'>
+                          <FileText className='w-5 h-5 text-purple-500' />
+                          <span className='font-medium text-purple-600'>
+                            {formData.file.name}
+                          </span>
+                        </div>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => {
+                            document.getElementById('file').value = '';
+                            setFormData(prev => ({
+                              ...prev,
+                              file: null,
+                              url: prev.url || initialData?.url // Restaurar URL anterior
+                            }));
+                          }}
+                          className='text-purple-600 hover:text-purple-700'
+                        >
+                          <X className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mostrar vista previa de imagen si es una imagen */}
+                  {formData.type === 'Imagen' && formData.file && (
+                    <div className='mt-3 flex justify-center'>
+                      <img
+                        src={URL.createObjectURL(formData.file)}
+                        alt={formData.title || 'Vista previa de imagen'}
+                        className='max-h-60 object-contain rounded-lg'
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Estado y botones de acción */}

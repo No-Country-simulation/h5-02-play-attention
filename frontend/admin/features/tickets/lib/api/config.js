@@ -20,12 +20,25 @@ export const commonHeaders = {
 export function mapTicketStatusToBackend(status) {
   const statusMap = {
     abierto: 'open',
-    'en proceso': 'in_progress',
+    'en proceso': 'progress',
+    'en revisión': 'review',
+    'pendiente de usuario': 'pending_user',
+    'pendiente de equipo': 'pending_team',
     resuelto: 'resolved',
-    cerrado: 'closed'
+    cerrado: 'closed',
+    reabierto: 'reopened'
   };
 
-  return statusMap[status.toLowerCase()] || 'open';
+  // Valor por defecto si no hay coincidencia
+  const defaultStatus = 'open';
+
+  console.log(
+    `[DEBUG] Mapeando estado de ticket: "${status}" -> "${
+      statusMap[status?.toLowerCase()] || defaultStatus
+    }"`
+  );
+
+  return statusMap[status?.toLowerCase()] || defaultStatus;
 }
 
 /**
@@ -38,12 +51,16 @@ export function mapTicketStatusToFrontend(status) {
 
   const statusMap = {
     open: 'abierto',
-    in_progress: 'en proceso',
+    progress: 'en proceso',
+    review: 'en revisión',
+    pending_user: 'pendiente de usuario',
+    pending_team: 'pendiente de equipo',
     resolved: 'resuelto',
-    closed: 'cerrado'
+    closed: 'cerrado',
+    reopened: 'reabierto'
   };
 
-  return statusMap[status.toLowerCase()] || 'abierto';
+  return statusMap[status?.toLowerCase()] || 'abierto';
 }
 
 /**

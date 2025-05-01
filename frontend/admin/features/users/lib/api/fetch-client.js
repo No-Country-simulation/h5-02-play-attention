@@ -5,6 +5,24 @@
 const API_URL = 'https://play-attention.onrender.com/api';
 
 /**
+ * Obtiene el token de autenticación de las cookies
+ * @returns {string|null} - Token de autenticación o null si no existe
+ */
+function getAuthToken() {
+  if (typeof document === 'undefined') return null;
+
+  const authCookie = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('auth_token='));
+
+  if (authCookie) {
+    return decodeURIComponent(authCookie.split('=')[1]);
+  }
+
+  return null;
+}
+
+/**
  * Cliente Fetch con configuración base
  */
 const fetchClient = {
@@ -15,11 +33,16 @@ const fetchClient = {
    */
   async get(endpoint) {
     try {
+      // Obtener token de autenticación
+      const authToken = getAuthToken();
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          Authorization: authToken ? `Bearer ${authToken}` : ''
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -58,11 +81,16 @@ const fetchClient = {
     try {
       console.log(`Enviando POST a ${API_URL}${endpoint} con datos:`, data);
 
+      // Obtener token de autenticación
+      const authToken = getAuthToken();
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: authToken ? `Bearer ${authToken}` : ''
         },
+        credentials: 'include',
         body: JSON.stringify(data)
       });
 
@@ -127,11 +155,16 @@ const fetchClient = {
    */
   async put(endpoint, data) {
     try {
+      // Obtener token de autenticación
+      const authToken = getAuthToken();
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: authToken ? `Bearer ${authToken}` : ''
         },
+        credentials: 'include',
         body: JSON.stringify(data)
       });
 
@@ -168,11 +201,16 @@ const fetchClient = {
    */
   async delete(endpoint) {
     try {
+      // Obtener token de autenticación
+      const authToken = getAuthToken();
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          Authorization: authToken ? `Bearer ${authToken}` : ''
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {

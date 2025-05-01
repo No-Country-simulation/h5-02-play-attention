@@ -20,9 +20,14 @@ export const contentAdapter = (apiContent = {}) => {
   let youtubeId = apiContent.youtubeId || null;
   let url = apiContent.url || null;
   let fileUrl = apiContent.fileUrl || null;
-  
+
   // Si no tenemos youtubeId pero tenemos una URL de YouTube, extraerla
-  if (!youtubeId && url && typeof url === 'string' && url.includes('youtube.com/watch?v=')) {
+  if (
+    !youtubeId &&
+    url &&
+    typeof url === 'string' &&
+    url.includes('youtube.com/watch?v=')
+  ) {
     try {
       const urlObj = new URL(url);
       youtubeId = urlObj.searchParams.get('v');
@@ -32,12 +37,32 @@ export const contentAdapter = (apiContent = {}) => {
     }
   }
 
+  // Manejar correctamente el objeto categoría
+  let categoryValue;
+  if (apiContent.category) {
+    if (typeof apiContent.category === 'object' && apiContent.category.name) {
+      // Si category es un objeto con name, usamos ese nombre
+      categoryValue = apiContent.category.name;
+    } else if (
+      typeof apiContent.category === 'object' &&
+      apiContent.category._id
+    ) {
+      // Si es un objeto con _id pero sin name, mantenemos el objeto para resolver después
+      categoryValue = apiContent.category;
+    } else {
+      // Si es una string o cualquier otro caso, lo usamos directamente
+      categoryValue = apiContent.category;
+    }
+  } else {
+    categoryValue = 'Otros';
+  }
+
   const adaptedContent = {
     id: apiContent._id || apiContent.id || '',
     title: apiContent.title || '',
     type: mapContentTypeToFrontend(apiContent.type || apiContent.contentType),
     content: apiContent.description || apiContent.content || '',
-    category: apiContent.category || 'Otros',
+    category: categoryValue,
     // Convertir boolean published a string de estado
     status: apiContent.published === true ? 'Publicado' : 'Borrador',
     youtubeId: youtubeId,
