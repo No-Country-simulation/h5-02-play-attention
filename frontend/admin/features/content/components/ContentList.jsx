@@ -24,7 +24,7 @@ import {
 import { FaYoutube } from 'react-icons/fa';
 import { Button } from '@/shared/ui/button';
 import DeleteConfirmationModal from '@/shared/ui/modals/DeleteConfirmationModal';
-import { useContents, useDeleteContent } from '../lib/hooks';
+import { useContents, useDeleteContent, useCategories } from '../lib/hooks';
 import ContentPagination from './ContentPagination';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
@@ -353,10 +353,48 @@ function ContentThumbnail({ content, onClick }) {
  */
 export default function ContentList({ contentType, searchFilters, onEdit }) {
   const { data: contents = [], isLoading, isError, error } = useContents();
+  const { data: categories = [] } = useCategories();
 
   console.log('ContentList - contents:', contents);
   console.log('ContentList - contentType:', contentType);
   console.log('ContentList - searchFilters:', searchFilters);
+  console.log('ContentList - categories:', categories);
+
+  // Crear un mapa de categorías por ID para búsqueda rápida
+  const categoryMap = useMemo(() => {
+    const map = {};
+    categories.forEach(category => {
+      map[category.id] = category.name;
+    });
+    return map;
+  }, [categories]);
+
+  // Función para obtener el nombre de categoría a partir de un ID o un objeto categoría
+  const getCategoryName = useCallback(
+    category => {
+      if (!category) return 'Sin categoría';
+
+      // Si es un objeto con el nombre de categoría, usarlo directamente
+      if (typeof category === 'object' && category.name) {
+        return category.name;
+      }
+
+      // Si es un objeto con ID, buscar el nombre en el mapa de categorías
+      if (typeof category === 'object' && (category._id || category.id)) {
+        const categoryId = category._id || category.id;
+        return categoryMap[categoryId] || 'Categoría desconocida';
+      }
+
+      // Si es un string que coincide con un ID en el mapa de categorías, mostrar el nombre
+      if (typeof category === 'string' && categoryMap[category]) {
+        return categoryMap[category];
+      }
+
+      // Por defecto, devolver el valor como está (asumiendo que es un nombre de categoría)
+      return category;
+    },
+    [categoryMap]
+  );
 
   // Estado para paginación y modales
   const [currentPage, setCurrentPage] = useState(1);
@@ -397,11 +435,14 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
       }
 
       // Filtrar por categoría
-      if (
-        searchFilters.category !== 'Todos' &&
-        content.category !== searchFilters.category
-      ) {
-        return false;
+      if (searchFilters.category !== 'Todos') {
+        // Obtener el nombre de la categoría del contenido actual
+        const contentCategoryName = getCategoryName(content.category);
+
+        // Comparar con el filtro seleccionado
+        if (contentCategoryName !== searchFilters.category) {
+          return false;
+        }
       }
 
       // Filtrar por estado
@@ -414,7 +455,7 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
 
       return true;
     });
-  }, [contents, contentType, searchFilters]);
+  }, [contents, contentType, searchFilters, getCategoryName]);
 
   // Calcular contenidos paginados
   const paginatedContents = useMemo(() => {
@@ -519,11 +560,7 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
                   </TableCell>
                   <TableCell className='font-medium'>{content.title}</TableCell>
                   <TableCell>{content.type}</TableCell>
-                  <TableCell>
-                    {typeof content.category === 'object'
-                      ? content.category.name
-                      : content.category}
-                  </TableCell>
+                  <TableCell>{getCategoryName(content.category)}</TableCell>
                   <TableCell>{content.date}</TableCell>
                   <TableCell>
                     <span
@@ -643,9 +680,7 @@ export default function ContentList({ contentType, searchFilters, onEdit }) {
                     </div>
                     <div>
                       <span className='font-medium'>Categoría:</span>{' '}
-                      {typeof content.category === 'object'
-                        ? content.category.name
-                        : content.category}
+                      {getCategoryName(content.category)}
                     </div>
                     <div>
                       <span className='font-medium'>Fecha:</span> {content.date}
