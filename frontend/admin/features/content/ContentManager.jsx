@@ -3,9 +3,9 @@
 import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ContentList from './components/ContentList';
-import ContentForm from './components/ContentForm';
 import ContentFilters from './components/ContentFilters';
 import ContentTypeSelector from './components/ContentTypeSelector';
+import ContentFormModal from './components/ContentFormModal';
 import CategoriesList from './components/categories/CategoriesList';
 import { Button } from '@/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
@@ -20,7 +20,7 @@ function ContentManagerInner() {
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'content');
 
-  const [isCreating, setIsCreating] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentType, setContentType] = useState('all');
   const [searchFilters, setSearchFilters] = useState({
@@ -39,19 +39,23 @@ function ContentManagerInner() {
   // Función para manejar la creación de nuevo contenido
   const handleCreateContent = () => {
     setSelectedContent(null);
-    setIsCreating(true);
+    setIsFormModalOpen(true);
   };
 
   // Función para editar contenido existente
   const handleEditContent = content => {
     setSelectedContent(content);
-    setIsCreating(true);
+    setIsFormModalOpen(true);
   };
 
-  // Función para cancelar la creación/edición
-  const handleCancel = () => {
-    setIsCreating(false);
-    setSelectedContent(null);
+  // Función para cerrar el modal
+  const handleCloseModal = () => {
+    setIsFormModalOpen(false);
+  };
+
+  // Función para manejar el éxito al guardar
+  const handleFormSuccess = () => {
+    setIsFormModalOpen(false);
   };
 
   // Función para actualizar los filtros de búsqueda
@@ -65,14 +69,7 @@ function ContentManagerInner() {
       return <CategoriesList />;
     }
 
-    // Pestaña de contenido
-    if (isCreating) {
-      return (
-        <ContentForm initialData={selectedContent} onCancel={handleCancel} />
-      );
-    }
-
-    // Listado de contenido
+    // Listado de contenido (siempre visible, el formulario está en un modal)
     return (
       <>
         <div className='flex flex-col gap-4 mb-6'>
@@ -104,7 +101,7 @@ function ContentManagerInner() {
 
   return (
     <div className='p-6 max-w-7xl mx-auto'>
-      {!isCreating && <PageHeader title={title} description={description} />}
+      <PageHeader title={title} description={description} />
 
       <Tabs
         defaultValue='content'
@@ -141,6 +138,14 @@ function ContentManagerInner() {
           {activeTab === 'categories' && renderContent()}
         </TabsContent>
       </Tabs>
+
+      {/* Modal para creación/edición de contenido */}
+      <ContentFormModal
+        isOpen={isFormModalOpen}
+        initialData={selectedContent}
+        onClose={handleCloseModal}
+        onSuccess={handleFormSuccess}
+      />
     </div>
   );
 }

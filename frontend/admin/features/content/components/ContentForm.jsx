@@ -34,27 +34,27 @@ import {
  * y el principio de Inversión de Dependencias (DIP) recibiendo callbacks externos
  */
 
-// Componente para previsualizar PDF
+// Componente para previsualizar PDF - versión compacta
 function PDFPreview({ url, title, newFile }) {
   if (!url && !newFile) return null;
 
   return (
-    <div className='mt-4 space-y-4'>
+    <div className='mt-2 space-y-2 text-xs'>
       {/* Mostrar archivo actual si existe */}
       {url && (
-        <div className='p-4 border rounded-lg bg-gray-50'>
-          <div className='flex items-center gap-2 mb-2'>
-            <FileText className='w-5 h-5 text-red-500' />
-            <span className='font-medium'>PDF actual:</span>
+        <div className='p-2 border rounded-md bg-gray-50'>
+          <div className='flex items-center gap-1 mb-1'>
+            <FileText className='w-3 h-3 text-red-500' />
+            <span className='font-medium'>PDF:</span>
           </div>
           <div className='flex items-center justify-between'>
             <a
               href={url}
               target='_blank'
               rel='noopener noreferrer'
-              className='text-blue-600 hover:underline truncate max-w-[80%]'
+              className='text-blue-600 hover:underline truncate max-w-[90%]'
             >
-              {title || 'Ver PDF actual'}
+              {title || 'Ver PDF'}
             </a>
           </div>
         </div>
@@ -62,31 +62,15 @@ function PDFPreview({ url, title, newFile }) {
 
       {/* Mostrar nuevo archivo si se ha seleccionado */}
       {newFile && (
-        <div className='p-4 border-2 border-purple-200 rounded-lg bg-purple-50'>
-          <div className='flex items-center gap-2 mb-2'>
-            <FileText className='w-5 h-5 text-purple-500' />
-            <span className='font-medium'>Nuevo PDF seleccionado:</span>
+        <div className='p-2 border border-purple-200 rounded-md bg-purple-50'>
+          <div className='flex items-center gap-1 mb-1'>
+            <FileText className='w-3 h-3 text-purple-500' />
+            <span className='font-medium'>Nuevo PDF:</span>
           </div>
           <div className='flex items-center justify-between'>
-            <span className='text-purple-600 truncate max-w-[80%]'>
+            <span className='text-purple-600 truncate max-w-[90%]'>
               {newFile.name}
             </span>
-            <Button
-              type='button'
-              variant='ghost'
-              size='sm'
-              onClick={() => {
-                document.getElementById('file').value = '';
-                setFormData(prev => ({
-                  ...prev,
-                  file: null,
-                  url: prev.url || initialData?.url // Restaurar URL anterior
-                }));
-              }}
-              className='text-purple-600 hover:text-purple-700'
-            >
-              <X className='h-4 w-4' />
-            </Button>
           </div>
         </div>
       )}
@@ -94,12 +78,12 @@ function PDFPreview({ url, title, newFile }) {
   );
 }
 
-// Componente para previsualizar Video
+// Componente para previsualizar Video - versión compacta
 function VideoPreview({ url, youtubeId, title }) {
   if (!url && !youtubeId) return null;
 
   return (
-    <div className='mt-4 border rounded-lg overflow-hidden max-w-[30%] mx-auto'>
+    <div className='mt-2 border rounded-md overflow-hidden max-w-full mx-auto'>
       {youtubeId ? (
         <div className='relative pb-[56.25%] h-0'>
           <iframe
@@ -129,7 +113,7 @@ function VideoPreview({ url, youtubeId, title }) {
   );
 }
 
-export default function ContentForm({ initialData, onCancel }) {
+export default function ContentForm({ initialData, onCancel, onSuccess }) {
   const isEditing = !!initialData;
 
   // Hooks para crear/editar contenido
@@ -151,8 +135,8 @@ export default function ContentForm({ initialData, onCancel }) {
   const [formData, setFormData] = useState({
     title: '',
     type: 'Artículo',
-    category: '', // Ahora será el ID de la categoría
-    categoryId: '', // Añadimos categoryId para almacenar el ID
+    category: '',
+    categoryId: '',
     content: '',
     status: 'Borrador',
     file: null,
@@ -565,6 +549,11 @@ export default function ContentForm({ initialData, onCancel }) {
 
       // Después de guardar, volvemos a la lista
       onCancel();
+
+      // Si hay un callback de éxito, lo llamamos
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Error al guardar contenido:', error);
       // El toast ya se muestra desde los hooks
@@ -572,20 +561,23 @@ export default function ContentForm({ initialData, onCancel }) {
   };
 
   return (
-    <div className='bg-white p-6 rounded-lg border'>
-      <div className='flex items-center mb-6'>
-        <Button onClick={onCancel} variant='ghost' className='mr-4'>
-          <ArrowLeft className='mr-2 h-4 w-4' />
+    <div className='p-4'>
+      <div className='flex items-center mb-4'>
+        <button
+          onClick={onCancel}
+          className='mr-3 flex items-center bg-transparent border-0 p-0 cursor-pointer'
+        >
+          <ArrowLeft className='h-4 w-4 mr-2' />
           Volver
-        </Button>
-        <h2 className='text-2xl font-bold'>
-          {isEditing ? 'Editar Contenido' : 'Crear Nuevo Contenido'}
+        </button>
+        <h2 className='text-xl font-bold flex-1'>
+          {isEditing ? 'Editar Contenido' : 'Crear Contenido'}
         </h2>
       </div>
 
-      <form onSubmit={handleSubmit} className='space-y-6'>
+      <form onSubmit={handleSubmit}>
         {/* Título */}
-        <div>
+        <div className='mb-4'>
           <label
             htmlFor='title'
             className='block text-sm font-medium text-gray-700 mb-1'
@@ -599,9 +591,9 @@ export default function ContentForm({ initialData, onCancel }) {
             required
             value={formData.title}
             onChange={handleChange}
-            className={`w-full p-3 border ${
+            className={`w-full p-2 border ${
               errors.title ? 'border-red-500' : 'border-gray-300'
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+            } rounded-md`}
             placeholder='Ingresa un título descriptivo'
             disabled={isSubmitting}
           />
@@ -610,26 +602,25 @@ export default function ContentForm({ initialData, onCancel }) {
           )}
         </div>
 
-        {/* Tipo y Categoría (siempre en columna en móvil y tablet, en fila en desktop) */}
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+        {/* Tipo y Categoría en una fila */}
+        <div className='grid grid-cols-2 gap-4 mb-4'>
           <div>
             <label
               htmlFor='type'
               className='block text-sm font-medium text-gray-700 mb-1'
             >
-              Tipo de Contenido <span className='text-red-500'>*</span>
+              Tipo <span className='text-red-500'>*</span>
             </label>
             <select
               id='type'
               name='type'
               value={formData.type}
               onChange={handleChange}
-              className={`w-full p-3 h-12 border ${
+              className={`w-full p-2 border ${
                 errors.type ? 'border-red-500' : 'border-gray-300'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+              } rounded-md`}
               disabled={isSubmitting}
             >
-              <option disabled>Tipo de contenido</option>
               {typeOptions.map(option => (
                 <option key={option} value={option}>
                   {option}
@@ -650,9 +641,9 @@ export default function ContentForm({ initialData, onCancel }) {
               Categoría <span className='text-red-500'>*</span>
             </label>
             {loadingCategories ? (
-              <div className='flex items-center text-sm text-gray-500'>
+              <div className='flex items-center text-sm text-gray-500 p-2 border border-gray-300 rounded-md'>
                 <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                Cargando categorías...
+                Cargando...
               </div>
             ) : (
               <select
@@ -660,13 +651,13 @@ export default function ContentForm({ initialData, onCancel }) {
                 name='categoryId'
                 value={formData.categoryId}
                 onChange={handleChange}
-                className={`w-full p-3 h-12 border ${
+                className={`w-full p-2 border ${
                   errors.category ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
+                } rounded-md`}
                 disabled={isSubmitting}
               >
                 <option disabled value=''>
-                  Selecciona una categoría
+                  Selecciona categoría
                 </option>
                 {categories.length > 0 ? (
                   categories.map(category => (
@@ -675,24 +666,18 @@ export default function ContentForm({ initialData, onCancel }) {
                     </option>
                   ))
                 ) : (
-                  <option disabled>No hay categorías disponibles</option>
+                  <option disabled>No hay categorías</option>
                 )}
               </select>
             )}
             {errors.category && (
               <p className='text-red-500 text-sm mt-1'>{errors.category}</p>
             )}
-            {categories.length === 0 && !loadingCategories && (
-              <p className='text-amber-500 text-sm mt-1'>
-                No hay categorías disponibles. Por favor, crea una categoría
-                primero.
-              </p>
-            )}
           </div>
         </div>
 
         {/* Contenido/Descripción */}
-        <div>
+        <div className='mb-4'>
           <label
             htmlFor='content'
             className='block text-sm font-medium text-gray-700 mb-1'
@@ -702,13 +687,13 @@ export default function ContentForm({ initialData, onCancel }) {
           <textarea
             id='content'
             name='content'
-            rows={6}
+            rows={3}
             value={formData.content}
             onChange={handleChange}
-            className={`w-full p-3 border ${
+            className={`w-full p-2 border ${
               errors.content ? 'border-red-500' : 'border-gray-300'
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300`}
-            placeholder='Ingresa el contenido o una descripción detallada'
+            } rounded-md`}
+            placeholder='Ingresa el contenido o una descripción'
             disabled={isSubmitting}
           />
           {errors.content && (
@@ -716,68 +701,48 @@ export default function ContentForm({ initialData, onCancel }) {
           )}
         </div>
 
-        {/* Subir archivo */}
-        <div className='space-y-5 mt-6'>
+        {/* Subir archivo - simplificado */}
+        <div className='mb-4 border border-dashed border-gray-300 rounded-md bg-gray-50'>
           <div
-            className={`border border-dashed ${
-              isDragging
-                ? 'border-purple-500 bg-purple-50'
-                : 'border-gray-300 bg-gray-50'
-            } rounded-lg p-6 transition-colors duration-300`}
+            className='p-4 flex flex-col items-center'
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
-            <div className='flex flex-col items-center justify-center space-y-4'>
-              <div
-                className={`p-4 rounded-full ${
-                  isDragging ? 'bg-purple-100' : 'bg-purple-50'
-                }`}
-              >
-                <Upload className='h-8 w-8 text-purple-600' />
-              </div>
-              <div className='text-center'>
-                <h3 className='font-medium text-gray-900'>
-                  Arrastra y suelta archivos aquí
-                </h3>
-                <p className='text-sm text-gray-500 mt-1'>
-                  o selecciona una opción para agregar contenido
-                </p>
-              </div>
-              <div className='flex flex-wrap gap-3 justify-center'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={handleFileUploadClick}
-                  className='h-10'
-                >
-                  <Upload className='w-4 h-4 mr-2' />
-                  Subir archivo
-                </Button>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={handleLinkClick}
-                  className='h-10'
-                >
-                  <Link2 className='w-4 h-4 mr-2' />
-                  Agregar enlace externo
-                </Button>
-                {(formData.type === 'Video' ||
-                  formData.type === 'Artículo') && (
-                  <Button
-                    type='button'
-                    variant='outline'
-                    onClick={handleYouTubeClick}
-                    className='h-10'
-                  >
-                    <Globe className='w-4 h-4 mr-2' />
-                    Agregar video de YouTube
-                  </Button>
-                )}
+            <div className='text-center mb-3'>
+              <Upload className='h-5 w-5 mx-auto mb-2 text-gray-400' />
+              <div className='text-sm text-gray-500'>
+                Arrastra archivos o selecciona una opción
               </div>
             </div>
+
+            <div className='flex gap-2 justify-center'>
+              <button
+                type='button'
+                onClick={handleFileUploadClick}
+                className='text-sm border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-100'
+              >
+                Subir
+              </button>
+              <button
+                type='button'
+                onClick={handleLinkClick}
+                className='text-sm border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-100'
+              >
+                Enlace
+              </button>
+              {(formData.type === 'Video' || formData.type === 'Artículo') && (
+                <button
+                  type='button'
+                  onClick={handleYouTubeClick}
+                  className='text-sm border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-100'
+                >
+                  YouTube
+                </button>
+              )}
+            </div>
+
             <input
               type='file'
               id='file'
@@ -797,235 +762,239 @@ export default function ContentForm({ initialData, onCancel }) {
             />
           </div>
 
-          {/* Previsualización de archivos y contenido */}
+          {/* Vista previa de archivos */}
           {(formData.file || formData.url || formData.youtubeId) && (
-            <div className='mt-6 p-4 border rounded-lg bg-white'>
-              <h3 className='font-medium text-gray-900 mb-3'>Vista previa</h3>
+            <div className='px-4 pb-4 border-t border-gray-200 mt-2 pt-3'>
+              <div className='flex items-center justify-between mb-2'>
+                <h4 className='text-sm font-medium text-gray-700'>
+                  Vista previa
+                </h4>
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (formData.file)
+                      document.getElementById('file').value = '';
+                    setFormData(prev => ({
+                      ...prev,
+                      file: null,
+                      url: null,
+                      youtubeId: null
+                    }));
+                  }}
+                  className='text-xs text-gray-500 hover:text-gray-700 flex items-center'
+                >
+                  <X className='h-3 w-3 mr-1' /> Quitar
+                </button>
+              </div>
 
-              {/* Vista previa de PDF */}
+              {/* PDF Preview */}
               {formData.type === 'PDF' && (
-                <PDFPreview
-                  url={!formData.file ? formData.url || initialData?.url : null}
-                  title={formData.title}
-                  newFile={formData.file}
-                />
+                <div className='flex items-center p-2 border rounded-md bg-white'>
+                  <FileText className='h-8 w-8 text-red-500 mr-3' />
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-sm font-medium text-gray-900 truncate'>
+                      {formData.file
+                        ? formData.file.name
+                        : formData.title || 'Documento PDF'}
+                    </p>
+                    {formData.url && !formData.file && (
+                      <a
+                        href={formData.url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-xs text-blue-600 hover:underline'
+                      >
+                        Ver PDF
+                      </a>
+                    )}
+                  </div>
+                </div>
               )}
 
-              {/* Vista previa de Video */}
+              {/* Video Preview */}
               {formData.type === 'Video' && (
-                <>
-                  <VideoPreview
-                    url={
-                      !formData.file
-                        ? formData.url || initialData?.url
-                        : formData.file
-                        ? URL.createObjectURL(formData.file)
-                        : null
-                    }
-                    youtubeId={formData.youtubeId || initialData?.youtubeId}
-                    title={formData.title}
-                  />
-                  {formData.file && (
-                    <div className='p-4 border-2 border-purple-200 rounded-lg bg-purple-50 mt-4'>
-                      <div className='flex items-center justify-between'>
-                        <div className='flex items-center gap-2'>
-                          <Video className='w-5 h-5 text-purple-500' />
-                          <span className='font-medium'>
-                            Nuevo video seleccionado:
-                          </span>
-                          <span className='text-purple-600'>
-                            {formData.file.name}
-                          </span>
-                        </div>
-                        <Button
-                          type='button'
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => {
-                            document.getElementById('file').value = '';
-                            setFormData(prev => ({
-                              ...prev,
-                              file: null,
-                              url: prev.url || initialData?.url // Restaurar URL anterior
-                            }));
-                          }}
-                          className='text-purple-600 hover:text-purple-700'
-                        >
-                          <X className='h-4 w-4' />
-                        </Button>
+                <div>
+                  {formData.youtubeId ? (
+                    <div className='flex items-center p-2 border rounded-md bg-white'>
+                      <div className='h-10 w-10 bg-red-100 rounded-md overflow-hidden mr-3 flex items-center justify-center'>
+                        <Video className='h-6 w-6 text-red-500' />
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-sm font-medium text-gray-900 truncate'>
+                          {formData.title || 'Video de YouTube'}
+                        </p>
+                        <p className='text-xs text-gray-500'>
+                          YouTube
+                        </p>
                       </div>
                     </div>
-                  )}
-                </>
-              )}
-
-              {/* Vista previa de otros tipos de contenido */}
-              {(formData.type === 'Imagen' ||
-                formData.type === 'Presentación' ||
-                formData.type === 'Artículo') && (
-                <>
-                  {/* Mostrar archivo actual si existe */}
-                  {formData.url && !formData.file && (
-                    <div className='flex items-center justify-between p-3 border rounded-lg bg-gray-50'>
-                      <div className='flex items-center gap-2'>
-                        <FileText className='w-5 h-5 text-blue-500' />
-                        <a
-                          href={formData.url}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-blue-600 hover:underline truncate max-w-[80%]'
+                  ) : formData.file ? (
+                    <div className='flex items-center p-2 border rounded-md bg-white'>
+                      <div className='w-16 h-16 bg-black rounded-md overflow-hidden mr-3 flex items-center justify-center'>
+                        <video
+                          src={URL.createObjectURL(formData.file)}
+                          className='max-h-full max-w-full'
                         >
-                          {formData.title || 'Ver archivo actual'}
+                          Tu navegador no soporta videos.
+                        </video>
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-sm font-medium text-gray-900 truncate'>
+                          {formData.file.name}
+                        </p>
+                        <p className='text-xs text-gray-500'>
+                          Video subido
+                        </p>
+                      </div>
+                    </div>
+                  ) : formData.url ? (
+                    <div className='flex items-center p-2 border rounded-md bg-white'>
+                      <Video className='h-8 w-8 text-blue-500 mr-3' />
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-sm font-medium text-gray-900 truncate'>
+                          {formData.title || 'Video enlazado'}
+                        </p>
+                        <a 
+                          href={formData.url} 
+                          target='_blank' 
+                          rel='noopener noreferrer' 
+                          className='text-xs text-blue-600 hover:underline'
+                        >
+                          Ver video
                         </a>
                       </div>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            url: null
-                          }));
-                        }}
-                        className='text-gray-500 hover:text-gray-700'
-                      >
-                        <X className='h-4 w-4' />
-                      </Button>
                     </div>
-                  )}
+                  ) : null}
+                </div>
+              )}
 
-                  {/* Mostrar nuevo archivo si se ha seleccionado */}
-                  {formData.file && (
-                    <div className='p-3 border-2 border-purple-200 rounded-lg bg-purple-50'>
-                      <div className='flex items-center justify-between'>
-                        <div className='flex items-center gap-2'>
-                          <FileText className='w-5 h-5 text-purple-500' />
-                          <span className='font-medium text-purple-600'>
-                            {formData.file.name}
-                          </span>
-                        </div>
-                        <Button
-                          type='button'
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => {
-                            document.getElementById('file').value = '';
-                            setFormData(prev => ({
-                              ...prev,
-                              file: null,
-                              url: prev.url || initialData?.url // Restaurar URL anterior
-                            }));
-                          }}
-                          className='text-purple-600 hover:text-purple-700'
-                        >
-                          <X className='h-4 w-4' />
-                        </Button>
+              {/* Imagen Preview */}
+              {formData.type === 'Imagen' && (
+                <div>
+                  {formData.file ? (
+                    <div className='flex items-center p-2 border rounded-md bg-white'>
+                      <div className='w-16 h-16 rounded-md overflow-hidden mr-3 flex items-center justify-center bg-gray-100'>
+                        <img
+                          src={URL.createObjectURL(formData.file)}
+                          alt={formData.title || 'Vista previa'}
+                          className='max-h-full max-w-full object-contain'
+                        />
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <p className='text-sm font-medium text-gray-900 truncate'>
+                          {formData.file.name}
+                        </p>
+                        <p className='text-xs text-gray-500'>Imagen subida</p>
                       </div>
                     </div>
+                  ) : (
+                    formData.url && (
+                      <div className='flex items-center p-2 border rounded-md bg-white'>
+                        <FileText className='h-8 w-8 text-blue-500 mr-3' />
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-sm font-medium text-gray-900 truncate'>
+                            {formData.title || 'Imagen enlazada'}
+                          </p>
+                          <a
+                            href={formData.url}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-xs text-blue-600 hover:underline'
+                          >
+                            Ver imagen
+                          </a>
+                        </div>
+                      </div>
+                    )
                   )}
+                </div>
+              )}
 
-                  {/* Mostrar vista previa de imagen si es una imagen */}
-                  {formData.type === 'Imagen' && formData.file && (
-                    <div className='mt-3 flex justify-center'>
-                      <img
-                        src={URL.createObjectURL(formData.file)}
-                        alt={formData.title || 'Vista previa de imagen'}
-                        className='max-h-60 object-contain rounded-lg'
-                      />
-                    </div>
-                  )}
-                </>
+              {/* Otros tipos */}
+              {(formData.type === 'Presentación' ||
+                (formData.type === 'Artículo' &&
+                  (formData.file || formData.url))) && (
+                <div className='flex items-center p-2 border rounded-md bg-white'>
+                  <FileText className='h-8 w-8 text-blue-500 mr-3' />
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-sm font-medium text-gray-900 truncate'>
+                      {formData.file
+                        ? formData.file.name
+                        : formData.title || 'Archivo'}
+                    </p>
+                    {formData.url && !formData.file && (
+                      <a
+                        href={formData.url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-xs text-blue-600 hover:underline'
+                      >
+                        Ver archivo
+                      </a>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           )}
         </div>
 
         {/* Estado y botones de acción */}
-        <div className='flex flex-col pt-4 border-t'>
-          <div className='mb-4 w-full'>
-            <label
-              htmlFor='status'
-              className='block text-sm font-medium text-gray-700 mb-1'
-            >
-              Estado
-            </label>
-            <select
-              id='status'
-              name='status'
-              value={formData.status}
-              onChange={handleChange}
-              className='h-12 w-full px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 appearance-none bg-white bg-no-repeat'
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
-                backgroundPosition: 'right 1rem center',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              <option disabled>Estado</option>
-              <option value='Borrador' className='flex items-center'>
-                Borrador
-              </option>
-              <option value='Publicado'>Publicado</option>
-            </select>
-          </div>
+        <div className='flex items-center mt-4 gap-3'>
+          <select
+            id='status'
+            name='status'
+            value={formData.status}
+            onChange={handleChange}
+            className='p-2 border border-gray-300 rounded-md'
+          >
+            <option value='Borrador'>Borrador</option>
+            <option value='Publicado'>Publicado</option>
+          </select>
 
-          <div className='grid grid-cols-2 gap-3'>
-            <Button
+          <div className='flex gap-2 ml-auto'>
+            <button
               type='button'
               onClick={onCancel}
-              variant='outline'
-              className='h-12 border border-gray-300 rounded-lg hover:bg-gray-50'
+              className='px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50'
               disabled={isSubmitting}
             >
               Cancelar
-            </Button>
-
-            <Button
+            </button>
+            <button
               type='submit'
-              variant='default'
-              className='bg-purple-700 hover:bg-purple-800 h-12'
+              className='px-4 py-2 bg-purple-700 text-white rounded-md text-sm hover:bg-purple-800'
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <div className='flex items-center'>
+                <span className='flex items-center'>
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Guardando...
-                </div>
-              ) : formData.status === 'Borrador' ? (
-                <>
-                  <Bookmark className='mr-2 h-4 w-4' />
-                  {isEditing ? 'Guardar como borrador' : 'Guardar borrador'}
-                </>
+                </span>
               ) : (
-                <>
-                  <Globe className='mr-2 h-4 w-4' />
-                  {isEditing ? 'Actualizar publicación' : 'Publicar'}
-                </>
+                'Guardar'
               )}
-            </Button>
+            </button>
           </div>
         </div>
       </form>
 
       {/* Modales para YouTube y enlaces */}
       <Dialog open={youtubeModalOpen} onOpenChange={setYoutubeModalOpen}>
-        <DialogContent className='sm:max-w-md'>
+        <DialogContent className='sm:max-w-sm'>
           <DialogHeader>
             <DialogTitle>Agregar video de YouTube</DialogTitle>
           </DialogHeader>
-          <div className='flex flex-col gap-4 py-4'>
+          <div className='flex flex-col gap-2 py-2'>
             <label className='text-sm font-medium'>
-              Pega el enlace del video de YouTube:
+              Pega el enlace del video:
             </label>
             <input
               type='text'
               value={tempYoutubeUrl}
               onChange={e => setTempYoutubeUrl(e.target.value)}
               placeholder='https://www.youtube.com/watch?v=...'
-              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-300'
+              className='w-full p-2 border border-gray-300 rounded-md'
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
@@ -1042,7 +1011,7 @@ export default function ContentForm({ initialData, onCancel }) {
               <Button
                 type='button'
                 variant='outline'
-                className='h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50'
+                className='h-9 px-4 border border-gray-300 rounded-md hover:bg-gray-50'
               >
                 Cancelar
               </Button>
@@ -1051,7 +1020,7 @@ export default function ContentForm({ initialData, onCancel }) {
               type='button'
               onClick={handleYoutubeSubmit}
               variant='default'
-              className='bg-purple-700 hover:bg-purple-800 h-10 px-4'
+              className='bg-purple-700 hover:bg-purple-800 h-9 px-4'
             >
               Agregar
             </Button>
@@ -1060,11 +1029,11 @@ export default function ContentForm({ initialData, onCancel }) {
       </Dialog>
 
       <Dialog open={linkModalOpen} onOpenChange={setLinkModalOpen}>
-        <DialogContent className='sm:max-w-md'>
+        <DialogContent className='sm:max-w-sm'>
           <DialogHeader>
             <DialogTitle>Agregar enlace</DialogTitle>
           </DialogHeader>
-          <div className='flex flex-col gap-4 py-4'>
+          <div className='flex flex-col gap-2 py-2'>
             <label className='text-sm font-medium'>Pega el enlace:</label>
             <input
               type='url'
@@ -1085,7 +1054,7 @@ export default function ContentForm({ initialData, onCancel }) {
               <Button
                 type='button'
                 variant='outline'
-                className='h-10 px-4 border border-gray-300 rounded-lg hover:bg-gray-50'
+                className='h-9 px-4 border border-gray-300 rounded-md hover:bg-gray-50'
               >
                 Cancelar
               </Button>
@@ -1094,7 +1063,7 @@ export default function ContentForm({ initialData, onCancel }) {
               type='button'
               onClick={handleLinkSubmit}
               variant='default'
-              className='bg-purple-700 hover:bg-purple-800 h-10 px-4'
+              className='bg-purple-700 hover:bg-purple-800 h-9 px-4'
             >
               Agregar
             </Button>
