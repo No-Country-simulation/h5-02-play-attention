@@ -139,14 +139,28 @@ export function useDashboardMetrics() {
             : 0
           : 0;
 
-      // Calcular tasa de conversión (leads convertidos a usuarios)
-      const convertedLeads = leads.filter(
-        lead => lead.status === 'converted'
-      ).length;
+      // Calcular tasa de conversión usando la misma lógica que el módulo CRM
+      // Leads con estado "convertido" o "cliente"
+      const convertedLeads = leads.filter(lead => {
+        const status = (lead.status || '').toLowerCase().trim();
+        return status === 'convertido' || status === 'cliente';
+      }).length;
+
+      // Calcular la tasa con un decimal, igual que en el módulo CRM
       const conversionRate =
         leads.length > 0
-          ? Math.round((convertedLeads / leads.length) * 100)
-          : 0;
+          ? ((convertedLeads / leads.length) * 100).toFixed(1)
+          : '0.0';
+
+      // Calcular cambio en la tasa de conversión (simulado con datos históricos)
+      // En una aplicación real, esto debería comparar con datos históricos
+      const previousConversionRate = 10.2; // Valor simulado
+      const conversionChange = conversionRate - previousConversionRate;
+      const conversionChangeTrend =
+        conversionChange > 0 ? 'up' : conversionChange < 0 ? 'down' : 'neutral';
+      const conversionChangeText = `${
+        conversionChange > 0 ? '+' : ''
+      }${Math.abs(conversionChange).toFixed(1)}% este mes`;
 
       // Actualizar el estado con las métricas calculadas
       setMetrics({
@@ -195,9 +209,9 @@ export function useDashboardMetrics() {
           trend: notifications.new > 0 ? 'up' : 'neutral'
         },
         conversion: {
-          rate: `${conversionRate}%`,
-          change: '+2.3% este mes', // Simulado, podría calcularse si hay datos históricos
-          trend: 'up'
+          rate: conversionRate,
+          change: conversionChangeText,
+          trend: conversionChangeTrend
         }
       });
     }
