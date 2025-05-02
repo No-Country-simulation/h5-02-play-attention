@@ -56,13 +56,13 @@ export const StaticContact = () => {
           <MessageCircle className="size-5 md:size-6 mr-2" />
           Whatsapp
         </Button>
-        <Button
+        {/* <Button
           variant="outline"
           className="w-full sm:w-[46.24%] h-12 border-2 border-[#330764] text-[#330764] hover:bg-[#330764]/10 cursor-pointer"
         >
           <CalendarDays className="size-5 mr-2" />
           <span className="text-sm md:text-base">Agendar reunión</span>
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

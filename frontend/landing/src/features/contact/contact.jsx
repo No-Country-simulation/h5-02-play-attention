@@ -145,9 +145,9 @@ export const ContactSection = () => {
 
   return (
     <section className='w-full min-h-screen flex flex-col'>
-      <h1 className='text-center text-2xl md:text-[2rem] pt-4 [font-family:var(--font-sans)] font-[700]'>
+      <h2 className='text-center text-2xl md:text-[2rem] pt-4 [font-family:var(--font-sans)] font-[700]'>
         Contactanos
-      </h1>
+      </h2>
       <small className='text-center text-sm text-[#656573] md:text-md pt-4 px-4 md:px-0 [font-family:var(--font-sans)] font-[400]'>
         ¿Tienes preguntas sobre Play Attention? Estamos aquí para ayudarte
       </small>
@@ -227,7 +227,7 @@ export const ContactSection = () => {
                   render={({ field }) => (
                     <div>
                       <FormLabel className={`mt-3 ${formClasses.label}`}>
-                        Institución*
+                      ¿Quién lo va a usar?*
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -265,7 +265,7 @@ export const ContactSection = () => {
                   render={({ field }) => (
                     <div>
                       <FormLabel className={`mt-3 ${formClasses.label}`}>
-                        Compañía*
+                        Institución
                       </FormLabel>
                       <FormControl>
                         <Input className={formClasses.input} {...field} />
