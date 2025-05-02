@@ -23,6 +23,9 @@ const iconClasses =
   "bg-[#cfcfe0] rounded-full w-6 h-6 p-1 text-[#5C3983] mx-2 stroke-[2px] md:w-7 md:h-7";
 
 export const StaticContact = () => {
+  const handleClick = () => {
+    window.open("https://wa.me/56940551892", "_blank", "noopener,noreferrer");
+  };
   return (
     <div className="w-full md:w-[29%] max-w-full flex flex-col gap-4 md:gap-6 px-2 md:px-0 border  max-h-[90%]">
       {/* Contenedor de información de contacto */}
@@ -45,15 +48,17 @@ export const StaticContact = () => {
         ))}
       </div>
 
-      {/* Contenedor de botones - Versión original recuperada */}
-      <div className="w-full flex flex-col xs:flex-row gap-3 lg:flex-row">
-        <Button className="w-full xs:w-auto flex-1 h-12 min-w-[150px]">
-          <MessageCircle className="size-5 mr-2" />
-          <span className="text-sm md:text-base">Whatsapp</span>
+      <div className="w-full flex flex-col sm:flex-row gap-4 mt-4 md:mt-0">
+        <Button
+          onClick={handleClick}
+          className="w-full sm:w-[46.24%] h-12 cursor-pointer"
+        >
+          <MessageCircle className="size-5 md:size-6 mr-2" />
+          Whatsapp
         </Button>
         <Button
           variant="outline"
-          className="w-full xs:w-auto flex-1 h-12 min-w-[max-content] border-2 border-[#330764] text-[#330764] hover:bg-[#330764]/10"
+          className="w-full sm:w-[46.24%] h-12 border-2 border-[#330764] text-[#330764] hover:bg-[#330764]/10 cursor-pointer"
         >
           <CalendarDays className="size-5 mr-2" />
           <span className="text-sm md:text-base">Agendar reunión</span>
