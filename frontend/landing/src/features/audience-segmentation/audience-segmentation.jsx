@@ -258,7 +258,7 @@ const FeatureCard = ({
           <h2 className="text-2xl font-bold mb-4 text-primary-900">{title}</h2>
           <p className="text-secondary-800 mb-6">{description}</p>
           <Button
-            className="min-w-3xs"
+            className="min-w-3xs w-full sm:w-3xs"
             onClick={() => scrollToSection("contact")}
           >
             Más info

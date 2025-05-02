@@ -28,7 +28,7 @@ export function HeroSection() {
             </p>
             <Button
               onClick={() => scrollToSection("contact")}
-              className="min-w-3xs my-2"
+              className="min-w-3xs w-full sm:w-3xs my-2"
             >
               Contacto
             </Button>
