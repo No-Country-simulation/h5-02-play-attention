@@ -194,14 +194,14 @@ export default function CreateTicketModal({ isOpen = true, onClose }) {
       }
 
       // Asegurar que ticket_origin sea exactamente uno de los valores aceptados
-      const validOrigins = ['crm', 'user_platform', 'wxternal'];
+      const validOrigins = ['crm', 'user_platform', 'admin_panel'];
 
       if (!validOrigins.includes(formData.ticket_origin)) {
         console.error(
           `Valor de ticket_origin inválido: "${formData.ticket_origin}"`
         );
         toast.error(
-          'El origen del ticket no es válido. Seleccione CRM, Plataforma de Usuario o Externo'
+          'El origen del ticket no es válido. Seleccione CRM, Plataforma de Usuario o Panel de Admin'
         );
         setIsSubmitting(false);
         return;
@@ -235,7 +235,7 @@ export default function CreateTicketModal({ isOpen = true, onClose }) {
       // Si el error contiene información sobre ticket_origin inválido
       if (errorMessage.includes('ticket_origin')) {
         errorMessage =
-          'El origen del ticket no es válido. Por favor, seleccione: CRM, Plataforma de Usuario o Externo';
+          'El origen del ticket no es válido. Por favor, seleccione: CRM, Plataforma de Usuario o Panel de Admin';
 
         // Restablecer el origen a un valor válido
         setFormData(prev => ({
