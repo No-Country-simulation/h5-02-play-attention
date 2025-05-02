@@ -1,9 +1,27 @@
 "use client";
+
+import { usePathname } from "next/navigation";
 import { Marquee } from "@/shared/ui/marquee";
 import { TestimonialCard } from "./testimonial";
 import { testimonials } from "./testimonials-data";
 
 export function TestimonialsSection() {
+  const pathname = usePathname();
+
+  const routeToTypeMap = {
+    "/": null,
+    "/personas": "individuals",
+    "/empresas": "companies",
+    "/profesionales": "professionals",
+  };
+
+  const selectedType = routeToTypeMap[pathname] || null;
+
+  const filteredTestimonials =
+    selectedType === null
+      ? testimonials
+      : testimonials.filter((t) => t.type === selectedType);
+
   return (
     <div className="py-12">
       <div className="relative overflow-hidden px-4 lg:px-20 m-0">
@@ -14,8 +32,15 @@ export function TestimonialsSection() {
             </h2>
 
             <div className="relative w-full overflow-hidden py-2">
-              <Marquee pauseOnHover className="[--duration:30s]">
-                {testimonials.map((testimonial) => (
+              <Marquee
+                pauseOnHover
+                className={
+                  selectedType === null
+                    ? "[--duration:90s]"
+                    : "[--duration:30s]"
+                }
+              >
+                {filteredTestimonials.map((testimonial) => (
                   <TestimonialCard key={testimonial.id} {...testimonial} />
                 ))}
               </Marquee>
