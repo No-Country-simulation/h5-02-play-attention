@@ -13,7 +13,8 @@ export const leadFormSchema = z.object({
   position: z.string().optional(),
   source: z.string().default('Sitio web'),
   userType: z.string().default('persona'),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  newsletter: z.boolean().default(false)
 });
 
 // Valores por defecto
@@ -25,5 +26,6 @@ export const defaultValues = {
   position: '',
   source: 'Sitio web',
   userType: 'persona',
-  notes: ''
+  notes: '',
+  newsletter: false
 };

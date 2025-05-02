@@ -21,7 +21,27 @@ export const login = async credentials => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || 'Error en el proceso de login');
+    // Proporcionar mensajes de error más amigables basados en el código de estado
+    if (response.status === 401) {
+      throw new Error(
+        data.error || 'El email o la contraseña son incorrectos.'
+      );
+    } else if (response.status === 400) {
+      throw new Error(
+        data.error || 'Por favor, completa todos los campos correctamente.'
+      );
+    } else if (response.status === 404) {
+      throw new Error(
+        'El usuario no existe. Verifica tu email e intenta nuevamente.'
+      );
+    } else if (response.status === 403) {
+      throw new Error('No tienes permisos para acceder a esta aplicación.');
+    } else {
+      throw new Error(
+        data.error ||
+          'Ha ocurrido un error al iniciar sesión. Por favor, intenta nuevamente.'
+      );
+    }
   }
 
   return data;

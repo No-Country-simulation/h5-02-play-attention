@@ -17,13 +17,15 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  FormDescription
 } from '@/shared/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { leadSourceOptions } from '../../lib/config/ui-config';
 import { useLeadForm } from '../../lib/hooks/useLeadForm';
 import { useCreateLead } from '../../lib/hooks/useLeads';
+import { Checkbox } from '@/shared/ui/checkbox';
 
 export default function NewLeadForm() {
   const {
@@ -238,6 +240,29 @@ export default function NewLeadForm() {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name='newsletter'
+                render={({ field }) => (
+                  <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <div className='space-y-1 leading-none'>
+                      <FormLabel>Suscripción a novedades</FormLabel>
+                      <FormDescription>
+                        Quiero recibir novedades, actualizaciones y ofertas
+                        especiales de Play Attention
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
               <div className='flex justify-end gap-2'>
                 <Button
                   type='button'
@@ -250,7 +275,7 @@ export default function NewLeadForm() {
                 <Button
                   type='submit'
                   disabled={isSubmitting}
-                  className='min-w-[100px]'
+                  className='bg-indigo-600 hover:bg-indigo-700'
                 >
                   {isSubmitting ? (
                     <>

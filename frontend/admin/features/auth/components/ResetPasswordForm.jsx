@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -18,7 +18,7 @@ export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Número de dígitos para el token (ajustar según sea necesario)
+  // Número de dígitos para el token
   const TOKEN_LENGTH = 6;
   const inputRefs = useRef([]);
 
@@ -251,131 +251,103 @@ export default function ResetPasswordForm() {
   return (
     <>
       {!success ? (
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div className='mb-6'>
-            <h2 className='text-2xl font-bold text-center'>
-              Restablecer contraseña
+        <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+          <div className='text-center mb-2'>
+            <h2 className='text-xl font-semibold text-black'>
+              Restablecer Contraseña
             </h2>
-            <p className='text-sm text-gray-500 text-center mt-2'>
-              Ingresa el código recibido por correo y tu nueva contraseña
+            <p className='mt-2 text-xs text-gray-600'>
+              Ingresa el código recibido por correo y crea tu nueva contraseña.
             </p>
           </div>
 
-          <div className='space-y-4'>
-            <div>
-              <Label
-                htmlFor='token-digits'
-                className='block text-sm font-medium text-gray-700 mb-1'
-              >
-                Código de recuperación
-              </Label>
-              <div className='flex gap-2 justify-center mb-2'>
-                {Array.from({ length: TOKEN_LENGTH }).map((_, index) => (
-                  <Input
-                    key={index}
-                    ref={el => (inputRefs.current[index] = el)}
-                    type='text'
-                    inputMode='numeric'
-                    maxLength={TOKEN_LENGTH}
-                    className='w-10 h-12 text-center text-lg font-semibold border-purple-200 focus:border-purple-500 focus:ring-purple-500'
-                    value={tokenDigits[index]}
-                    onChange={e => handleDigitChange(index, e.target.value)}
-                    onKeyDown={e => handleKeyDown(index, e)}
-                    onPaste={e => {
-                      e.preventDefault();
-                      const pastedData = e.clipboardData.getData('text');
-                      handleDigitChange(index, pastedData);
-                    }}
-                    disabled={isValidatingToken || tokenValidated}
-                  />
-                ))}
-              </div>
-              {tokenValidated && (
-                <p className='text-xs text-green-500 text-center mt-1'>
-                  Código válido
-                </p>
-              )}
-              {isValidatingToken && (
-                <p className='text-xs text-gray-500 text-center mt-1'>
-                  Validando código...
-                </p>
-              )}
-              {!isValidatingToken && !tokenValidated && !error && (
-                <p className='text-xs text-gray-500 text-center mt-1'>
-                  El código será validado automáticamente
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label
-                htmlFor='password'
-                className='block text-sm font-medium text-gray-700 mb-1'
-              >
-                Nueva contraseña
-              </Label>
-              <div className='relative'>
+          <div>
+            <Label
+              htmlFor='token'
+              className='block text-sm font-medium text-gray-700 mb-1'
+            >
+              Código de Recuperación
+            </Label>
+            <div className='flex justify-center gap-2'>
+              {Array.from({ length: TOKEN_LENGTH }).map((_, index) => (
                 <Input
-                  id='password'
-                  name='password'
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder='Nueva contraseña'
-                  value={formData.password}
-                  onChange={handleChange}
-                  className='pr-10 border-purple-200 focus:border-purple-500 focus:ring-purple-500'
-                  disabled={!tokenValidated}
+                  key={index}
+                  type='text'
+                  maxLength={1}
+                  value={tokenDigits[index]}
+                  className='w-11 h-10 text-center border-0 border-b border-purple-300 bg-transparent focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 rounded-none focus:border-purple-300 outline-none !shadow-none'
+                  style={{ boxShadow: 'none' }}
+                  onChange={e => handleDigitChange(index, e.target.value)}
+                  onKeyDown={e => handleKeyDown(index, e)}
+                  ref={el => (inputRefs.current[index] = el)}
                 />
-                <button
-                  type='button'
-                  className='absolute inset-y-0 right-0 flex items-center pr-3 text-purple-500 hover:text-purple-700'
-                  onClick={togglePasswordVisibility}
-                  disabled={!tokenValidated}
-                >
-                  {showPassword ? (
-                    <EyeOff className='h-5 w-5' />
-                  ) : (
-                    <Eye className='h-5 w-5' />
-                  )}
-                </button>
-              </div>
-              <p className='text-xs text-gray-500 mt-1'>
-                La contraseña debe tener al menos 8 caracteres
-              </p>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <Label
-                htmlFor='confirmPassword'
-                className='block text-sm font-medium text-gray-700 mb-1'
+          <div>
+            <Label
+              htmlFor='password'
+              className='block text-sm font-medium text-gray-700 mb-1'
+            >
+              Contraseña
+            </Label>
+            <div className='relative'>
+              <Input
+                id='password'
+                name='password'
+                type={showPassword ? 'text' : 'password'}
+                autoComplete='new-password'
+                required
+                placeholder='••••••••'
+                value={formData.password}
+                onChange={handleChange}
+                className='w-full h-10 rounded border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 pr-10'
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600'
+                onClick={togglePasswordVisibility}
               >
-                Confirmar contraseña
-              </Label>
-              <div className='relative'>
-                <Input
-                  id='confirmPassword'
-                  name='confirmPassword'
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  placeholder='Confirmar contraseña'
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className='pr-10 border-purple-200 focus:border-purple-500 focus:ring-purple-500'
-                  disabled={!tokenValidated}
-                />
-                <button
-                  type='button'
-                  className='absolute inset-y-0 right-0 flex items-center pr-3 text-purple-500 hover:text-purple-700'
-                  onClick={toggleConfirmPasswordVisibility}
-                  disabled={!tokenValidated}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className='h-5 w-5' />
-                  ) : (
-                    <Eye className='h-5 w-5' />
-                  )}
-                </button>
-              </div>
+                {showPassword ? (
+                  <EyeOff className='h-5 w-5' />
+                ) : (
+                  <Eye className='h-5 w-5' />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <Label
+              htmlFor='confirmPassword'
+              className='block text-sm font-medium text-gray-700 mb-1'
+            >
+              Confirmar Contraseña
+            </Label>
+            <div className='relative'>
+              <Input
+                id='confirmPassword'
+                name='confirmPassword'
+                type={showConfirmPassword ? 'text' : 'password'}
+                autoComplete='new-password'
+                required
+                placeholder='••••••••'
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className='w-full h-10 rounded border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 pr-10'
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600'
+                onClick={toggleConfirmPasswordVisibility}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className='h-5 w-5' />
+                ) : (
+                  <Eye className='h-5 w-5' />
+                )}
+              </button>
             </div>
           </div>
 
@@ -387,31 +359,33 @@ export default function ResetPasswordForm() {
 
           <Button
             type='submit'
-            disabled={isLoading || !tokenValidated}
-            className='w-full bg-purple-600 hover:bg-purple-700 text-white'
+            disabled={isLoading}
+            className='w-full h-10 bg-purple-800 hover:bg-purple-900 text-white rounded'
           >
             {isLoading ? (
               <>
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                Restableciendo...
+                Procesando...
               </>
             ) : (
-              'Restablecer contraseña'
+              'Restablecer'
             )}
           </Button>
 
-          <div className='text-center mt-4'>
-            <Link
-              href='/login'
-              className='text-sm text-purple-600 hover:text-purple-800 flex items-center justify-center'
-            >
-              <ArrowLeft className='h-4 w-4 mr-1' />
-              Volver al inicio de sesión
+          <div className='mt-1'>
+            <Link href='/login'>
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full h-10 hover:text-purple-800 bg-white border-gray-300 hover:bg-gray-50 text-purple-900 rounded'
+              >
+                Volver atrás
+              </Button>
             </Link>
           </div>
         </form>
       ) : (
-        <div className='text-center py-8'>
+        <div className='text-center py-4'>
           <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4'>
             <svg
               className='h-6 w-6 text-green-600'
@@ -433,7 +407,7 @@ export default function ResetPasswordForm() {
           </h3>
           <p className='mt-2 text-sm text-gray-500 max-w-md mx-auto'>
             Tu contraseña ha sido restablecida correctamente. Serás redirigido a
-            la página de inicio de sesión en unos segundos.
+            la página de inicio de sesión en unos segundos...
           </p>
         </div>
       )}

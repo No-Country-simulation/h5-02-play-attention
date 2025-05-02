@@ -48,34 +48,32 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
         <div>
           <Label
             htmlFor='email'
-            className='block text-sm font-medium text-gray-700'
+            className='block text-sm font-medium text-gray-700 mb-1'
           >
             Correo electrónico
           </Label>
-          <div className='mt-1'>
-            <Input
-              id='email'
-              name='email'
-              type='email'
-              autoComplete='email'
-              required
-              placeholder='nombre@ejemplo.com'
-              value={credentials.email}
-              onChange={handleChange}
-              className='border-purple-200 focus:border-purple-500 focus:ring-purple-500'
-            />
-          </div>
+          <Input
+            id='email'
+            name='email'
+            type='email'
+            autoComplete='email'
+            required
+            placeholder='admin@gmail.com'
+            value={credentials.email}
+            onChange={handleChange}
+            className='w-full h-10 rounded shadow-sm border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500'
+          />
         </div>
 
         <div>
-          <div className='flex items-center justify-between'>
+          <div className='flex items-center justify-between mb-1'>
             <Label
               htmlFor='password'
               className='block text-sm font-medium text-gray-700'
             >
               Contraseña
             </Label>
-            <div className='text-sm'>
+            <div className='text-xs'>
               <Link
                 href='/forgot-password'
                 className='font-medium text-purple-600 hover:text-purple-500'
@@ -84,31 +82,29 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
               </Link>
             </div>
           </div>
-          <div className='mt-1'>
-            <div className='relative'>
-              <Input
-                id='password'
-                name='password'
-                type={showPassword ? 'text' : 'password'}
-                autoComplete='current-password'
-                required
-                placeholder='••••••••'
-                value={credentials.password}
-                onChange={handleChange}
-                className='pr-10 border-purple-200 focus:border-purple-500 focus:ring-purple-500'
-              />
-              <button
-                type='button'
-                className='absolute inset-y-0 right-0 flex items-center pr-3 text-purple-500 hover:text-purple-700'
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? (
-                  <EyeOff className='h-5 w-5' />
-                ) : (
-                  <Eye className='h-5 w-5' />
-                )}
-              </button>
-            </div>
+          <div className='relative'>
+            <Input
+              id='password'
+              name='password'
+              type={showPassword ? 'text' : 'password'}
+              autoComplete='current-password'
+              required
+              placeholder='••••••••'
+              value={credentials.password}
+              onChange={handleChange}
+              className='w-full h-10 rounded shadow-sm border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 pr-10'
+            />
+            <button
+              type='button'
+              className='absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600'
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <EyeOff className='h-5 w-5' />
+              ) : (
+                <Eye className='h-5 w-5' />
+              )}
+            </button>
           </div>
         </div>
 
@@ -123,7 +119,7 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
         <Button
           type='submit'
           disabled={login.isPending}
-          className='w-full bg-purple-600 hover:bg-purple-700 text-white'
+          className='w-full h-10 bg-purple-800 hover:bg-purple-900 text-white rounded'
         >
           {login.isPending ? (
             <>
@@ -131,7 +127,7 @@ export default function LoginForm({ redirectUrl = '/dashboard' }) {
               Iniciando sesión...
             </>
           ) : (
-            'Iniciar sesión'
+            'Iniciar Sesión'
           )}
         </Button>
       </form>

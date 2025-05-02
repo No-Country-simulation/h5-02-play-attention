@@ -1,13 +1,8 @@
 'use client';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription
-} from '@/shared/ui/dialog';
+import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { Button } from '@/shared/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -28,26 +23,28 @@ export default function AccessDeniedModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-md'>
-        <div className='flex items-center gap-4'>
-          <div className='bg-red-100 p-2 rounded-full'>
-            <AlertTriangle className='h-6 w-6 text-red-600' />
+      <DialogContent className='sm:max-w-md p-8 rounded-lg'>
+        <div className='flex flex-col items-center text-center'>
+          <div className='flex justify-center mb-4'>
+            <div className='bg-white rounded-full border-4 border-red-600 p-2'>
+              <X className='h-8 w-8 text-red-600' />
+            </div>
           </div>
-          <DialogTitle className='text-xl'>Acceso Denegado</DialogTitle>
-        </div>
 
-        <DialogDescription className='pt-4 pb-5'>
-          Tu cuenta no tiene permisos para acceder al panel de administración.
-          Esta plataforma es exclusiva para administradores y personal
-          comercial.
-          <br />
-          <br />
-          Si crees que esto es un error, contacta al administrador del sistema.
-        </DialogDescription>
+          <h2 className='text-xl font-semibold mb-3'>Acceso denegado</h2>
 
-        <div className='flex justify-end gap-3'>
-          <Button variant='default' onClick={handleReturnToLogin}>
-            Volver al inicio de sesión
+          <p className='text-sm text-gray-600 mb-6'>
+            Tu cuenta no tiene permisos para acceder al panel del administrador.
+            Si crees que esto es un error, contacta al administrador del
+            sistema.
+          </p>
+
+          <Button
+            variant='default'
+            onClick={handleReturnToLogin}
+            className='bg-purple-800 hover:bg-purple-900 text-white w-full py-2'
+          >
+            Volver a Iniciar Sesión
           </Button>
         </div>
       </DialogContent>
