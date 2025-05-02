@@ -27,7 +27,8 @@ export async function createLead(formData) {
       notes: formData.notes || '',
       status: 'Nuevo',
       origen: mapSourceToBackend(formData.source) || 'Sitio web',
-      relation: formData.position || 'Cantante'
+      relation: formData.position || 'Cantante',
+      newsletter: formData.newsletter || false
     };
 
     const response = await fetch(`${API_URL}/leads`, {
