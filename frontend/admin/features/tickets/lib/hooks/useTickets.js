@@ -14,10 +14,40 @@ import { toast } from 'sonner';
  * @returns {Object} Resultado de useQuery con datos y estado
  */
 export function useTickets(options = {}) {
+  const {
+    page = 1,
+    limit = 500,
+    status,
+    priority,
+    search,
+    sort_by,
+    order,
+    ...restOptions
+  } = options;
+
   return useQuery({
-    queryKey: ['tickets'],
+    // Incluir todos los parámetros de filtro en la queryKey para que React Query refresque los datos cuando cambien
+    queryKey: [
+      'tickets',
+      page,
+      limit,
+      status,
+      priority,
+      search,
+      sort_by,
+      order
+    ],
     queryFn: async () => {
-      const tickets = await ticketsApi.getTickets();
+      const tickets = await ticketsApi.getTickets({
+        page,
+        limit,
+        status,
+        priority,
+        search,
+        sort_by,
+        order,
+        ...restOptions
+      });
 
       // Adaptamos los datos
       const adaptedData = ticketsAdapter(tickets);
@@ -27,12 +57,13 @@ export function useTickets(options = {}) {
       return {
         tickets: adaptedData.tickets || [],
         total: adaptedData.total || 0,
-        totalPages: adaptedData.totalPages || 1
+        totalPages: adaptedData.totalPages || 1,
+        page: adaptedData.page || page
       };
     },
     refetchOnWindowFocus: false, // Evitar refetch automático al cambiar de ventana
-    staleTime: 5 * 60 * 1000, // Datos frescos por 5 minutos
-    ...options
+    staleTime: 10 * 60 * 1000, // Datos frescos por 10 minutos
+    ...restOptions
   });
 }
 

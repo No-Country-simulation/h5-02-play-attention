@@ -18,6 +18,7 @@ import {
 import MetricCard from './components/MetricCard';
 import ActionCard from './components/ActionCard';
 import AlertCard from './components/AlertCard';
+import ConversionRateChart from './components/ConversionRateChart';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 import { Button } from '@/shared/ui/button';
 import PageHeader from '@/shared/ui/page-header';
@@ -28,7 +29,9 @@ import {
 } from '@/shared/lib/utils/color-utils';
 import { useDashboardStore } from './lib/store/dashboard-store';
 import { useDashboardRefresh } from './lib/hooks/useDashboardRefresh';
+import { useDashboardMetrics } from './lib/hooks/useDashboardMetrics';
 import { useState } from 'react';
+import MetricCardSkeleton from './components/MetricCardSkeleton';
 
 // Datos de ejemplo para simular varias alertas
 const mockAlerts = [
@@ -118,6 +121,9 @@ export default function Dashboard() {
   // Utilizamos el custom hook para la actualización automática (sin indicador visual)
   useDashboardRefresh();
 
+  // Utilizamos el custom hook para obtener métricas reales
+  const { isLoading, isError, metrics } = useDashboardMetrics();
+
   // Utilizamos el store para preferencias de visualización, pero no para los datos
   const viewPreferences = useDashboardStore(state => state.viewPreferences);
 
@@ -198,55 +204,163 @@ export default function Dashboard() {
         <TabsContent value='overview' className='mt-0'>
           {/* Métricas principales */}
           <div className='grid grid-cols-1 lg:grid-cols-4 gap-5 mb-6'>
-            <MetricCard
-              title='Leads Nuevos'
-              value='32'
-              change='+8% esta semana'
-              trend='up'
-              icon={UserPlus}
-              color='leads'
-            />
-            <MetricCard
-              title='Usuarios Activos'
-              value='1,254'
-              change='+12% este mes'
-              trend='up'
-              icon={Users}
-              color='users'
-            />
-            <MetricCard
-              title='Contenido Total'
-              value='87'
-              change='+5% este mes'
-              trend='up'
-              icon={FileText}
-              color='content'
-            />
-            <MetricCard
-              title='Tickets Abiertos'
-              value='14'
-              change='-3% esta semana'
-              trend='down'
-              icon={TicketCheck}
-              color='tickets'
-            />
-            <MetricCard
-              title='Notificaciones'
-              value='8'
-              change='+2 nuevas hoy'
-              trend='up'
-              icon={Bell}
-              color='notifications'
-            />
-            <MetricCard
-              title='Tasa de Conversión'
-              value='18.5%'
-              change='+2.3% este mes'
-              trend='up'
-              icon={PercentCircle}
-              color='conversions'
-            />
+            {isLoading ? (
+              // Mostrar skeletons durante la carga
+              <>
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+              </>
+            ) : isError ? (
+              // Mostrar mensaje de error si algo falló
+              <div className='col-span-4 p-6 bg-red-50 rounded-md text-red-600 text-center'>
+                <p>
+                  No se pudieron cargar las métricas. Por favor, intenta
+                  nuevamente.
+                </p>
+              </div>
+            ) : (
+              // Mostrar las métricas reales cuando están disponibles
+              <>
+                <MetricCard
+                  title='Usuarios Activos'
+                  value={metrics.users.activeUsers.toString()}
+                  change={metrics.users.change}
+                  trend={metrics.users.trend}
+                  icon={Users}
+                  color='content'
+                />
+                <MetricCard
+                  title='Contenido Total'
+                  value={metrics.content.total.toString()}
+                  change={metrics.content.change}
+                  trend={metrics.content.trend}
+                  icon={FileText}
+                  color='content'
+                />
+                <MetricCard
+                  title='Tickets Abiertos'
+                  value={metrics.tickets.openTickets.toString()}
+                  change={metrics.tickets.change}
+                  trend={metrics.tickets.trend}
+                  icon={TicketCheck}
+                  color='content'
+                />
+                <MetricCard
+                  title='Notificaciones'
+                  value={metrics.notifications.total.toString()}
+                  change={metrics.notifications.change}
+                  trend={metrics.notifications.trend}
+                  icon={Bell}
+                  color='content'
+                />
+              </>
+            )}
           </div>
+
+          {/* Gráfico de tasa de conversión */}
+          {!isLoading && !isError && (
+            <div className='mb-6'>
+              <div className='flex justify-between items-center mb-4'>
+                <h2 className='text-xl font-semibold text-transparent'>
+                  Tasa de Conversión
+                </h2>
+                <a
+                  href='/crm?tab=dashboard'
+                  className='text-blue-600 text-sm flex items-center hover:underline'
+                >
+                  Ver detalles completos <span className='ml-1'>→</span>
+                </a>
+              </div>
+              <div className=' lg:flex gap-2'>
+                <div className='flex items-center justify-center w-full lg:w-1/2'>
+                  <ConversionRateChart
+                    conversionRate={parseFloat(metrics.conversion.rate)}
+                  />
+                </div>
+                <div className='bg-white p-6 rounded-lg border h-full w-full lg:w-1/2 flex flex-col lg:col-span-2'>
+                  <h3 className='text-lg font-semibold mb-3'>
+                    Análisis de Conversión y Leads
+                  </h3>
+                  <p className='text-gray-700 mb-4'>
+                    La tasa de conversión actual es del{' '}
+                    <span className='font-bold'>
+                      {metrics.conversion.rate}%
+                    </span>
+                    . Esto representa {metrics.conversion.change} respecto al
+                    periodo anterior.
+                  </p>
+                  <div className='space-y-3 mb-4'>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-sm text-gray-600'>
+                        Leads totales:
+                      </span>
+                      <span className='font-medium text-right'>
+                        {metrics.leads.total}
+                      </span>
+                    </div>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-sm text-gray-600'>
+                        Leads nuevos:
+                      </span>
+                      <span className='font-medium text-green-600 text-right'>
+                        {metrics.leads.newLeads}
+                        <span className='text-xs text-gray-500 ml-1'>
+                          (+
+                          {Math.round(
+                            (metrics.leads.newLeads / metrics.leads.total) * 100
+                          )}
+                          % esta semana)
+                        </span>
+                      </span>
+                    </div>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-sm text-gray-600'>
+                        Leads convertidos:
+                      </span>
+                      <span className='font-medium text-right'>
+                        {Math.round(
+                          (metrics.leads.total *
+                            parseFloat(metrics.conversion.rate)) /
+                            100
+                        )}
+                      </span>
+                    </div>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-sm text-gray-600'>
+                        Promedio de sector:
+                      </span>
+                      <span className='font-medium text-right'>15.2%</span>
+                    </div>
+                  </div>
+                  <div className='mt-auto pt-4 border-t'>
+                    <h4 className='text-sm font-medium mb-2'>
+                      Recomendaciones
+                    </h4>
+                    <ul className='text-sm text-gray-600 space-y-1'>
+                      <li className='flex items-start gap-2'>
+                        <span className='text-green-500'>•</span>
+                        <span>
+                          Mejorar el seguimiento de leads en etapa inicial
+                        </span>
+                      </li>
+                      <li className='flex items-start gap-2'>
+                        <span className='text-green-500'>•</span>
+                        <span>Optimizar el proceso de cualificación</span>
+                      </li>
+                      <li className='flex items-start gap-2'>
+                        <span className='text-green-500'>•</span>
+                        <span>
+                          Revisar el material de presentación comercial
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Alertas y Notificaciones */}
           <div className='mb-6'>
@@ -385,19 +499,19 @@ export default function Dashboard() {
             <h2 className='text-xl font-semibold'>Acciones Rápidas</h2>
           </div>
 
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6 h-full'>
             <ActionCard
               title='Crear Lead'
               description='Registra un nuevo lead de ventas'
               icon={UserPlus}
-              color='leads'
+              color='content'
               link='/crm/new'
             />
             <ActionCard
               title='Responder Tickets'
               description='Gestionar tickets de soporte pendientes'
               icon={TicketCheck}
-              color='tickets'
+              color='content'
               link='/tickets'
             />
             <ActionCard
@@ -412,33 +526,44 @@ export default function Dashboard() {
       </Tabs>
 
       {/* Panel de resumen: siempre visible si no estamos en Vista General */}
-      {activeTab !== 'overview' && (
+      {activeTab !== 'overview' && !isLoading && !isError && (
         <div className='bg-gray-50 rounded-lg p-4 mb-6'>
           <h3 className='text-sm font-medium mb-3'>Resumen rápido</h3>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6'>
-            <div className='bg-white p-3 rounded border text-center'>
-              <p className='text-xs text-gray-500'>Leads</p>
-              <p className='text-xl font-bold text-green-600'>32</p>
+          <div className='grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6'>
+            <div className='bg-white p-3 rounded border text-center lg:col-span-2'>
+              <p className='text-xs text-gray-500'>Leads y Conversión</p>
+              <div className='flex justify-center items-center gap-2'>
+                <p className='text-xl font-bold text-green-600'>
+                  {metrics.leads.total}{' '}
+                  <span className='text-xs font-normal'>leads</span>
+                </p>
+                <span className='text-gray-300 font-bold'>|</span>
+                <p className='text-xl font-bold text-indigo-600'>
+                  {metrics.conversion.rate}%{' '}
+                  <span className='text-xs font-normal'>conv.</span>
+                </p>
+              </div>
+              <p className='text-xs text-gray-500 mt-1'>
+                {metrics.leads.newLeads} nuevos {metrics.leads.change}
+              </p>
             </div>
             <div className='bg-white p-3 rounded border text-center'>
               <p className='text-xs text-gray-500'>Tickets</p>
-              <p className='text-xl font-bold text-amber-600'>14</p>
+              <p className='text-xl font-bold text-purple-600'>
+                {metrics.tickets.total}
+              </p>
             </div>
             <div className='bg-white p-3 rounded border text-center'>
               <p className='text-xs text-gray-500'>Usuarios</p>
-              <p className='text-xl font-bold text-blue-600'>1,254</p>
-            </div>
-            <div className='bg-white p-3 rounded border text-center'>
-              <p className='text-xs text-gray-500'>Alertas</p>
-              <p className='text-xl font-bold text-red-600'>4</p>
+              <p className='text-xl font-bold text-purple-600'>
+                {metrics.users.total}
+              </p>
             </div>
             <div className='bg-white p-3 rounded border text-center'>
               <p className='text-xs text-gray-500'>Contenido</p>
-              <p className='text-xl font-bold text-purple-600'>87</p>
-            </div>
-            <div className='bg-white p-3 rounded border text-center'>
-              <p className='text-xs text-gray-500'>Conversión</p>
-              <p className='text-xl font-bold text-indigo-600'>18.5%</p>
+              <p className='text-xl font-bold text-purple-600'>
+                {metrics.content.total}
+              </p>
             </div>
           </div>
         </div>

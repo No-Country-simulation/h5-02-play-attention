@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -47,7 +47,8 @@ const originOptions = [
   { id: 'app', label: 'Aplicación móvil' },
   { id: 'email', label: 'Email' },
   { id: 'phone', label: 'Teléfono' },
-  { id: 'crm', label: 'CRM' }
+  { id: 'crm', label: 'CRM' },
+  { id: 'admin_panel', label: 'Panel de Administración' }
 ];
 
 /**
@@ -64,34 +65,75 @@ export default function TicketEditModal({
   const [formData, setFormData] = useState({
     status: '',
     priority: '',
-    assignedTo: 'none',
+    assignedTo: '',
+    assignedUserId: '',
     category: '',
     ticketOrigin: ''
   });
 
   // Cargar usuarios asignables
   const {
-    data: assignableUsers = [],
+    data: assignableUsersData = [],
     isLoading: isLoadingUsers,
     error: usersError
   } = useAssignableUsers();
 
+  // Procesar la lista de usuarios para mostrar correctamente
+  const assignableUsers = useMemo(() => {
+    if (!assignableUsersData || !Array.isArray(assignableUsersData)) {
+      return [];
+    }
+
+    // Normalizar datos de usuarios para mostrar correctamente
+    return assignableUsersData.map(user => ({
+      id: user._id || user.id || '',
+      name: user.fullname || user.name || 'Sin nombre',
+      email: user.email || ''
+    }));
+  }, [assignableUsersData]);
+
   // Inicializar el formulario con los datos del ticket cuando se abre el modal
   useEffect(() => {
     if (ticket && open) {
+      // Encontrar usuario asignado si existe
+      const assignedUser = assignableUsers.find(
+        user =>
+          ticket.assignedTo === user.name || ticket.assignedTo === user.email
+      );
+
       setFormData({
         status: ticket.status || 'abierto',
         priority: ticket.priority || 'media',
-        assignedTo: ticket.assignedTo || 'none',
-        category: ticket.category || 'other',
+        assignedTo: ticket.assignedTo || 'Sin asignar',
+        assignedUserId: assignedUser?.id || '',
+        category: ticket.category || 'bug',
         ticketOrigin: ticket.ticketOrigin || 'web'
       });
     }
-  }, [ticket, open]);
+  }, [ticket, open, assignableUsers]);
 
   // Función para manejar cambios en los selects
   const handleSelectChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // Si cambia la asignación de usuario
+    if (name === 'assignedUserId') {
+      if (value === 'none') {
+        setFormData(prev => ({
+          ...prev,
+          assignedUserId: '',
+          assignedTo: 'Sin asignar'
+        }));
+      } else {
+        // Buscar el usuario seleccionado para obtener su nombre
+        const selectedUser = assignableUsers.find(user => user.id === value);
+        setFormData(prev => ({
+          ...prev,
+          assignedUserId: value,
+          assignedTo: selectedUser ? selectedUser.name : 'Sin asignar'
+        }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   // Función para manejar el envío del formulario
@@ -101,10 +143,13 @@ export default function TicketEditModal({
     // Preparar datos para actualización
     const updateData = {
       id: ticket.id,
-      ...formData,
-      // Convertir 'none' a cadena vacía para el backend
-      assignedTo: formData.assignedTo === 'none' ? '' : formData.assignedTo
+      status: formData.status,
+      priority: formData.priority,
+      assignedTo: formData.assignedTo,
+      category: formData.category,
+      ticketOrigin: formData.ticketOrigin
     };
+
 
     // Llamar a la función de actualización proporcionada por el componente padre
     onSubmit(updateData);
@@ -125,7 +170,7 @@ export default function TicketEditModal({
               value={formData.status}
               onValueChange={value => handleSelectChange('status', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder='Selecciona el estado' />
               </SelectTrigger>
               <SelectContent>
@@ -145,7 +190,7 @@ export default function TicketEditModal({
               value={formData.priority}
               onValueChange={value => handleSelectChange('priority', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder='Selecciona la prioridad' />
               </SelectTrigger>
               <SelectContent>
@@ -160,13 +205,19 @@ export default function TicketEditModal({
 
           {/* Campo Asignado a */}
           <div className='space-y-2'>
-            <Label htmlFor='assignedTo'>Asignado a</Label>
+            <Label htmlFor='assignedUserId'>Asignado a</Label>
             <Select
-              value={formData.assignedTo}
-              onValueChange={value => handleSelectChange('assignedTo', value)}
+              value={formData.assignedUserId || 'none'}
+              onValueChange={value =>
+                handleSelectChange('assignedUserId', value)
+              }
             >
-              <SelectTrigger>
-                <SelectValue placeholder='Selecciona un usuario' />
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Selecciona un usuario'>
+                  {formData.assignedUserId === ''
+                    ? 'Sin asignar'
+                    : formData.assignedTo}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='none'>Sin asignar</SelectItem>
@@ -177,7 +228,7 @@ export default function TicketEditModal({
                 ) : (
                   assignableUsers.map(user => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name || user.email}
+                      {user.name}
                     </SelectItem>
                   ))
                 )}
@@ -192,7 +243,7 @@ export default function TicketEditModal({
               value={formData.category}
               onValueChange={value => handleSelectChange('category', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder='Selecciona una categoría' />
               </SelectTrigger>
               <SelectContent>
@@ -212,7 +263,7 @@ export default function TicketEditModal({
               value={formData.ticketOrigin}
               onValueChange={value => handleSelectChange('ticketOrigin', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className='w-full'>
                 <SelectValue placeholder='Selecciona el origen' />
               </SelectTrigger>
               <SelectContent>
@@ -233,11 +284,19 @@ export default function TicketEditModal({
             >
               Cancelar
             </Button>
-            <Button type='submit' disabled={isSubmitting}>
+            <Button
+              type='submit'
+              disabled={isSubmitting}
+              className='min-w-[140px]'
+            >
               {isSubmitting ? (
-                <LoadingSpinner size={16} className='mr-2' />
-              ) : null}
-              Guardar cambios
+                <div className='flex items-center justify-center'>
+             {/*      <LoadingSpinner size={16} className='mr-2' /> */}
+                  <span>Guardando</span>
+                </div>
+              ) : (
+                'Guardar cambios'
+              )}
             </Button>
           </DialogFooter>
         </form>

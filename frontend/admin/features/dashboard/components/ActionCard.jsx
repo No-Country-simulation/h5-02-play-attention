@@ -21,9 +21,9 @@ export default function ActionCard({
   link
 }) {
   return (
-    <Link href={link} className='block'>
-      <Card className='p-4 hover:shadow-md transition-shadow border cursor-pointer'>
-        <div className='flex items-center'>
+    <Link href={link} className='block h-full'>
+      <Card className='p-4 hover:shadow-md transition-shadow border cursor-pointer h-full flex flex-col'>
+        <div className='flex items-center h-full'>
           <div
             className={cn(
               'p-3 rounded-full mr-4',

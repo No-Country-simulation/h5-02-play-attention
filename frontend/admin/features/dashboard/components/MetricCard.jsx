@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { cn } from '@/shared/lib/utils/common-utils';
 import {
   getTextColorClass,
-  getBackgroundColorClass
+  getBackgroundColorClass,
+  getSemanticColor
 } from '@/shared/lib/utils/color-utils';
 
 /**
@@ -23,25 +24,29 @@ export default function MetricCard({
   color = 'primary',
   link
 }) {
-  // Determinar el icono y color de la tendencia
+  // Determinar el icono y color de la tendencia usando el mismo color de la tarjeta
   const getTrendIcon = () => {
+    const colorClass = `text-${getSemanticColor(color)}`;
+
     switch (trend) {
       case 'up':
-        return <TrendingUp className='h-3 w-3 text-green-500' />;
+        return <TrendingUp className={`h-3 w-3 ${colorClass}`} />;
       case 'down':
-        return <TrendingDown className='h-3 w-3 text-red-500' />;
+        return <TrendingDown className={`h-3 w-3 ${colorClass} opacity-70`} />;
       default:
         return <Minus className='h-3 w-3 text-gray-500' />;
     }
   };
 
-  // Determinar el color del texto de cambio
+  // Determinar el color del texto de cambio usando el mismo color de la tarjeta
   const getChangeColor = () => {
+    const baseColor = `text-${getSemanticColor(color)}`;
+
     switch (trend) {
       case 'up':
-        return 'text-green-600';
+        return baseColor;
       case 'down':
-        return 'text-red-600';
+        return `${baseColor} opacity-80`;
       default:
         return 'text-gray-600';
     }
@@ -52,8 +57,8 @@ export default function MetricCard({
       <CardContent className='pt-6'>
         <div className='flex justify-between items-start'>
           <div>
-            <p className='text-sm font-medium text-gray-500'>{title}</p>
-            <h3 className='text-2xl font-bold mt-1'>{value}</h3>
+            <p className='text-sm font-medium text-gray-800'>{title}</p>
+            <h3 className='text-2xl font-bold mt-1 text-[#15032A]'>{value}</h3>
             <div className='flex items-center mt-1'>
               {getTrendIcon()}
               <span className={`text-xs font-medium ml-1 ${getChangeColor()}`}>

@@ -77,6 +77,18 @@ export const ticketAdapter = (apiTicket = {}) => {
   const ticketCreator = getTicketCreator();
   const assignedUser = getAssignedUser();
 
+  // Unificar la fecha de creación considerando todos los formatos posibles
+  const createdAtValue =
+    apiTicket.createdAt || apiTicket.created_at || apiTicket.date || '';
+
+  // Añadir log para depuración de fecha
+  console.log('Fecha original:', {
+    createdAt: apiTicket.createdAt,
+    created_at: apiTicket.created_at,
+    date: apiTicket.date,
+    formatted: formatDate(createdAtValue)
+  });
+
   return {
     id: apiTicket._id || apiTicket.id || '',
     subject: apiTicket.title || apiTicket.subject || 'Sin asunto',
@@ -90,9 +102,9 @@ export const ticketAdapter = (apiTicket = {}) => {
     assignedEmail: assignedUser.assignedEmail,
     status: mapTicketStatusToFrontend(apiTicket.status),
     priority: mapTicketPriority(apiTicket.priority || 'media'),
-    date: formatDate(
-      apiTicket.createdAt || apiTicket.created_at || apiTicket.created_at
-    ),
+    // Añadir createdAt para que esté disponible para ordenación
+    createdAt: formatDate(createdAtValue),
+    date: formatDate(createdAtValue),
     updated: formatDate(
       apiTicket.updatedAt || apiTicket.updated_at || apiTicket.updated_at
     ),
@@ -122,7 +134,6 @@ export const ticketAdapter = (apiTicket = {}) => {
  * @returns {Object} - Datos formateados para el frontend con paginación si existe
  */
 export const ticketsAdapter = (apiResponse = []) => {
-
   // Caso para la nueva estructura con el array @tickets
   if (
     apiResponse &&
