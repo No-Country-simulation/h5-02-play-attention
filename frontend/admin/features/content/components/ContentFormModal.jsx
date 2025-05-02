@@ -1,7 +1,7 @@
 'use client';
 
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
-import ContentForm from './ContentForm';
+import ContentForm from './form/ContentForm';
 
 /**
  * Modal que encapsula el formulario de contenido existente
