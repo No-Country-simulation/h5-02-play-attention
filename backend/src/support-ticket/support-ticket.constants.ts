@@ -20,7 +20,7 @@ export const TICKET_CATEGORY = [
 
 export const TICKET_PRIORITY = ['low', 'medium', 'high', 'critical'] as const;
 
-export const TICKET_ORIGIN = ['crm', 'user_plataform', 'wxternal'] as const;
+export const TICKET_ORIGIN = ['crm', 'user_plataform', 'admin_panel'] as const;
 
 export const TICKET_SORTABLE_FIELDS: (keyof ResponseSupportTicketDto)[] = [
   'created_at',
