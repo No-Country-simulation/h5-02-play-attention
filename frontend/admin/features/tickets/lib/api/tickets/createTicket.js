@@ -8,7 +8,8 @@ import {
   commonHeaders,
   mapTicketStatusToBackend,
   mapTicketPriority,
-  handleResponseError
+  handleResponseError,
+  validateTicketOrigin
 } from '../config';
 
 /**
@@ -23,6 +24,8 @@ import {
  */
 export async function createTicket(ticketData) {
   try {
+    console.log('DATOS ORIGINALES DEL TICKET:', ticketData);
+
     // Validar campos requeridos
     if (!ticketData.title) {
       throw new Error('El título del ticket es obligatorio');
@@ -32,18 +35,32 @@ export async function createTicket(ticketData) {
       throw new Error('La descripción del ticket es obligatoria');
     }
 
+    // Validar ticket_origin - esta es la parte crítica
+    // Usar la función específica de validación para asegurar valores exactos
+    const validatedTicketOrigin = validateTicketOrigin(
+      ticketData.ticket_origin
+    );
+
+    // Crear copia limpia de los datos para evitar mutar el objeto original
+    const ticketDataCopy = { ...ticketData };
+
+    // Asignar el valor validado
+    ticketDataCopy.ticket_origin = validatedTicketOrigin;
+
+    console.log(`Ticket origin validado: "${validatedTicketOrigin}"`);
+
     // Preparar datos para el backend
     const mappedData = {
-      ...ticketData,
-      status: ticketData.status
-        ? mapTicketStatusToBackend(ticketData.status)
+      ...ticketDataCopy,
+      status: ticketDataCopy.status
+        ? mapTicketStatusToBackend(ticketDataCopy.status)
         : 'open'
     };
 
     // Asegurar que priority sea uno de los valores aceptados por el backend
-    if (ticketData.priority) {
+    if (ticketDataCopy.priority) {
       // El backend espera: low, medium, high, critical
-      const priority = ticketData.priority.toLowerCase();
+      const priority = ticketDataCopy.priority.toLowerCase();
 
       // Si ya es un valor válido en inglés, usarlo directamente
       if (['low', 'medium', 'high', 'critical'].includes(priority)) {
@@ -64,6 +81,14 @@ export async function createTicket(ticketData) {
 
     // Log para depuración
     console.log('Prioridad final enviada:', mappedData.priority);
+    console.log('Origen del ticket enviado:', mappedData.ticket_origin);
+
+    // Verificar ID de usuario asignado
+    if (mappedData.assigned_to) {
+      console.log('Usuario asignado:', mappedData.assigned_to);
+    } else {
+      console.warn('No se asignó el ticket a ningún usuario');
+    }
 
     // Obtener el token de la cookie
     let token = null;
@@ -90,8 +115,6 @@ export async function createTicket(ticketData) {
     // Agregar el token al header Authorization si existe
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      // También probar con el formato que usa Swagger
-      // headers['PlayAttentionToken'] = `Bearer ${token}`;
     }
 
     console.log('📨 Headers enviados:', JSON.stringify(headers));
@@ -100,7 +123,7 @@ export async function createTicket(ticketData) {
     const endpoint = '/support-tickets/admin';
     const fullUrl = `${API_URL}${endpoint}`;
     console.log('🌐 URL completa de la API:', fullUrl);
-    console.log('📦 Datos enviados:', JSON.stringify(mappedData));
+    console.log('📦 Datos finales enviados:', JSON.stringify(mappedData));
 
     // Realizar la petición
     const response = await fetch(fullUrl, {
@@ -117,13 +140,24 @@ export async function createTicket(ticketData) {
       response.statusText
     );
 
+    // Si el servidor responde con un error, intentar leer el cuerpo de la respuesta
     if (!response.ok) {
       const errorText = await handleResponseError(response);
       console.error('Error detallado:', errorText);
+
+      // Intentar parsear el cuerpo de error si es JSON
+      try {
+        const errorBody = await response.text();
+        console.error('Cuerpo de la respuesta de error:', errorBody);
+      } catch (e) {
+        console.error('No se pudo leer el cuerpo de la respuesta:', e);
+      }
+
       throw new Error(errorText);
     }
 
     const newTicket = await response.json();
+    console.log('Ticket creado exitosamente:', newTicket);
     return newTicket;
   } catch (error) {
     console.error('Error al crear ticket:', error);
