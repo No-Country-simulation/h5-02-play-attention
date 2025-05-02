@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -27,39 +27,69 @@ import { createTicket } from '../lib/api/tickets/createTicket';
 import { useAssignableUsers } from '../lib/hooks/useAssignableUsers';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
+// Componente con Debug info
+function UsersDebug({ users }) {
+  if (!users) return null;
+
+  return (
+    <div className='bg-yellow-100 p-2 mb-2 rounded text-xs'>
+      <div>Usuarios disponibles: {users.length}</div>
+      <ul className='pl-4'>
+        {users.map(u => (
+          <li key={u._id}>
+            ID: {u._id} - {u.fullname} - Rol: {u.role}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function CreateTicket() {
   const router = useRouter();
+
+  // Usar el hook para obtener usuarios asignables
   const {
-    users,
+    data: usersData = [],
     isLoading: isLoadingUsers,
     error: usersError
   } = useAssignableUsers();
+
+  // Crear una versión memoizada para evitar re-renderizados innecesarios
+  const users = useMemo(() => {
+    console.log('PROCESANDO USUARIOS:', usersData);
+    // Si no hay datos, devolver array vacío
+    if (!usersData || !Array.isArray(usersData)) {
+      console.warn('No hay datos de usuarios válidos');
+      return [];
+    }
+    return usersData;
+  }, [usersData]);
+
+  const [showDebug, setShowDebug] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [authToken, setAuthToken] = useState(null);
+
+  // Efecto para depurar
+  useEffect(() => {
+    console.log('DATOS DE USUARIOS DISPONIBLES:', users);
+  }, [users]);
 
   useEffect(() => {
     // Extraer token directamente - con mejor manejo de errores
     try {
-      // Imprimir todas las cookies para debug
-      console.log('Todas las cookies:', document.cookie);
-
       const tokenCookie = document.cookie
         .split('; ')
         .find(row => row.startsWith('auth_token='));
 
-      console.log('Cookie auth_token encontrada:', tokenCookie);
-
       if (tokenCookie) {
         // Verificar el formato exacto
-        console.log('Cookie completa:', tokenCookie);
-
         const token = tokenCookie.split('=')[1];
-        console.log('Token extraído:', token);
 
         // En caso de que esté codificado
         try {
           const decodedToken = decodeURIComponent(token);
-          console.log('Token decodificado:', decodedToken);
+
           setAuthToken(decodedToken);
         } catch (decodeError) {
           console.log(
@@ -67,8 +97,6 @@ export default function CreateTicket() {
           );
           setAuthToken(token);
         }
-
-        console.log('Token final guardado en estado:', token);
       } else {
         console.warn('No se encontró la cookie auth_token');
       }
@@ -147,6 +175,63 @@ export default function CreateTicket() {
     }
   };
 
+  // Componente renderizado condicional para el selector de usuarios
+  const renderUserSelect = () => {
+    // Si está cargando, mostrar spinner
+    if (isLoadingUsers) {
+      return (
+        <div className='flex items-center justify-center py-2'>
+          <LoadingSpinner className='h-6 w-6' />
+        </div>
+      );
+    }
+
+    // Si hay error, mostrar mensaje
+    if (usersError) {
+      return (
+        <div className='text-sm text-red-500'>
+          Error al cargar usuarios: {usersError.message}
+        </div>
+      );
+    }
+
+    // Verificar si hay usuarios
+    const hasUsers = Array.isArray(users) && users.length > 0;
+
+    return (
+      <div>
+        {!hasUsers && (
+          <div className='text-amber-600 text-xs mb-2'>
+            No hay usuarios asignables disponibles.
+          </div>
+        )}
+
+        <Select
+          name='assigned_to'
+          value={formData.assigned_to}
+          onValueChange={value => handleSelectChange('assigned_to', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder='Seleccione agente' />
+          </SelectTrigger>
+          <SelectContent>
+            {hasUsers ? (
+              users.map(user => (
+                <SelectItem key={user._id} value={user._id}>
+                  {user.fullname || user.name || user.email}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value='no-users' disabled>
+                No hay usuarios disponibles
+              </SelectItem>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  };
+
   return (
     <div className='container mx-auto py-6'>
       <Button
@@ -155,6 +240,16 @@ export default function CreateTicket() {
         onClick={() => router.push('/tickets')}
       >
         <ArrowLeft className='h-4 w-4' /> Volver
+      </Button>
+
+      {/* Botón para mostrar/ocultar información de debug */}
+      <Button
+        variant='outline'
+        size='sm'
+        className='absolute top-4 right-4'
+        onClick={() => setShowDebug(!showDebug)}
+      >
+        {showDebug ? 'Ocultar Debug' : 'Mostrar Debug'}
       </Button>
 
       <Card>
@@ -223,37 +318,8 @@ export default function CreateTicket() {
 
             <div className='space-y-2'>
               <Label htmlFor='assigned_to'>Asignar a</Label>
-              {isLoadingUsers ? (
-                <div className='flex items-center justify-center py-2'>
-                  <LoadingSpinner className='h-6 w-6' />
-                </div>
-              ) : usersError ? (
-                <div className='text-sm text-red-500'>
-                  Error al cargar usuarios: {usersError.message}
-                </div>
-              ) : (
-                <Select
-                  name='assigned_to'
-                  value={formData.assigned_to}
-                  onValueChange={value =>
-                    handleSelectChange('assigned_to', value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder='Seleccione agente' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users?.map(user => (
-                      <SelectItem
-                        key={user._id || user.id}
-                        value={user._id || user.id}
-                      >
-                        {user.fullname || user.name || user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              {showDebug && <UsersDebug users={users} />}
+              {renderUserSelect()}
             </div>
 
             <div className='space-y-2'>
