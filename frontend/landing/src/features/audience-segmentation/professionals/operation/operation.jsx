@@ -30,14 +30,29 @@ export function OperationSection() {
               videoSrc="https://www.youtube.com/embed/MajIHSZN0oY"
               thumbnailSrc="https://img.youtube.com/vi/MajIHSZN0oY/maxresdefault.jpg"
               thumbnailAlt="Funcionalidad del dispositivo Play Attention en personas"
+              customSubtitles={[
+                {
+                  src: "/segmentation/subtittles.vtt",
+                  label: "Español",
+                  srcLang: "es",
+                  default: true,
+                },
+              ]}
             />
-      
             <HeroVideoDialog
               className="hidden dark:block"
               animationStyle="from-center"
               videoSrc="https://www.youtube.com/embed/MajIHSZN0oY"
               thumbnailSrc="https://img.youtube.com/vi/MajIHSZN0oY/maxresdefault.jpg"
               thumbnailAlt="Funcionalidad del dispositivo Play Attention en personas"
+              customSubtitles={[
+                {
+                  src: "/segmentation/subtittles.vtt",
+                  label: "Español",
+                  srcLang: "es",
+                  default: true,
+                },
+              ]}
             />
           </div>
 
