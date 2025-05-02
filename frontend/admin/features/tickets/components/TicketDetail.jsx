@@ -181,14 +181,7 @@ export default function TicketDetail({ ticket, onBack, onUpdate }) {
           <div className='flex justify-between items-start'>
             <div>
               <div className='flex items-center gap-2'>
-                <Button
-                  onClick={onBack}
-                  variant='ghost'
-                  size='icon'
-                  className='mr-2'
-                >
-                  <ArrowLeft className='h-4 w-4' />
-                </Button>
+     
                 <CardTitle className='text-xl font-bold'>
                   {ticket?.subject || 'Detalle del ticket'}
                 </CardTitle>

@@ -64,7 +64,8 @@ export default function TicketList({
   onPageChange = () => {},
   onPreviousPage = () => {},
   onNextPage = () => {},
-  isLoading = false
+  isLoading = false,
+  noPagination = false
 }) {
   const router = useRouter();
   const [hoveredRow, setHoveredRow] = useState(null);
@@ -195,7 +196,12 @@ export default function TicketList({
     }
 
     // No hay tickets en la página actual pero hay en otras páginas (con filtros aplicados)
-    if (!isLoading && tickets.length === 0 && totalTickets > 0) {
+    if (
+      !noPagination &&
+      !isLoading &&
+      tickets.length === 0 &&
+      totalTickets > 0
+    ) {
       return (
         <div className='bg-white border rounded-lg p-8 text-center'>
           <p className='text-gray-500 mb-4'>No hay tickets en esta página.</p>
@@ -433,47 +439,53 @@ export default function TicketList({
   };
 
   return (
-    <Card className='h-full flex flex-col'>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+    <Card className='overflow-hidden rounded-lg shadow-sm'>
+      <CardHeader className='bg-slate-50 px-6 py-4 justify-between flex-row flex items-center space-y-0'>
         <div>
-          <CardTitle className='text-xl font-bold'>
+          <CardTitle className='text-lg leading-normal font-semibold text-slate-800'>
             Tickets de Soporte
           </CardTitle>
-          <CardDescription>
-            Gestiona las solicitudes de soporte de los usuarios
+          <CardDescription className='text-sm'>
+            {isLoading ? (
+              <span>Cargando...</span>
+            ) : (
+              <span>
+                Gestiona las solicitudes de soporte de los usuarios
+                {totalTickets > 0 && (
+                  <>
+                    <br />
+                    Mostrando {tickets.length} de {totalTickets} tickets
+                  </>
+                )}
+              </span>
+            )}
           </CardDescription>
         </div>
       </CardHeader>
+      <CardContent className='p-0'>{renderContent()}</CardContent>
 
-      <CardContent className='flex-grow p-0'>
-        {renderContent()}
-
-        {/* Paginación - ahora mostramos siempre que haya tickets, no solo cuando hay múltiples páginas */}
-        {!isLoading && tickets.length > 0 && (
+      {/* Paginación - Solo mostrar si no estamos en modo sin paginación */}
+      {!noPagination && totalPages > 1 && (
+        <div className='p-4 bg-slate-50 border-t'>
           <TicketPagination
             currentPage={currentPage}
-            totalPages={totalPages || 3} // Aseguramos que siempre haya al menos 3 páginas
-            pageSize={pageSize}
-            totalTickets={totalTickets || tickets.length * 3} // Si no hay totalTickets, simulamos el triple
-            currentTickets={tickets.length}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
             onPreviousPage={onPreviousPage}
             onNextPage={onNextPage}
-            onPageChange={onPageChange}
           />
-        )}
-      </CardContent>
+        </div>
+      )}
 
-      {/* Modal de confirmación de eliminación */}
+      {/* Modal de confirmación para eliminar ticket */}
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
-        onClose={cancelDelete}
         onConfirm={confirmDelete}
-        title='Eliminar ticket'
-        message={
-          ticketToDelete
-            ? `¿Estás seguro que deseas eliminar el ticket "${ticketToDelete.subject}"? Esta acción no se puede deshacer.`
-            : 'Confirmar eliminación de ticket'
-        }
+        onCancel={cancelDelete}
+        title={`Eliminar ticket: ${ticketToDelete?.subject || ''}`}
+        description='¿Estás seguro de que deseas eliminar este ticket? Esta acción no se puede deshacer.'
+        confirmText='Eliminar'
+        cancelText='Cancelar'
       />
     </Card>
   );

@@ -14,14 +14,38 @@ import { toast } from 'sonner';
  * @returns {Object} Resultado de useQuery con datos y estado
  */
 export function useTickets(options = {}) {
-  const { page = 1, limit = 500, ...restOptions } = options;
+  const {
+    page = 1,
+    limit = 500,
+    status,
+    priority,
+    search,
+    sort_by,
+    order,
+    ...restOptions
+  } = options;
 
   return useQuery({
-    queryKey: ['tickets', page, limit],
+    // Incluir todos los parámetros de filtro en la queryKey para que React Query refresque los datos cuando cambien
+    queryKey: [
+      'tickets',
+      page,
+      limit,
+      status,
+      priority,
+      search,
+      sort_by,
+      order
+    ],
     queryFn: async () => {
       const tickets = await ticketsApi.getTickets({
         page,
         limit,
+        status,
+        priority,
+        search,
+        sort_by,
+        order,
         ...restOptions
       });
 

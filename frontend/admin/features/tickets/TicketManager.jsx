@@ -23,26 +23,58 @@ import { ServiceUnavailable, CorsError } from '@/shared/errors';
 export default function TicketManager() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const pageSize = 6; // Tamaño de paginación visual
-  const apiPageSize = 500; // Tamaño de paginación para la API
 
   const router = useRouter();
   const { title, description } = getPageMetadata('tickets');
 
-  // Restablecer la página cuando cambien los filtros
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [statusFilter, searchQuery, dateFilter, priorityFilter, sortOrder]);
+  // Configurar las opciones para la API basadas en los filtros actuales
+  const apiOptions = useMemo(() => {
+    // Determinar el campo de ordenación basado en el tipo de orden
+    let sortField;
+    if (sortOrder === 'newest' || sortOrder === 'oldest') {
+      // Para ordenación por fecha, usar exactamente el valor aceptado por la API
+      sortField = 'created_at'; // Valor exacto requerido por la API
+    } else if (sortOrder === 'alphabetical') {
+      // Para ordenación alfabética
+      sortField = 'title'; // Valor exacto requerido por la API
+    }
 
-  // Obtener todos los tickets sin filtros desde el backend
+    const options = {
+      // Sin paginación - pedir todos los tickets
+      page: 1,
+      limit: 100, // Un valor grande para obtener todos los tickets de una vez
+      // Mapear filtros a parámetros de la API
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      priority: priorityFilter !== 'all' ? priorityFilter : undefined,
+      search: searchQuery || undefined,
+      // Mapear orden - usar exactamente los valores aceptados por la API
+      sort_by: sortField,
+      order:
+        sortOrder === 'newest'
+          ? 'desc'
+          : sortOrder === 'oldest'
+          ? 'asc'
+          : undefined
+    };
+
+    // Eliminar propiedades undefined para no enviarlas como parámetros
+    Object.keys(options).forEach(
+      key => options[key] === undefined && delete options[key]
+    );
+
+    console.log('API Options:', options); // Agregamos log para depuración
+
+    return options;
+  }, [statusFilter, priorityFilter, searchQuery, sortOrder]);
+
+  // Obtener los tickets filtrados desde el backend
   const {
-    data: allTicketsData = {
+    data: ticketsData = {
       tickets: [],
       total: 0,
       totalPages: 0
@@ -50,15 +82,13 @@ export default function TicketManager() {
     isLoading,
     error,
     refetch
-  } = useTickets({
-    limit: apiPageSize // Usamos el tamaño de página grande para la API
-  });
+  } = useTickets(apiOptions);
 
   // Para fines de demo, creamos algunos tickets de ejemplo si no hay datos
   const demoTickets = useMemo(() => {
     // Solo crear tickets de demo si no hay tickets reales
-    if (allTicketsData.tickets && allTicketsData.tickets.length > 0) {
-      return allTicketsData.tickets;
+    if (ticketsData.tickets && ticketsData.tickets.length > 0) {
+      return ticketsData.tickets;
     }
 
     // Crear tickets de demo
@@ -108,89 +138,39 @@ export default function TicketManager() {
         userEmail: 'ana@ejemplo.com'
       }
     ];
-  }, [allTicketsData.tickets]);
+  }, [ticketsData.tickets]);
 
-  // Aplicar filtrado en el lado del cliente
-  const filteredTickets = useMemo(() => {
-    // Usamos los tickets de demo en lugar de los tickets de la API si no hay datos
-    const ticketsToFilter =
-      demoTickets.length > 0 ? demoTickets : allTicketsData.tickets;
+  // Procesamiento de los tickets para mostrar
+  const ticketListData = useMemo(() => {
+    // Obtener los tickets (ya sea demo o reales)
+    let tickets = demoTickets.length > 0 ? demoTickets : ticketsData.tickets;
 
-    if (!ticketsToFilter || ticketsToFilter.length === 0) {
-      return [];
-    }
+    // Ordenación secundaria en el cliente como respaldo
+    if (tickets && tickets.length > 0) {
+      tickets = [...tickets].sort((a, b) => {
+        // Obtener fechas de creación
+        const dateA = new Date(a.createdAt || a.date || 0);
+        const dateB = new Date(b.createdAt || b.date || 0);
 
-    let filtered = [...ticketsToFilter];
-
-    // Filtrar por estado
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(ticket => ticket.status === statusFilter);
-    }
-
-    // Filtrar por búsqueda
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        ticket =>
-          ticket.id?.toString().includes(query) ||
-          ticket.subject?.toLowerCase().includes(query) ||
-          ticket.userName?.toLowerCase().includes(query) ||
-          ticket.description?.toLowerCase().includes(query)
-      );
-    }
-
-    // Para fines de demo, no aplicamos filtros de fecha reales
-
-    // Filtrar por prioridad
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(ticket => ticket.priority === priorityFilter);
-    }
-
-    // Ordenar tickets
-    filtered.sort((a, b) => {
-      // Obtener fechas de creación
-      const dateA = new Date(a.createdAt || 0);
-      const dateB = new Date(b.createdAt || 0);
-
-      switch (sortOrder) {
-        case 'newest':
+        if (sortOrder === 'newest') {
           return dateB - dateA; // Más recientes primero
-        case 'oldest':
+        } else if (sortOrder === 'oldest') {
           return dateA - dateB; // Más antiguos primero
-        case 'alphabetical':
+        } else if (sortOrder === 'alphabetical') {
           // Ordenar alfabéticamente por asunto
           return (a.subject || '').localeCompare(b.subject || '');
-        default:
-          return dateB - dateA; // Por defecto, más recientes primero
-      }
-    });
+        }
 
-    return filtered;
-  }, [
-    demoTickets,
-    allTicketsData.tickets,
-    statusFilter,
-    searchQuery,
-    dateFilter,
-    priorityFilter,
-    sortOrder
-  ]);
-
-  // Calcular paginación en el cliente
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedTickets = filteredTickets.slice(startIndex, endIndex);
-    const totalFilteredTickets = filteredTickets.length;
-    const totalFilteredPages = Math.ceil(totalFilteredTickets / pageSize);
+        // Por defecto, ordenar por fecha más reciente
+        return dateB - dateA;
+      });
+    }
 
     return {
-      tickets: paginatedTickets,
-      total: totalFilteredTickets,
-      totalPages: totalFilteredPages,
-      currentTickets: paginatedTickets.length
+      tickets: tickets,
+      total: tickets.length
     };
-  }, [filteredTickets, currentPage, pageSize]);
+  }, [demoTickets, ticketsData, sortOrder]);
 
   // Hooks para operaciones de actualización y eliminación
   const updateTicketMutation = useUpdateTicket();
@@ -259,48 +239,24 @@ export default function TicketManager() {
     }
   };
 
-  // Manejar cambio de página
-  const handlePageChange = newPage => {
-    setCurrentPage(newPage);
-    // Hacer scroll hacia arriba cuando se cambia de página
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Navegación de paginación - métodos específicos
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < paginatedData.totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
-
   // Manejar cambios en la búsqueda
   const handleSearchChange = query => {
     setSearchQuery(query);
-    setCurrentPage(1); // Resetear a la primera página al cambiar la búsqueda
   };
 
   // Manejar cambio de filtro de fecha
   const handleDateFilterChange = filter => {
     setDateFilter(filter);
-    setCurrentPage(1);
   };
 
   // Manejar cambio de filtro de prioridad
   const handlePriorityChange = filter => {
     setPriorityFilter(filter);
-    setCurrentPage(1);
   };
 
   // Manejar cambio de orden
   const handleSortOrderChange = order => {
     setSortOrder(order);
-    setCurrentPage(1);
   };
 
   // Función para detectar si un error es de tipo CORS
@@ -315,7 +271,7 @@ export default function TicketManager() {
   };
 
   // Mostrar loading spinner mientras se cargan los datos
-  if (isLoading && allTicketsData.tickets.length === 0) {
+  if (isLoading && ticketsData.tickets.length === 0) {
     return (
       <div className='flex justify-center items-center h-full py-20'>
         <LoadingSpinner text='Cargando tickets de soporte' size={40} />
@@ -392,18 +348,13 @@ export default function TicketManager() {
           </div>
 
           <TicketList
-            tickets={paginatedData.tickets}
+            tickets={ticketListData.tickets}
             onSelectTicket={handleSelectTicket}
             onDeleteTicket={handleDeleteTicket}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalPages={paginatedData.totalPages}
-            totalTickets={paginatedData.total}
-            currentTickets={paginatedData.currentTickets}
-            onPageChange={handlePageChange}
-            onPreviousPage={goToPreviousPage}
-            onNextPage={goToNextPage}
             isLoading={isLoading && demoTickets.length === 0}
+            // Ya no necesitamos paginación
+            totalTickets={ticketListData.total}
+            noPagination={true}
           />
 
           {/* Modal para crear nuevo ticket */}
@@ -413,7 +364,7 @@ export default function TicketManager() {
           />
 
           {/* Mensaje para indicar el modo demo */}
-          {demoTickets.length > 0 && allTicketsData.tickets.length === 0 && (
+          {demoTickets.length > 0 && ticketsData.tickets.length === 0 && (
             <div className='mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm text-yellow-700'>
               <p className='font-medium'>Modo demostración</p>
               <p>
