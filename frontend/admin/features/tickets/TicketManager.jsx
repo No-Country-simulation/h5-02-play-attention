@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import TicketList from './components/TicketList';
 import TicketDetail from './components/TicketDetail';
 import TicketFilters from './components/TicketFilters';
+import CreateTicketModal from './components/CreateTicket';
 import { Button } from '@/shared/ui/button';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -27,6 +28,7 @@ export default function TicketManager() {
   const [dateFilter, setDateFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const pageSize = 10; // Número de tickets por página
 
   const router = useRouter();
@@ -202,9 +204,16 @@ export default function TicketManager() {
     refetch();
   };
 
-  // Función para crear un nuevo ticket
+  // Función para crear un nuevo ticket - ahora abre el modal
   const handleCreateTicket = () => {
-    router.push('/tickets/new');
+    setIsCreateModalOpen(true);
+  };
+
+  // Función para cerrar el modal
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+    // Refrescar la lista después de crear un ticket
+    refetch();
   };
 
   // Actualizar un ticket después de responder
@@ -390,6 +399,12 @@ export default function TicketManager() {
             onPreviousPage={goToPreviousPage}
             onNextPage={goToNextPage}
             isLoading={isLoading && demoTickets.length === 0}
+          />
+
+          {/* Modal para crear nuevo ticket */}
+          <CreateTicketModal
+            isOpen={isCreateModalOpen}
+            onClose={handleCloseCreateModal}
           />
 
           {/* Mensaje para indicar el modo demo */}

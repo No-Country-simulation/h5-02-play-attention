@@ -64,6 +64,60 @@ export function mapTicketStatusToFrontend(status) {
 }
 
 /**
+ * Asegura que ticket_origin sea exactamente uno de los valores esperados por el backend
+ * @param {string} origin - Origen del ticket desde el frontend
+ * @returns {string} - Valor exacto esperado por el backend
+ */
+export function validateTicketOrigin(origin) {
+  // Lista exacta de valores permitidos por el backend
+  const validOrigins = ['crm', 'user_platform', 'admin_panel'];
+
+  // Verificar si el valor es exactamente igual a uno de los permitidos
+  if (validOrigins.includes(origin)) {
+    console.log(`[DEBUG] Origen del ticket válido: "${origin}"`);
+    return origin;
+  }
+
+  // Si no es un valor válido, intentar normalizar
+  console.warn(`[WARN] Origen del ticket inválido: "${origin}"`);
+
+  // Asegurar que sea string y normalizar a minúsculas sin espacios
+  const normalizedOrigin = String(origin || '')
+    .toLowerCase()
+    .trim();
+
+  // Mapeo específico por si hay variaciones comunes
+  const originMap = {
+    crm: 'crm',
+    external: 'admin_panel',
+    externo: 'admin_panel',
+    'panel de admin': 'admin_panel',
+    'panel admin': 'admin_panel',
+    admin: 'admin_panel',
+    wxternal: 'admin_panel',
+    platform: 'user_platform',
+    plataforma: 'user_platform',
+    'user platform': 'user_platform',
+    userplatform: 'user_platform',
+    user_plataform: 'user_platform',
+    userplataform: 'user_platform'
+  };
+
+  // Verificar si hay un mapeo directo
+  if (originMap[normalizedOrigin]) {
+    const mappedValue = originMap[normalizedOrigin];
+    console.log(`[DEBUG] Origen mapeado: "${origin}" -> "${mappedValue}"`);
+    return mappedValue;
+  }
+
+  // Si todo falla, usar valor por defecto
+  console.error(
+    `[ERROR] No se pudo mapear el origen "${origin}", usando valor por defecto: "crm"`
+  );
+  return 'crm';
+}
+
+/**
  * Mapea la prioridad del ticket para frontend y backend
  * @param {string} priority - Prioridad del ticket
  * @returns {string} - Prioridad mapeada

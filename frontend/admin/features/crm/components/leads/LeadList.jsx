@@ -354,149 +354,168 @@ export default function LeadList({
   return (
     <div className='space-y-4'>
       {/* Vista de tabla - Desktop y tablets */}
-      <div className='hidden md:block bg-white border rounded-lg overflow-x-auto'>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className='whitespace-nowrap'>Nombre</TableHead>
-              <TableHead className='whitespace-nowrap'>Contacto</TableHead>
-              <TableHead className='whitespace-nowrap hidden lg:table-cell'>
-                Empresa
-              </TableHead>
-              <TableHead className='whitespace-nowrap hidden lg:table-cell'>
-                Origen
-              </TableHead>
-              <TableHead className='whitespace-nowrap'>Tipo</TableHead>
-              <TableHead className='whitespace-nowrap'>Estado</TableHead>
-              <TableHead className='whitespace-nowrap hidden lg:table-cell'>
-                Fecha
-              </TableHead>
-              <TableHead className='whitespace-nowrap text-center'>
-                Newsletter
-              </TableHead>
-              <TableHead className='whitespace-nowrap text-right'>
-                Acciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedLeads.map(lead => (
-              <TableRow key={lead.id} className='hover:bg-gray-50'>
-                <TableCell>
-                  <div className='font-medium truncate max-w-[120px] sm:max-w-none'>
-                    {lead.name}
-                  </div>
-                  <div className='text-xs sm:text-sm text-muted-foreground truncate max-w-[120px] sm:max-w-none'>
-                    {lead.position}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className='space-y-1'>
-                    <div className='flex items-center text-xs sm:text-sm'>
-                      <Mail className='h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground' />
-                      <span className='truncate max-w-[120px] md:max-w-none'>
-                        {lead.email}
-                      </span>
-                    </div>
-                    {lead.phone && (
-                      <div className='flex items-center text-xs sm:text-sm'>
-                        <Phone className='h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground' />
-                        <span className='truncate max-w-[120px] md:max-w-none'>
-                          {lead.phone}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className='hidden lg:table-cell'>
-                  {lead.company || 'N/A'}
-                </TableCell>
-                <TableCell className='hidden lg:table-cell'>
-                  {lead.source || 'N/A'}
-                </TableCell>
-                <TableCell>{renderUserTypeBadge(lead.userType)}</TableCell>
-                <TableCell>
-                  <Select
-                    value={getLeadStatus(lead.id, lead.status)}
-                    onValueChange={value => handleStatusChange(lead.id, value)}
-                    disabled={getLeadStatus(lead.id, lead.status) === 'cliente'}
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        'h-8 px-2 text-xs sm:text-sm border capitalize',
-                        getStatusSelectClass(lead.id, lead.status)
-                      )}
-                      aria-label='Cambiar estado'
-                    >
-                      <SelectValue placeholder='Cambiar estado' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ESTADOS_LEAD.map(estado => (
-                        <SelectItem
-                          key={estado.value}
-                          value={estado.value}
-                          className={cn(
-                            'capitalize',
-                            leadStatusConfig[estado.value]?.className
-                          )}
-                        >
-                          {estado.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className='hidden lg:table-cell'>
-                  <div className='flex items-center text-xs sm:text-sm'>
-                    <Calendar className='h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground' />
-                    {formatDate(lead.createdAt)}
-                  </div>
-                </TableCell>
-                <TableCell className='text-center'>
-                  <div className='flex justify-center items-center'>
-                    <input
-                      type='checkbox'
-                      id={`newsletter-${lead.id}`}
-                      checked={getNewsletterStatus(lead.id, lead.newsletter)}
-                      onChange={e =>
-                        handleNewsletterChange(lead.id, e.target.checked)
-                      }
-                      className='h-4 w-4 cursor-pointer accent-primary'
-                      disabled={updatingNewsletterLeads.includes(lead.id)}
-                      aria-label='Suscripción a newsletter'
-                    />
-                    {updatingNewsletterLeads.includes(lead.id) && (
-                      <span className='ml-2 inline-block h-3 w-3'>
-                        <LoadingSpinner size={12} className='border-primary' />
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className='text-right'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={() => onViewLead(lead.id)}
-                    className='px-2 h-8 text-xs sm:text-sm'
-                  >
-                    <span className='hidden sm:inline'>Ver detalle</span>
-                    <span className='sm:hidden'>Ver</span>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {!loading && totalLeads > 0 && sortedLeads.length === 0 && (
+      <div className='hidden md:block bg-white border rounded-lg overflow-hidden'>
+        <div className='overflow-x-auto'>
+          <Table className='w-full text-xs md:text-sm'>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={9}
-                  className='text-center text-gray-500 py-4'
-                >
-                  No hay leads en esta página.
-                </TableCell>
+                <TableHead className='whitespace-nowrap w-[15%]'>
+                  Nombre
+                </TableHead>
+                <TableHead className='whitespace-nowrap w-[20%]'>
+                  Contacto
+                </TableHead>
+                <TableHead className='whitespace-nowrap hidden xl:table-cell w-[10%]'>
+                  Empresa
+                </TableHead>
+                <TableHead className='whitespace-nowrap hidden xl:table-cell w-[10%]'>
+                  Origen
+                </TableHead>
+                <TableHead className='whitespace-nowrap w-[10%]'>
+                  Tipo
+                </TableHead>
+                <TableHead className='whitespace-nowrap w-[15%]'>
+                  Estado
+                </TableHead>
+                <TableHead className='whitespace-nowrap hidden lg:table-cell w-[10%]'>
+                  Fecha
+                </TableHead>
+                <TableHead className='whitespace-nowrap text-center w-[10%]'>
+                  News
+                </TableHead>
+                <TableHead className='whitespace-nowrap text-right pr-4 w-[80px] md:w-[100px]'>
+                  Acción
+                </TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {sortedLeads.map(lead => (
+                <TableRow key={lead.id} className='hover:bg-gray-50'>
+                  <TableCell className='max-w-[100px] md:max-w-[150px]'>
+                    <div className='font-medium truncate'>{lead.name}</div>
+                    <div className='text-[10px] md:text-xs text-muted-foreground truncate'>
+                      {lead.position}
+                    </div>
+                  </TableCell>
+                  <TableCell className='max-w-[120px] md:max-w-[180px]'>
+                    <div className='space-y-1'>
+                      <div className='flex items-center text-[10px] md:text-xs'>
+                        <Mail className='h-3 w-3 mr-1 text-muted-foreground flex-shrink-0' />
+                        <span className='truncate'>{lead.email}</span>
+                      </div>
+                      {lead.phone && (
+                        <div className='flex items-center text-[10px] md:text-xs'>
+                          <Phone className='h-3 w-3 mr-1 text-muted-foreground flex-shrink-0' />
+                          <span className='truncate'>{lead.phone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className='hidden xl:table-cell'>
+                    <span className='text-[10px] md:text-xs truncate block max-w-[100px]'>
+                      {lead.company || 'N/A'}
+                    </span>
+                  </TableCell>
+                  <TableCell className='hidden xl:table-cell'>
+                    <span className='text-[10px] md:text-xs truncate block max-w-[100px]'>
+                      {lead.source || 'N/A'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className='scale-90 origin-left transform md:scale-100'>
+                      {renderUserTypeBadge(lead.userType)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={getLeadStatus(lead.id, lead.status)}
+                      onValueChange={value =>
+                        handleStatusChange(lead.id, value)
+                      }
+                      disabled={
+                        getLeadStatus(lead.id, lead.status) === 'cliente'
+                      }
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          'h-7 md:h-8 px-1 md:px-2 text-[10px] md:text-xs border capitalize',
+                          getStatusSelectClass(lead.id, lead.status)
+                        )}
+                        aria-label='Cambiar estado'
+                      >
+                        <SelectValue placeholder='Cambiar estado' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ESTADOS_LEAD.map(estado => (
+                          <SelectItem
+                            key={estado.value}
+                            value={estado.value}
+                            className={cn(
+                              'capitalize text-xs',
+                              leadStatusConfig[estado.value]?.className
+                            )}
+                          >
+                            {estado.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className='hidden lg:table-cell'>
+                    <div className='flex items-center text-[10px] md:text-xs'>
+                      <Calendar className='h-3 w-3 mr-1 text-muted-foreground flex-shrink-0' />
+                      {formatDate(lead.createdAt)}
+                    </div>
+                  </TableCell>
+                  <TableCell className='text-center'>
+                    <div className='flex justify-center items-center'>
+                      <input
+                        type='checkbox'
+                        id={`newsletter-${lead.id}`}
+                        checked={getNewsletterStatus(lead.id, lead.newsletter)}
+                        onChange={e =>
+                          handleNewsletterChange(lead.id, e.target.checked)
+                        }
+                        className='h-3 w-3 md:h-4 md:w-4 cursor-pointer accent-primary'
+                        disabled={updatingNewsletterLeads.includes(lead.id)}
+                        aria-label='Suscripción a newsletter'
+                      />
+                      {updatingNewsletterLeads.includes(lead.id) && (
+                        <span className='ml-1 inline-block h-3 w-3'>
+                          <LoadingSpinner
+                            size={10}
+                            className='border-primary'
+                          />
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className='text-right'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={() => onViewLead(lead.id)}
+                      className='px-2 h-7 md:h-8 text-[10px] md:text-xs whitespace-nowrap w-[40px] sm:w-auto min-w-[40px] sm:min-w-[60px]'
+                    >
+                      <span className='hidden sm:inline'>Ver</span>
+                      <ArrowRight className='h-3 w-3 sm:ml-1' />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {!loading && totalLeads > 0 && sortedLeads.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={9}
+                    className='text-center text-gray-500 py-4'
+                  >
+                    No hay leads en esta página.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Vista de tarjetas para móvil */}
@@ -508,10 +527,10 @@ export default function LeadList({
             onClick={() => onViewLead(lead.id)}
           >
             <div className='flex justify-between items-start mb-2'>
-              <div>
-                <h3 className='font-medium text-sm'>{lead.name}</h3>
+              <div className='w-[60%]'>
+                <h3 className='font-medium text-sm truncate'>{lead.name}</h3>
                 {lead.position && (
-                  <p className='text-xs text-muted-foreground'>
+                  <p className='text-xs text-muted-foreground truncate'>
                     {lead.position}
                   </p>
                 )}
@@ -521,7 +540,7 @@ export default function LeadList({
                   className='flex items-center'
                   onClick={e => e.stopPropagation()}
                 >
-                  <label className='flex items-center cursor-pointer text-xs mr-2'>
+                  <label className='flex items-center cursor-pointer text-xs mr-1'>
                     <input
                       type='checkbox'
                       checked={getNewsletterStatus(lead.id, lead.newsletter)}
@@ -531,7 +550,7 @@ export default function LeadList({
                       className='h-3 w-3 mr-1 accent-primary'
                       aria-label='Suscripción a newsletter'
                     />
-                    Newsletter
+                    <span className='hidden xs:inline'>Newsletter</span>
                   </label>
                 </div>
                 <div
@@ -545,12 +564,12 @@ export default function LeadList({
                   >
                     <SelectTrigger
                       className={cn(
-                        'h-8 px-2 text-xs sm:text-sm border capitalize',
+                        'h-7 px-1 text-xs border capitalize max-w-[100px]',
                         getStatusSelectClass(lead.id, lead.status)
                       )}
                       aria-label='Cambiar estado'
                     >
-                      <SelectValue placeholder='Cambiar estado' />
+                      <SelectValue placeholder='Estado' />
                     </SelectTrigger>
                     <SelectContent>
                       {ESTADOS_LEAD.map(estado => (
@@ -558,7 +577,7 @@ export default function LeadList({
                           key={estado.value}
                           value={estado.value}
                           className={cn(
-                            'capitalize',
+                            'capitalize text-xs',
                             leadStatusConfig[estado.value]?.className
                           )}
                         >
@@ -571,27 +590,28 @@ export default function LeadList({
               </div>
             </div>
             <div className='text-xs text-muted-foreground mb-6'>
-              {lead.email ? (
-                <div className='flex items-center'>
-                  <Mail className='h-4 w-4 mr-1 text-muted-foreground' />
-                  <span>{lead.email}</span>
+              {lead.email && (
+                <div className='flex items-center truncate'>
+                  <Mail className='h-3 w-3 mr-1 text-muted-foreground flex-shrink-0' />
+                  <span className='truncate'>{lead.email}</span>
                 </div>
-              ) : (
-                <div className='flex items-center'>
-                  <Phone className='h-4 w-4 mr-1 text-muted-foreground' />
-                  <span>{lead.phone}</span>
+              )}
+              {lead.phone && (
+                <div className='flex items-center mt-1 truncate'>
+                  <Phone className='h-3 w-3 mr-1 text-muted-foreground flex-shrink-0' />
+                  <span className='truncate'>{lead.phone}</span>
                 </div>
               )}
               {lead.source && (
-                <div className='flex items-center mt-1'>
-                  <ClipboardList className='h-4 w-4 mr-1 text-muted-foreground' />
-                  <span>Origen: {lead.source}</span>
+                <div className='flex items-center mt-1 truncate'>
+                  <ClipboardList className='h-3 w-3 mr-1 text-muted-foreground flex-shrink-0' />
+                  <span className='truncate'>Origen: {lead.source}</span>
                 </div>
               )}
             </div>
             <div className='absolute bottom-2 right-2 text-xs text-primary flex items-center opacity-70'>
               <span className='mr-1'>Ver detalle</span>
-              <ArrowRight className='h-3 w-3' />
+              <ArrowRight className='h-3 w-3 flex-shrink-0' />
             </div>
           </div>
         ))}
