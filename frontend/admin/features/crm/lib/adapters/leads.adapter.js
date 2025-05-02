@@ -59,7 +59,8 @@ const adaptLead = lead => {
     source: lead.origen || lead.source || '',
     notes: lead.message || lead.notes || '',
     createdAt: lead.createdAt || new Date().toISOString(),
-    updatedAt: lead.updatedAt || null
+    updatedAt: lead.updatedAt || null,
+    newsletter: lead.newsletter === true // Convertimos a booleano explícito
   };
 };
 

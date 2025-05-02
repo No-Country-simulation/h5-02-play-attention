@@ -9,7 +9,8 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  ChevronRight as ArrowRight
+  ChevronRight as ArrowRight,
+  ClipboardList
 } from 'lucide-react';
 import {
   Table,
@@ -59,9 +60,12 @@ export default function LeadList({
   totalLeads = 0,
   onPageChange,
   onStatusChange = () => {},
+  onNewsletterChange = () => {},
   sortOrder = 'recent'
 }) {
   const [leadStatuses, setLeadStatuses] = useState({});
+  const [localNewsletterState, setLocalNewsletterState] = useState({});
+  const [updatingNewsletterLeads, setUpdatingNewsletterLeads] = useState([]);
 
   // Los leads ya vienen ordenados del componente padre
   const sortedLeads = leads;
@@ -242,6 +246,111 @@ export default function LeadList({
     }
   };
 
+  // Manejo del cambio de newsletter
+  const handleNewsletterChange = (leadId, checked) => {
+    if (!leadId) {
+      toast.error('No se pudo identificar el lead');
+      return;
+    }
+
+    // Actualizar estado local para UI inmediata
+    setLocalNewsletterState(prev => ({
+      ...prev,
+      [leadId]: checked
+    }));
+
+    // Marcar este lead como en proceso de actualización
+    setUpdatingNewsletterLeads(prev => [...prev, leadId]);
+
+    // Encontrar el lead actual para obtener su estado
+    const lead = leads.find(l => l.id === leadId);
+    if (!lead) {
+      toast.error('No se pudo encontrar el lead');
+      setUpdatingNewsletterLeads(prev => prev.filter(id => id !== leadId));
+      return;
+    }
+
+    // Obtener el estado actual en formato backend
+    const currentStatus = getBackendStatus(getLeadStatus(leadId, lead.status));
+
+    // Mostrar toast de carga
+    const toastId = toast.loading(
+      `${checked ? 'Activando' : 'Desactivando'} newsletter...`
+    );
+
+    // Crear un payload minimal con los campos requeridos
+    const payload = {
+      newsletter: checked,
+      status: currentStatus // Incluir el estado actual para evitar validación
+    };
+
+    // Realizar la petición directamente al backend
+    fetch(
+      `${
+        process.env.NEXT_PUBLIC_API_URL ||
+        'https://play-attention.onrender.com/api'
+      }/leads/${leadId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      }
+    )
+      .then(async response => {
+        if (!response.ok) {
+          let errorMessage = '';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || JSON.stringify(errorData);
+          } catch (e) {
+            errorMessage = (await response.text()) || response.statusText;
+          }
+          throw new Error(errorMessage);
+        }
+        return response.json();
+      })
+      .then(() => {
+        // Actualizar toast a éxito
+        toast.success(`Newsletter ${checked ? 'activado' : 'desactivado'}`, {
+          id: toastId
+        });
+
+        // Si existe onNewsletterChange, llamarlo también
+        if (typeof onNewsletterChange === 'function') {
+          onNewsletterChange(leadId, checked);
+        }
+      })
+      .catch(error => {
+        console.error('Error al actualizar newsletter:', error);
+
+        // Revertir cambio local si hay error
+        setLocalNewsletterState(prev => {
+          const updated = { ...prev };
+          delete updated[leadId];
+          return updated;
+        });
+
+        // Actualizar toast a error
+        toast.error('Error al actualizar suscripción', {
+          id: toastId,
+          description: error.message
+        });
+      })
+      .finally(() => {
+        // Quitar el lead de la lista de actualizaciones en progreso
+        setUpdatingNewsletterLeads(prev => prev.filter(id => id !== leadId));
+      });
+  };
+
+  // Obtener el estado local o remoto del newsletter
+  const getNewsletterStatus = (leadId, remoteStatus) => {
+    return localNewsletterState[leadId] !== undefined
+      ? localNewsletterState[leadId]
+      : !!remoteStatus;
+  };
+
   return (
     <div className='space-y-4'>
       {/* Vista de tabla - Desktop y tablets */}
@@ -254,10 +363,16 @@ export default function LeadList({
               <TableHead className='whitespace-nowrap hidden lg:table-cell'>
                 Empresa
               </TableHead>
+              <TableHead className='whitespace-nowrap hidden lg:table-cell'>
+                Origen
+              </TableHead>
               <TableHead className='whitespace-nowrap'>Tipo</TableHead>
               <TableHead className='whitespace-nowrap'>Estado</TableHead>
               <TableHead className='whitespace-nowrap hidden lg:table-cell'>
                 Fecha
+              </TableHead>
+              <TableHead className='whitespace-nowrap text-center'>
+                Newsletter
               </TableHead>
               <TableHead className='whitespace-nowrap text-right'>
                 Acciones
@@ -295,6 +410,9 @@ export default function LeadList({
                 </TableCell>
                 <TableCell className='hidden lg:table-cell'>
                   {lead.company || 'N/A'}
+                </TableCell>
+                <TableCell className='hidden lg:table-cell'>
+                  {lead.source || 'N/A'}
                 </TableCell>
                 <TableCell>{renderUserTypeBadge(lead.userType)}</TableCell>
                 <TableCell>
@@ -334,6 +452,26 @@ export default function LeadList({
                     {formatDate(lead.createdAt)}
                   </div>
                 </TableCell>
+                <TableCell className='text-center'>
+                  <div className='flex justify-center items-center'>
+                    <input
+                      type='checkbox'
+                      id={`newsletter-${lead.id}`}
+                      checked={getNewsletterStatus(lead.id, lead.newsletter)}
+                      onChange={e =>
+                        handleNewsletterChange(lead.id, e.target.checked)
+                      }
+                      className='h-4 w-4 cursor-pointer accent-primary'
+                      disabled={updatingNewsletterLeads.includes(lead.id)}
+                      aria-label='Suscripción a newsletter'
+                    />
+                    {updatingNewsletterLeads.includes(lead.id) && (
+                      <span className='ml-2 inline-block h-3 w-3'>
+                        <LoadingSpinner size={12} className='border-primary' />
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className='text-right'>
                   <Button
                     variant='outline'
@@ -350,7 +488,7 @@ export default function LeadList({
             {!loading && totalLeads > 0 && sortedLeads.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={9}
                   className='text-center text-gray-500 py-4'
                 >
                   No hay leads en esta página.
@@ -378,39 +516,58 @@ export default function LeadList({
                   </p>
                 )}
               </div>
-              <div
-                className='flex flex-shrink-0'
-                onClick={e => e.stopPropagation()} // Evitar que el click en el select propague al padre
-              >
-                <Select
-                  value={getLeadStatus(lead.id, lead.status)}
-                  onValueChange={value => handleStatusChange(lead.id, value)}
-                  disabled={getLeadStatus(lead.id, lead.status) === 'cliente'}
+              <div className='flex items-center gap-2'>
+                <div
+                  className='flex items-center'
+                  onClick={e => e.stopPropagation()}
                 >
-                  <SelectTrigger
-                    className={cn(
-                      'h-8 px-2 text-xs sm:text-sm border capitalize',
-                      getStatusSelectClass(lead.id, lead.status)
-                    )}
-                    aria-label='Cambiar estado'
+                  <label className='flex items-center cursor-pointer text-xs mr-2'>
+                    <input
+                      type='checkbox'
+                      checked={getNewsletterStatus(lead.id, lead.newsletter)}
+                      onChange={e =>
+                        handleNewsletterChange(lead.id, e.target.checked)
+                      }
+                      className='h-3 w-3 mr-1 accent-primary'
+                      aria-label='Suscripción a newsletter'
+                    />
+                    Newsletter
+                  </label>
+                </div>
+                <div
+                  className='flex flex-shrink-0'
+                  onClick={e => e.stopPropagation()} // Evitar que el click en el select propague al padre
+                >
+                  <Select
+                    value={getLeadStatus(lead.id, lead.status)}
+                    onValueChange={value => handleStatusChange(lead.id, value)}
+                    disabled={getLeadStatus(lead.id, lead.status) === 'cliente'}
                   >
-                    <SelectValue placeholder='Cambiar estado' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ESTADOS_LEAD.map(estado => (
-                      <SelectItem
-                        key={estado.value}
-                        value={estado.value}
-                        className={cn(
-                          'capitalize',
-                          leadStatusConfig[estado.value]?.className
-                        )}
-                      >
-                        {estado.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger
+                      className={cn(
+                        'h-8 px-2 text-xs sm:text-sm border capitalize',
+                        getStatusSelectClass(lead.id, lead.status)
+                      )}
+                      aria-label='Cambiar estado'
+                    >
+                      <SelectValue placeholder='Cambiar estado' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ESTADOS_LEAD.map(estado => (
+                        <SelectItem
+                          key={estado.value}
+                          value={estado.value}
+                          className={cn(
+                            'capitalize',
+                            leadStatusConfig[estado.value]?.className
+                          )}
+                        >
+                          {estado.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             <div className='text-xs text-muted-foreground mb-6'>
@@ -423,6 +580,12 @@ export default function LeadList({
                 <div className='flex items-center'>
                   <Phone className='h-4 w-4 mr-1 text-muted-foreground' />
                   <span>{lead.phone}</span>
+                </div>
+              )}
+              {lead.source && (
+                <div className='flex items-center mt-1'>
+                  <ClipboardList className='h-4 w-4 mr-1 text-muted-foreground' />
+                  <span>Origen: {lead.source}</span>
                 </div>
               )}
             </div>
