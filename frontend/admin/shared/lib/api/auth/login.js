@@ -18,7 +18,25 @@ export const login = async (email, password) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || 'Error al iniciar sesión');
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(
+        data.message || 'El email o la contraseña son incorrectos.'
+      );
+    } else if (response.status === 404) {
+      throw new Error(
+        data.message ||
+          'El usuario no existe. Verifica tu email e intenta nuevamente.'
+      );
+    } else if (response.status === 400) {
+      throw new Error(
+        data.message || 'Por favor, completa todos los campos correctamente.'
+      );
+    } else {
+      throw new Error(
+        data.message ||
+          'Ha ocurrido un error al iniciar sesión. Por favor, intenta nuevamente.'
+      );
+    }
   }
 
   // Manejar formato de token variable (puede venir como token o playAttentionToken)

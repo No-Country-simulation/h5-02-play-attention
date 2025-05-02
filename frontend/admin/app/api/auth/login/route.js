@@ -46,8 +46,11 @@ export async function POST(request) {
     if (!token) {
       console.error('Respuesta sin token:', data);
       return NextResponse.json(
-        { error: 'No se recibió token de autenticación' },
-        { status: 500 }
+        {
+          error:
+            'Las credenciales ingresadas no son válidas. Por favor, verifica tu email y contraseña.'
+        },
+        { status: 401 }
       );
     }
 
@@ -83,7 +86,10 @@ export async function POST(request) {
     } catch (error) {
       console.error('Error decodificando token:', error);
       return NextResponse.json(
-        { error: 'Error al procesar token de autenticación' },
+        {
+          error:
+            'Ha ocurrido un error durante el inicio de sesión. Por favor, intenta nuevamente.'
+        },
         { status: 500 }
       );
     }
