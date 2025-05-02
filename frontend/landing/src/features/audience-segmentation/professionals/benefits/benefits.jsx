@@ -1,12 +1,7 @@
 "use client";
 import { scrollToSection } from "@/shared/lib/section-navigation";
 import { Button } from "@/shared/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import Image from "next/image";
 
 export function BenefitsSection() {
@@ -16,22 +11,22 @@ export function BenefitsSection() {
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col gap-8 items-center">
             <h2 className="text-3xl md:text-4xl font-semibold text-primary-900">
-              Beneficios para ti
+              Beneficios para tu campo profesional
             </h2>
 
             <p className="text-secondary-800 my-2 mx-auto font-normal text-xl">
-              Descubre beneficios específicos para ti: soluciones adaptadas a
-              cada etapa de la vida.
+              En Play Attention entendemos que cada profesional tiene
+              necesidades únicas.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Adultos */}
+              {/* Psicólogos y psiquiatras */}
               <Card className="overflow-hidden bg-secondary-200 border-primary-100 shadow-md hover:shadow-lg transition-shadow rounded-lg">
                 <div className="px-4">
                   <div className="relative w-full aspect-square rounded-lg overflow-hidden ">
                     <Image
-                      src="/individuals/adults.jpg"
-                      alt="Adulto trabajando en computadora"
+                      src="/professionals/psychologists.jpg"
+                      alt="Profesionales de la salud mental"
                       fill
                       className="object-cover object-center"
                       sizes="(max-width: 768px) 100vw, 33vw"
@@ -39,24 +34,26 @@ export function BenefitsSection() {
                   </div>
                 </div>
                 <CardHeader className="text-center">
-                  <CardTitle className="text-2xl font-bold text-primary-900">Adultos</CardTitle>
+                  <CardTitle className="text-2xl font-bold text-primary-900">
+                    Psicólogos y psiquiatras
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center px-4 pb-6">
                   <p className="text-primary-900">
-                    Logra mayor productividad en el trabajo y reduce el estrés
-                    con ejercicios diseñados para mantener tu enfoque durante
-                    horas.
+                    Mejora tu práctica con métricas objetivas de atención e
+                    impulsividad. Ajusta tratamientos basados en datos y
+                    automatiza hasta el 70% de los informes clínicos.
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Adolescentes */}
+              {/* Educadores y psicopedagogos */}
               <Card className="overflow-hidden bg-secondary-200 border-primary-100 shadow-md hover:shadow-lg transition-shadow rounded-lg">
                 <div className="px-4">
                   <div className="relative w-full aspect-square rounded-lg overflow-hidden ">
                     <Image
-                      src="/individuals/teenagers.jpg"
-                      alt="Adolescente junto a estantería"
+                      src="/professionals/educators.jpg"
+                      alt="Profesional de la educación"
                       fill
                       className="object-cover object-center"
                       sizes="(max-width: 768px) 100vw, 33vw"
@@ -65,24 +62,24 @@ export function BenefitsSection() {
                 </div>
                 <CardHeader className="text-center ">
                   <CardTitle className="text-2xl font-bold text-primary-900">
-                    Adolescentes
+                    Educadores y psicopedagogos
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center px-4 pb-6">
                   <p className="text-primary-900">
-                    Mejora tu rendimiento académico con técnicas que combaten la
-                    distracción y ayudan a retener información fácilmente.
+                    Detecta dificultades de aprendizaje con evaluaciones
+                    científicas y personaliza planes educativos.
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Padres de familia */}
+              {/* Neurólogos y más */}
               <Card className="overflow-hidden bg-secondary-200 border-primary-100 shadow-md hover:shadow-lg transition-shadow rounded-lg">
                 <div className="px-4">
                   <div className="relative w-full aspect-square rounded-lg overflow-hidden ">
                     <Image
-                      src="/individuals/parents.jpg"
-                      alt="Familia ayudando a niño con tareas"
+                      src="/professionals/neurologists.jpg"
+                      alt="Profesional de la salud neurológica"
                       fill
                       className="object-cover object-center"
                       sizes="(max-width: 768px) 100vw, 33vw"
@@ -91,14 +88,14 @@ export function BenefitsSection() {
                 </div>
                 <CardHeader className="text-center ">
                   <CardTitle className="text-2xl font-bold text-primary-900">
-                    Padres de familia
+                    Neurólogos y más
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center px-4 pb-6">
                   <p className="text-primary-900">
-                    Apoya el desarrollo de tus hijos con herramientas efectivas
-                    que fortalecen su atención y reducen frustraciones en el
-                    hogar.
+                    Monitorea TDAH y trastornos del neurodesarrollo con
+                    tecnología que complementa EEG y pruebas cognitivas. Detecta
+                    cambios y tratamientos con precisión.
                   </p>
                 </CardContent>
               </Card>

@@ -1,12 +1,12 @@
-import { Button } from "../../ui/button";
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
+} from "@/shared/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function NavbarDesktop({ scrollToSection, activeSection }) {
@@ -23,10 +23,10 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
         Inicio
       </Button>
       <Button
-        onClick={() => scrollToSection("demo-videos")}
+        onClick={() => scrollToSection("operation")}
         variant="link"
         className={cn(
-          activeSection === "demo-videos" ? "underline" : "underline-offset-4"
+          activeSection === "operation" ? "underline" : "underline-offset-4"
         )}
       >
         Funcionamiento
@@ -42,10 +42,18 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
                 : "underline-offset-4"
             )}
           >
-            ¿Para quién es? <ChevronDown size={16} />
+            Profesionales <ChevronDown size={16} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="hidden lg:block">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              router.push("/");
+            }}
+          >
+            Principal
+          </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(e) => {
               e.preventDefault();
@@ -57,14 +65,6 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
           <DropdownMenuItem
             onSelect={(e) => {
               e.preventDefault();
-              router.push("/profesionales");
-            }}
-          >
-            Profesionales
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
               router.push("/empresas");
             }}
           >
@@ -72,12 +72,11 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <Button
-        onClick={() => scrollToSection("pricing-plans")}
+        onClick={() => scrollToSection("benefits")}
         variant="link"
         className={cn(
-          activeSection === "pricing-plans" ? "underline" : "underline-offset-4"
+          activeSection === "benefits" ? "underline" : "underline-offset-4"
         )}
       >
         Beneficios
@@ -92,13 +91,13 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
         Testimonios
       </Button>
       <Button
-        onClick={() => scrollToSection("about-us")}
+        onClick={() => scrollToSection("faq")}
         variant="link"
         className={cn(
-          activeSection === "about-us" ? "underline" : "underline-offset-4"
+          activeSection === "faq" ? "underline" : "underline-offset-4"
         )}
       >
-        Nosotros
+        FAQ
       </Button>
       <Button className="rounded-md" onClick={() => scrollToSection("contact")}>
         Contacto

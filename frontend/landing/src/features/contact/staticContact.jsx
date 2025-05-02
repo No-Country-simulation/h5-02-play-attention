@@ -27,17 +27,20 @@ export const StaticContact = () => {
     window.open("https://wa.me/56940551892", "_blank", "noopener,noreferrer");
   };
   return (
-    <div className="w-full  md:w-[29%] flex flex-col gap-8 p-4 md:p-0">
+    <div className="w-full md:w-[29%] max-w-full flex flex-col gap-4 md:gap-6 px-2 md:px-0 border  max-h-[90%]">
       {/* Contenedor de información de contacto */}
-      <div className="w-full md:w-[74%]  space-y-6 bg-white md:bg-[transparent] p-4 rounded-lg shadow-sm md:shadow-none">
+      <div className=" w-full max-w-full space-y-4 bg-[transparent] p-4 rounded-lg border ">
         {contactItems.map((item, index) => (
           <div key={index} className="space-y-1">
             <div className="flex items-center">
               <item.icon className={iconClasses} />
-              <b>{item.title}</b>
+              <b className="text-sm md:text-base">{item.title}</b>
             </div>
             {item.details.map((detail, i) => (
-              <small key={i} className="block pl-10 text-sm md:text-base">
+              <small
+                key={i}
+                className="block pl-10 text-xs md:text-sm text-gray-600 break-words"
+              >
                 {detail}
               </small>
             ))}
@@ -57,8 +60,8 @@ export const StaticContact = () => {
           variant="outline"
           className="w-full sm:w-[46.24%] h-12 border-2 border-[#330764] text-[#330764] hover:bg-[#330764]/10 cursor-pointer"
         >
-          <CalendarDays className="size-5 md:size-6 mr-2" />
-          Agendar reunión
+          <CalendarDays className="size-5 mr-2" />
+          <span className="text-sm md:text-base">Agendar reunión</span>
         </Button>
       </div>
     </div>

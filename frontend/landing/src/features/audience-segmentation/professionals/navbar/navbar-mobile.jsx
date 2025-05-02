@@ -65,7 +65,7 @@ export default function NavbarMobile({
                   : "underline-offset-4"
               )}
             >
-              Personas
+              Profesionales
               <ChevronDown
                 size={16}
                 className={cn(
@@ -87,12 +87,12 @@ export default function NavbarMobile({
                 </button>
                 <button
                   onClick={() => {
-                    router.push("/profesionales");
+                    router.push("/personas");
                     setIsMenuOpen(false);
                   }}
                   className="text-left text-sm text-gray-700"
                 >
-                  Profesionales
+                  Personas
                 </button>
                 <button
                   onClick={() => {

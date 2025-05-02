@@ -1,36 +1,34 @@
 "use client";
 
+import { MarqueeBenefits } from "@/shared/components/marquee-benefits/marquee-benefits";
 import { BackgroundShapes } from "@/shared/ui/background-shapes";
 import { Button } from "@/shared/ui/button";
 import Image from "next/image";
-import { MarqueeBenefits } from "./components/marquee-benefits";
+import { useBenefits } from "./benefits";
+import { scrollToSection } from "@/shared/lib/section-navigation";
 
 export function HeroSection() {
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const benefits = useBenefits();
+
   return (
     <div className="relative overflow-hidden px-4 lg:px-20 m-0">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl font-bold text-primary-900 leading-tight">
-              Entrenamiento Cerebral con Tecnología de la NASA.
-              <span className="block">Ahora en Argentina.</span>
+              Soluciones Corporativas para Maximizar el Potencial de tus
+              Colaboradores
             </h1>
             <p className="text-2xl text-primary-400">
-              Transformá la concentración, el autocontrol y el rendimiento
-              cognitivo con Play Attention, el sistema de neurofeedback más
-              completo del mundo.
+              Herramientas validadas científicamente para instituciones
+              educativas, empresas y organizaciones deportivas que buscan
+              resultados medibles.
             </p>
             <Button
               onClick={() => scrollToSection("contact")}
               className="min-w-3xs my-2"
             >
-              Contacto
+              ¡Comienza Ahora!
             </Button>
           </div>
           <div className="relative">
@@ -39,11 +37,11 @@ export function HeroSection() {
             </div>
 
             <Image
-              src="/hero.png"
-              alt="Profesional médico mostrando el dispositivo Play Attention BodyWave"
+              src="/companies/hero.png"
+              alt="Persona usando el dispositivo Play Attention"
               width={500}
               height={600}
-               className="relative z-10 mx-auto w-full max-w-[500px] h-[500px] sm:h-[600px] max-h-[600px]"
+              className="relative z-10 mx-auto w-full max-w-[500px] h-[500px] sm:h-[600px] max-h-[600px]"
               priority
             />
           </div>
@@ -58,7 +56,7 @@ export function HeroSection() {
             />
 
             <div className="relative z-10 py-8">
-              <MarqueeBenefits />
+              <MarqueeBenefits benefits={benefits} />
             </div>
           </div>
         </div>
