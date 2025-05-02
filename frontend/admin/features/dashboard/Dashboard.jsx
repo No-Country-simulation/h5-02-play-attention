@@ -229,7 +229,7 @@ export default function Dashboard() {
                   change={metrics.users.change}
                   trend={metrics.users.trend}
                   icon={Users}
-                  color='users'
+                  color='content'
                 />
                 <MetricCard
                   title='Contenido Total'
@@ -245,7 +245,7 @@ export default function Dashboard() {
                   change={metrics.tickets.change}
                   trend={metrics.tickets.trend}
                   icon={TicketCheck}
-                  color='tickets'
+                  color='content'
                 />
                 <MetricCard
                   title='Notificaciones'
@@ -253,7 +253,7 @@ export default function Dashboard() {
                   change={metrics.notifications.change}
                   trend={metrics.notifications.trend}
                   icon={Bell}
-                  color='notifications'
+                  color='content'
                 />
               </>
             )}
@@ -273,13 +273,13 @@ export default function Dashboard() {
                   Ver detalles completos <span className='ml-1'>→</span>
                 </a>
               </div>
-              <div className='flex gap-2'>
-                <div className='flex items-center justify-center w-1/2'>
+              <div className=' lg:flex gap-2'>
+                <div className='flex items-center justify-center w-full lg:w-1/2'>
                   <ConversionRateChart
                     conversionRate={parseFloat(metrics.conversion.rate)}
                   />
                 </div>
-                <div className='bg-white p-6 rounded-lg border h-full w-1/2 flex flex-col lg:col-span-2'>
+                <div className='bg-white p-6 rounded-lg border h-full w-full lg:w-1/2 flex flex-col lg:col-span-2'>
                   <h3 className='text-lg font-semibold mb-3'>
                     Análisis de Conversión y Leads
                   </h3>
@@ -499,19 +499,19 @@ export default function Dashboard() {
             <h2 className='text-xl font-semibold'>Acciones Rápidas</h2>
           </div>
 
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6 h-full'>
             <ActionCard
               title='Crear Lead'
               description='Registra un nuevo lead de ventas'
               icon={UserPlus}
-              color='leads'
+              color='content'
               link='/crm/new'
             />
             <ActionCard
               title='Responder Tickets'
               description='Gestionar tickets de soporte pendientes'
               icon={TicketCheck}
-              color='tickets'
+              color='content'
               link='/tickets'
             />
             <ActionCard
@@ -549,13 +549,13 @@ export default function Dashboard() {
             </div>
             <div className='bg-white p-3 rounded border text-center'>
               <p className='text-xs text-gray-500'>Tickets</p>
-              <p className='text-xl font-bold text-amber-600'>
+              <p className='text-xl font-bold text-purple-600'>
                 {metrics.tickets.total}
               </p>
             </div>
             <div className='bg-white p-3 rounded border text-center'>
               <p className='text-xs text-gray-500'>Usuarios</p>
-              <p className='text-xl font-bold text-blue-600'>
+              <p className='text-xl font-bold text-purple-600'>
                 {metrics.users.total}
               </p>
             </div>

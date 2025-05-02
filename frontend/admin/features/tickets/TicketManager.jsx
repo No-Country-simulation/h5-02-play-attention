@@ -29,7 +29,8 @@ export default function TicketManager() {
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const pageSize = 10; // Número de tickets por página
+  const pageSize = 6; // Tamaño de paginación visual
+  const apiPageSize = 500; // Tamaño de paginación para la API
 
   const router = useRouter();
   const { title, description } = getPageMetadata('tickets');
@@ -49,7 +50,9 @@ export default function TicketManager() {
     isLoading,
     error,
     refetch
-  } = useTickets();
+  } = useTickets({
+    limit: apiPageSize // Usamos el tamaño de página grande para la API
+  });
 
   // Para fines de demo, creamos algunos tickets de ejemplo si no hay datos
   const demoTickets = useMemo(() => {
@@ -184,7 +187,8 @@ export default function TicketManager() {
     return {
       tickets: paginatedTickets,
       total: totalFilteredTickets,
-      totalPages: totalFilteredPages
+      totalPages: totalFilteredPages,
+      currentTickets: paginatedTickets.length
     };
   }, [filteredTickets, currentPage, pageSize]);
 
@@ -395,6 +399,7 @@ export default function TicketManager() {
             pageSize={pageSize}
             totalPages={paginatedData.totalPages}
             totalTickets={paginatedData.total}
+            currentTickets={paginatedData.currentTickets}
             onPageChange={handlePageChange}
             onPreviousPage={goToPreviousPage}
             onNextPage={goToNextPage}
