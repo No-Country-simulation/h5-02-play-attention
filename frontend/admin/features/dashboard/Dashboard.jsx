@@ -28,7 +28,9 @@ import {
 } from '@/shared/lib/utils/color-utils';
 import { useDashboardStore } from './lib/store/dashboard-store';
 import { useDashboardRefresh } from './lib/hooks/useDashboardRefresh';
+import { useDashboardMetrics } from './lib/hooks/useDashboardMetrics';
 import { useState } from 'react';
+import MetricCardSkeleton from './components/MetricCardSkeleton';
 
 // Datos de ejemplo para simular varias alertas
 const mockAlerts = [
@@ -118,6 +120,9 @@ export default function Dashboard() {
   // Utilizamos el custom hook para la actualización automática (sin indicador visual)
   useDashboardRefresh();
 
+  // Utilizamos el custom hook para obtener métricas reales
+  const { isLoading, isError, metrics } = useDashboardMetrics();
+
   // Utilizamos el store para preferencias de visualización, pero no para los datos
   const viewPreferences = useDashboardStore(state => state.viewPreferences);
 
@@ -198,54 +203,77 @@ export default function Dashboard() {
         <TabsContent value='overview' className='mt-0'>
           {/* Métricas principales */}
           <div className='grid grid-cols-1 lg:grid-cols-4 gap-5 mb-6'>
-            <MetricCard
-              title='Leads Nuevos'
-              value='32'
-              change='+8% esta semana'
-              trend='up'
-              icon={UserPlus}
-              color='leads'
-            />
-            <MetricCard
-              title='Usuarios Activos'
-              value='1,254'
-              change='+12% este mes'
-              trend='up'
-              icon={Users}
-              color='users'
-            />
-            <MetricCard
-              title='Contenido Total'
-              value='87'
-              change='+5% este mes'
-              trend='up'
-              icon={FileText}
-              color='content'
-            />
-            <MetricCard
-              title='Tickets Abiertos'
-              value='14'
-              change='-3% esta semana'
-              trend='down'
-              icon={TicketCheck}
-              color='tickets'
-            />
-            <MetricCard
-              title='Notificaciones'
-              value='8'
-              change='+2 nuevas hoy'
-              trend='up'
-              icon={Bell}
-              color='notifications'
-            />
-            <MetricCard
-              title='Tasa de Conversión'
-              value='18.5%'
-              change='+2.3% este mes'
-              trend='up'
-              icon={PercentCircle}
-              color='conversions'
-            />
+            {isLoading ? (
+              // Mostrar skeletons durante la carga
+              <>
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+                <MetricCardSkeleton />
+              </>
+            ) : isError ? (
+              // Mostrar mensaje de error si algo falló
+              <div className='col-span-4 p-6 bg-red-50 rounded-md text-red-600 text-center'>
+                <p>
+                  No se pudieron cargar las métricas. Por favor, intenta
+                  nuevamente.
+                </p>
+              </div>
+            ) : (
+              // Mostrar las métricas reales cuando están disponibles
+              <>
+                <MetricCard
+                  title='Leads Nuevos'
+                  value={metrics.leads.newLeads.toString()}
+                  change={metrics.leads.change}
+                  trend={metrics.leads.trend}
+                  icon={UserPlus}
+                  color='leads'
+                />
+                <MetricCard
+                  title='Usuarios Activos'
+                  value={metrics.users.activeUsers.toString()}
+                  change={metrics.users.change}
+                  trend={metrics.users.trend}
+                  icon={Users}
+                  color='users'
+                />
+                <MetricCard
+                  title='Contenido Total'
+                  value={metrics.content.total.toString()}
+                  change={metrics.content.change}
+                  trend={metrics.content.trend}
+                  icon={FileText}
+                  color='content'
+                />
+                <MetricCard
+                  title='Tickets Abiertos'
+                  value={metrics.tickets.openTickets.toString()}
+                  change={metrics.tickets.change}
+                  trend={metrics.tickets.trend}
+                  icon={TicketCheck}
+                  color='tickets'
+                />
+                <MetricCard
+                  title='Notificaciones'
+                  value={metrics.notifications.total.toString()}
+                  change={metrics.notifications.change}
+                  trend={metrics.notifications.trend}
+                  icon={Bell}
+                  color='notifications'
+                />
+                <MetricCard
+                  title='Tasa de Conversión'
+                  value={metrics.conversion.rate}
+                  change={metrics.conversion.change}
+                  trend={metrics.conversion.trend}
+                  icon={PercentCircle}
+                  color='conversions'
+                />
+              </>
+            )}
           </div>
 
           {/* Alertas y Notificaciones */}
