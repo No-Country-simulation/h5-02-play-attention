@@ -1,5 +1,8 @@
+import { FloatingSocialMedia } from "@/features/contact/floatingSocialMedia";
 import { Footer } from "@/shared/components/footer";
 import { Navbar } from "@/shared/components/navbar/navbar";
+
+import dynamic from "next/dynamic";
 
 export const metadata = {
   title: "Play Attention Argentina - Proveedores Certificados",
@@ -57,6 +60,7 @@ export default function LandingLayout({ children }) {
     <>
       <Navbar />
       {children}
+      <FloatingSocialMedia />
       <Footer />
     </>
   );

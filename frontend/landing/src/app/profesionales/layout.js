@@ -1,9 +1,9 @@
 import { Navbar } from "@/features/audience-segmentation/professionals/navbar/navbar";
+import { FloatingSocialMedia } from "@/features/contact/floatingSocialMedia";
 import { Footer } from "@/shared/components/footer";
 
 export const metadata = {
-  title:
-    "Play Attention Argentina | Profesionales de la Salud Mental",
+  title: "Play Attention Argentina | Profesionales de la Salud Mental",
   description:
     "Neurotecnología clínicamente validada para mejorar el rendimiento de los profesionales de la salud mental. Herramientas avanzadas para psicólogos, neurólogos y educadores, desde detección temprana hasta informes de progreso automatizados.",
   keywords: [
@@ -61,6 +61,8 @@ export default function LandingLayout({ children }) {
     <>
       <Navbar />
       {children}
+      <FloatingSocialMedia />
+
       <Footer />
     </>
   );
