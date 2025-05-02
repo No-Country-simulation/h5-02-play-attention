@@ -27,9 +27,9 @@ export const StaticContact = () => {
     window.open("https://wa.me/56940551892", "_blank", "noopener,noreferrer");
   };
   return (
-    <div className="w-full md:w-[29%] max-w-full flex flex-col gap-4 md:gap-6 px-2 md:px-0 border  max-h-[90%]">
+    <div className="w-full md:w-[29%] max-w-full flex flex-col gap-4 md:gap-6 px-2 md:px-0 border-none shadow-none max-h-[90%] ">
       {/* Contenedor de información de contacto */}
-      <div className=" w-full max-w-full space-y-4 bg-[transparent] p-4 rounded-lg border ">
+      <div className=" w-full max-w-full space-y-4 bg-[transparent] p-4 rounded-lg border-none shadow-none ">
         {contactItems.map((item, index) => (
           <div key={index} className="space-y-1">
             <div className="flex items-center">
