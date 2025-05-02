@@ -22,27 +22,30 @@ export default function ForgotPasswordPage() {
   }, [session, router, isLoading]);
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='w-full max-w-md space-y-8'>
-        <div className='text-center'>
-          <div className='flex justify-center mb-4'>
-            <div className='h-16 w-16'>
+    <div
+      className='min-h-screen flex items-center justify-center p-6'
+      style={{
+        backgroundImage: "url('/img/backgroundlogin.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className='w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-lg'>
+        <div className='px-8 py-10'>
+          <div className='text-center mb-8'>
+            <div className='flex justify-center'>
               <Image
-                src='/img/logospinner.png'
+                src='/svgs/logologin.svg'
                 alt='Play Attention Logo'
-                width={64}
-                height={64}
+                width={200}
+                height={80}
+                className='h-auto'
                 priority
               />
             </div>
           </div>
-          <h1 className='text-3xl font-extrabold text-gray-900'>
-            Play Attention
-          </h1>
-          <p className='mt-2 text-sm text-gray-600'>Panel de administración</p>
-        </div>
 
-        <div className='mt-8 bg-white p-8 shadow sm:rounded-lg'>
           <Suspense
             fallback={
               <div className='text-center py-4'>Cargando formulario...</div>
@@ -50,13 +53,13 @@ export default function ForgotPasswordPage() {
           >
             <ForgotPasswordForm />
           </Suspense>
-        </div>
 
-        <div className='text-center mt-4 text-sm text-gray-500'>
-          <p>
-            © {new Date().getFullYear()} Play Attention Argentina. Todos los
-            derechos reservados.
-          </p>
+          <div className='text-center mt-8 text-xs text-gray-500'>
+            <p>
+              © {new Date().getFullYear()} Play Attention Argentina. Todos los
+              derechos reservados.
+            </p>
+          </div>
         </div>
       </div>
     </div>

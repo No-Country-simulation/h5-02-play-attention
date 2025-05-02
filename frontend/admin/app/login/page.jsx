@@ -53,13 +53,13 @@ export default function LoginPage() {
             priority
           />
           {/* Logo sobrepuesto */}
-          <div className='absolute bottom-[30%] left-0 right-0 flex justify-center'>
+          <div className='absolute top-6 left-10'>
             <Image
               src='/svgs/logologin.svg'
               alt='Logo'
-              width={500}
-              height={500}
-              className='w-48 h-48'
+              width={200}
+              height={80}
+              className='h-auto'
             />
           </div>
         </div>

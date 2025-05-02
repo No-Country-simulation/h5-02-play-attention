@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import Link from 'next/link';
 
@@ -51,18 +51,18 @@ export default function ForgotPasswordForm() {
   return (
     <>
       {!success ? (
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div>
-            <div className='mb-6'>
-              <h2 className='text-2xl font-bold text-center'>
-                Recuperar contraseña
-              </h2>
-              <p className='text-sm text-gray-500 text-center mt-2'>
-                Ingresa tu correo electrónico y te enviaremos instrucciones para
-                restablecer tu contraseña.
-              </p>
-            </div>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+          <div className='text-center mb-6 flex flex-col gap-2'>
+            <h2 className='text-xl font-semibold text-black'>
+              Recuperar Contraseña
+            </h2>
+            <p className='mt-2 text-xs text-gray-600'>
+              Ingresa tu correo electrónico y te enviaremos instrucciones para
+              restablecer tu contraseña.
+            </p>
+          </div>
 
+          <div>
             <Label
               htmlFor='email'
               className='block text-sm font-medium text-gray-700 mb-1'
@@ -75,10 +75,10 @@ export default function ForgotPasswordForm() {
               type='email'
               autoComplete='email'
               required
-              placeholder='nombre@ejemplo.com'
+              placeholder='admin@gmail.com'
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className='border-purple-200 focus:border-purple-500 focus:ring-purple-500'
+              className='w-full h-10 rounded border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500'
             />
           </div>
 
@@ -91,7 +91,7 @@ export default function ForgotPasswordForm() {
           <Button
             type='submit'
             disabled={isLoading}
-            className='w-full bg-purple-600 hover:bg-purple-700 text-white'
+            className='w-full h-10 bg-purple-800 hover:bg-purple-900 text-white rounded'
           >
             {isLoading ? (
               <>
@@ -99,22 +99,24 @@ export default function ForgotPasswordForm() {
                 Enviando...
               </>
             ) : (
-              'Enviar instrucciones'
+              'Enviar'
             )}
           </Button>
 
-          <div className='text-center mt-4'>
-            <Link
-              href='/login'
-              className='text-sm text-purple-600 hover:text-purple-800 flex items-center justify-center'
-            >
-              <ArrowLeft className='h-4 w-4 mr-1' />
-              Volver al inicio de sesión
+          <div className='mt-3'>
+            <Link href='/login'>
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full h-10 hover:text-purple-800 bg-white border-gray-300 hover:bg-gray-50 text-purple-900 rounded'
+              >
+                Volver atrás
+              </Button>
             </Link>
           </div>
         </form>
       ) : (
-        <div className='text-center py-8'>
+        <div className='text-center py-4'>
           <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4'>
             <svg
               className='h-6 w-6 text-green-600'
@@ -140,12 +142,14 @@ export default function ForgotPasswordForm() {
             carpeta de spam) para continuar con el proceso.
           </p>
           <div className='mt-6'>
-            <Link
-              href='/login'
-              className='text-sm text-purple-600 hover:text-purple-800 flex items-center justify-center'
-            >
-              <ArrowLeft className='h-4 w-4 mr-1' />
-              Volver al inicio de sesión
+            <Link href='/login'>
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full h-10 bg-white border-gray-300 hover:bg-gray-50 text-gray-700 rounded'
+              >
+                Volver al inicio de sesión
+              </Button>
             </Link>
           </div>
         </div>
