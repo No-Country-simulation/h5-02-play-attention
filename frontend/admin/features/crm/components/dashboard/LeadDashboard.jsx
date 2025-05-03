@@ -6,14 +6,16 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
+  CardFooter
 } from '@/shared/ui/card';
 import {
   CalendarIcon,
   TrendingUpIcon,
   UserIcon,
   AlertTriangleIcon,
-  FileText
+  FileText,
+  Clock
 } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -43,6 +45,8 @@ import {
 } from '../../lib/adapters/schedule-adapter';
 import { useCreateSchedule } from '../../lib/hooks/useSchedules';
 import { toast } from 'sonner';
+import { isAfter, isSameDay } from 'date-fns';
+import { MeetingsCarousel } from './cards/MeetingsCarousel';
 
 /**
  * Componente para visualizar métricas y gráficos de leads
@@ -91,6 +95,26 @@ export default function LeadDashboard({
 
     return transformedMeetings;
   }, [schedulesData]);
+
+  // Filtrar las próximas reuniones (solo futuras, ordenadas por fecha)
+  const upcomingMeetings = useMemo(() => {
+    const now = new Date();
+    return meetings
+      .filter(meeting => {
+        try {
+          const meetingDate = new Date(meeting.date);
+          return isAfter(meetingDate, now) || isSameDay(meetingDate, now);
+        } catch (e) {
+          console.error('Error al filtrar reuniones próximas:', e);
+          return false;
+        }
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA - dateB;
+      });
+  }, [meetings]);
 
   // Custom hook para métricas
   const metrics = useLeadMetrics(leads, timeRange, isLoading);
@@ -290,7 +314,7 @@ export default function LeadDashboard({
           />
         </div>
 
-        {/* Columna 3: Calendario ocupando toda la altura */}
+        {/* Columna 3: Calendario con carrusel de próximas reuniones */}
         <div className='h-auto lg:h-full mt-4 lg:mt-0'>
           <Card className='h-full min-h-[300px]'>
             <CardHeader className='pb-1 pt-3'>
@@ -299,7 +323,7 @@ export default function LeadDashboard({
                 Calendario de Reuniones
               </CardTitle>
             </CardHeader>
-            <CardContent className='p-2 pt-0 h-[calc(100%-48px)]'>
+            <CardContent className='p-2 pt-0 h-[calc(80%-120px)]'>
               <div className='h-full overflow-hidden'>
                 <MeetingCalendar
                   meetings={meetings}
@@ -308,6 +332,23 @@ export default function LeadDashboard({
                 />
               </div>
             </CardContent>
+            <CardFooter className='p-0 pb-1'>
+              {/* Carrusel de próximas reuniones */}
+              <div className='w-full border-t border-muted/50'>
+                <div className='flex items-center px-2 py-4 bg-muted/10'>
+                  <Clock className='h-3 w-3 mr-1 text-primary' />
+                  <span className='text-[16px] font-medium'>
+                    Próximas reuniones
+                  </span>
+                </div>
+                <div className='h-[60px] overflow-hidden'>
+                  <MeetingsCarousel
+                    meetings={upcomingMeetings}
+                    isLoading={meetingsLoading}
+                  />
+                </div>
+              </div>
+            </CardFooter>
           </Card>
         </div>
       </div>

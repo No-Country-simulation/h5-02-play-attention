@@ -330,48 +330,6 @@ export default function MeetingCalendar({
         )}
       </div>
 
-      {/* Próximas reuniones */}
-      <div className='mt-6'>
-        <h3 className='text-sm font-medium mb-2 flex items-center'>
-          <Clock className='h-4 w-4 mr-1 text-primary' />
-          Próximas reuniones
-        </h3>
-
-        {upcomingMeetings.length === 0 ? (
-          <div className='text-sm text-center text-muted-foreground py-3'>
-            No hay reuniones programadas
-          </div>
-        ) : (
-          <div className='space-y-2'>
-            {upcomingMeetings.map(meeting => (
-              <div
-                key={meeting.id}
-                className='p-2 rounded-md bg-muted/30 text-sm'
-              >
-                <div className='font-medium'>{meeting.title}</div>
-                <div className='flex items-center text-muted-foreground text-xs'>
-                  <CalendarIcon className='h-3 w-3 mr-1' />
-                  {format(new Date(meeting.date), 'PPP, HH:mm', { locale: es })}
-                </div>
-                <div className='flex items-center text-muted-foreground text-xs'>
-                  <UserIcon className='h-3 w-3 mr-1' />
-                  {meeting.leadName || 'Sin cliente'}
-                </div>
-              </div>
-            ))}
-
-            <Button
-              variant='outline'
-              size='sm'
-              className='w-full text-xs'
-              onClick={() => handleAddMeetingOnDate(new Date())}
-            >
-              <Plus className='h-3 w-3 mr-1' />
-              Nueva reunión
-            </Button>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

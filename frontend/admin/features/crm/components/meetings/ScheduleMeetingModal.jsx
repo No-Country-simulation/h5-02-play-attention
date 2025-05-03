@@ -53,10 +53,7 @@ import { apiToClientSchedule } from '../../lib/adapters/schedule-adapter';
 const DURATION_OPTIONS = [
   { value: '15', label: '15 minutos' },
   { value: '30', label: '30 minutos' },
-  { value: '45', label: '45 minutos' },
-  { value: '60', label: '1 hora' },
-  { value: '90', label: '1.5 horas' },
-  { value: '120', label: '2 horas' }
+  { value: '60', label: '1 hora' }
 ];
 
 // Horarios disponibles por defecto (en un caso real se obtendrían del backend)
@@ -83,6 +80,46 @@ const DEFAULT_TIME_SLOTS = [
   '17:30',
   '18:00'
 ];
+
+// Hora de inicio y fin del horario comercial (para generar slots dinámicamente)
+const BUSINESS_HOURS = {
+  start: 8, // 8:00 AM
+  end: 18 // 6:00 PM
+};
+
+/**
+ * Genera slots de tiempo basados en la duración seleccionada
+ * @param {number} durationMinutes - Duración en minutos
+ * @returns {string[]} Array de horarios en formato HH:MM
+ */
+const generateTimeSlots = durationMinutes => {
+  const slots = [];
+  const startHour = BUSINESS_HOURS.start;
+  const endHour = BUSINESS_HOURS.end;
+
+  // Convertir duración a minutos
+  const duration = parseInt(durationMinutes, 10);
+
+  // El intervalo debe ser igual a la duración elegida
+  // (los horarios se mostrarán en bloques que coinciden con la duración)
+  const interval = duration;
+
+  for (let hour = startHour; hour < endHour; hour++) {
+    for (let minute = 0; minute < 60; minute += interval) {
+      // Verificar que la reunión no termine después del horario comercial
+      const endMinutes = hour * 60 + minute + duration;
+      const endHour = Math.floor(endMinutes / 60);
+
+      if (endHour <= BUSINESS_HOURS.end) {
+        const formattedHour = hour.toString().padStart(2, '0');
+        const formattedMinute = minute.toString().padStart(2, '0');
+        slots.push(`${formattedHour}:${formattedMinute}`);
+      }
+    }
+  }
+
+  return slots;
+};
 
 /**
  * Modal para programar una nueva reunión o editar una existente
@@ -191,11 +228,18 @@ export default function ScheduleMeetingModal({
         return;
       }
 
-      // Obtener todos los slots disponibles por defecto
-      const allSlots = [...DEFAULT_TIME_SLOTS];
+      // Generar slots de tiempo según la duración seleccionada
+      const durationMinutes = parseInt(formData.duration, 10);
+      const allSlots = generateTimeSlots(durationMinutes);
 
-      // Identificar slots ocupados para esta fecha
+      console.log(
+        `Generando slots para reuniones de ${durationMinutes} minutos`
+      );
+      console.log(`Total de slots generados: ${allSlots.length}`);
+
+      // Identificar qué slots están ocupados para esta fecha
       const busySlots = new Set();
+      const occupiedTimeRanges = [];
 
       existingMeetings.forEach(existingMeeting => {
         try {
@@ -203,19 +247,38 @@ export default function ScheduleMeetingModal({
 
           // Solo filtrar reuniones del mismo día
           if (isSameDay(meetingDate, formData.date)) {
-            const existingHours = meetingDate
+            // Obtener hora de inicio
+            const startHours = meetingDate
               .getHours()
               .toString()
               .padStart(2, '0');
-            const existingMinutes = meetingDate
+            const startMinutes = meetingDate
               .getMinutes()
               .toString()
               .padStart(2, '0');
-            const timeSlot = `${existingHours}:${existingMinutes}`;
+            const startTimeSlot = `${startHours}:${startMinutes}`;
 
-            busySlots.add(timeSlot);
+            // Calcular hora de fin basada en duración
+            const existingDuration = existingMeeting.duration
+              ? parseInt(existingMeeting.duration, 10)
+              : 30;
+
+            const startTimeMinutes =
+              meetingDate.getHours() * 60 + meetingDate.getMinutes();
+            const endTimeMinutes = startTimeMinutes + existingDuration;
+
+            // Guardar el rango ocupado
+            occupiedTimeRanges.push({
+              start: startTimeMinutes,
+              end: endTimeMinutes,
+              title: existingMeeting.title
+            });
+
+            // Marcar el slot inicial como ocupado
+            busySlots.add(startTimeSlot);
+
             console.log(
-              `Horario ocupado: ${timeSlot} - ${existingMeeting.title}`
+              `Ocupado: ${startTimeSlot} - ${existingMeeting.title} (${existingDuration} min)`
             );
           }
         } catch (error) {
@@ -223,18 +286,36 @@ export default function ScheduleMeetingModal({
         }
       });
 
-      // Marcar todos los slots con su estado de disponibilidad
-      const slotsWithAvailability = allSlots.map(slot => ({
-        time: slot,
-        available: !busySlots.has(slot)
-      }));
+      // Verificar para cada slot si estaría en conflicto con una reunión existente
+      const slotsWithAvailability = allSlots.map(slot => {
+        const [hours, minutes] = slot.split(':').map(Number);
+        const slotStartMinutes = hours * 60 + minutes;
+        const slotEndMinutes = slotStartMinutes + durationMinutes;
+
+        // Verificar si este slot se solapa con alguna reunión existente
+        const hasConflict = occupiedTimeRanges.some(range => {
+          // Hay conflicto si:
+          // - El inicio del nuevo slot está dentro de una reunión existente
+          // - El fin del nuevo slot está dentro de una reunión existente
+          // - El nuevo slot abarca completamente una reunión existente
+          return (
+            (slotStartMinutes >= range.start && slotStartMinutes < range.end) ||
+            (slotEndMinutes > range.start && slotEndMinutes <= range.end) ||
+            (slotStartMinutes <= range.start && slotEndMinutes >= range.end)
+          );
+        });
+
+        return {
+          time: slot,
+          available: !hasConflict
+        };
+      });
 
       setAvailableSlots(slotsWithAvailability);
 
       console.log(`Fecha seleccionada: ${formData.date.toDateString()}`);
-      console.log(`Horarios ocupados: ${Array.from(busySlots).join(', ')}`);
       console.log(
-        `Total de horarios disponibles: ${
+        `Total de slots disponibles: ${
           slotsWithAvailability.filter(s => s.available).length
         }`
       );
@@ -243,10 +324,22 @@ export default function ScheduleMeetingModal({
 
   // Actualizar formulario
   const handleChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // Si se cambia la duración, resetear el horario seleccionado
+    if (field === 'duration' && formData.time) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        time: '' // Resetear el horario seleccionado
+      }));
+
+      // Mostrar mensaje informativo
+      console.log('Duración cambiada, horarios recalculados');
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
 
     // Limpiar error si el campo fue completado
     if (errors[field]) {
@@ -428,6 +521,10 @@ export default function ScheduleMeetingModal({
             {errors.duration && (
               <p className='text-sm text-destructive mt-1'>{errors.duration}</p>
             )}
+            <p className='text-xs text-muted-foreground mt-1'>
+              <Info className='inline h-3 w-3 mr-1' />
+              Al cambiar la duración se recalcularán los horarios disponibles
+            </p>
           </div>
 
           {/* Horarios disponibles */}
@@ -437,39 +534,25 @@ export default function ScheduleMeetingModal({
             </Label>
             <div className='grid grid-cols-3 gap-2 mt-1 max-h-[240px] overflow-y-auto p-1'>
               {availableSlots.length > 0 ? (
-                availableSlots.map(slot => (
-                  <Button
-                    key={slot.time}
-                    type='button'
-                    size='sm'
-                    variant={
-                      formData.time === slot.time ? 'default' : 'outline'
-                    }
-                    className={`
-                      text-xs py-1 relative
-                      ${formData.time === slot.time ? 'bg-primary' : ''}
-                      ${!slot.available ? 'opacity-50' : ''}
-                    `}
-                    onClick={() =>
-                      slot.available && handleChange('time', slot.time)
-                    }
-                    disabled={!slot.available}
-                  >
-                    {slot.time}
-                    {!slot.available && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <AlertTriangle className='h-3 w-3 absolute -top-1 -right-1 text-amber-500' />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className='text-xs'>Horario no disponible</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </Button>
-                ))
+                // Filtrar para mostrar solo los horarios disponibles
+                availableSlots
+                  .filter(slot => slot.available)
+                  .map(slot => (
+                    <Button
+                      key={slot.time}
+                      type='button'
+                      size='sm'
+                      variant={
+                        formData.time === slot.time ? 'default' : 'outline'
+                      }
+                      className={`text-xs py-1 ${
+                        formData.time === slot.time ? 'bg-primary' : ''
+                      }`}
+                      onClick={() => handleChange('time', slot.time)}
+                    >
+                      {slot.time}
+                    </Button>
+                  ))
               ) : (
                 <p className='text-sm text-muted-foreground col-span-3 text-center py-4'>
                   {formData.date?.getDay() === 0 ||
@@ -478,6 +561,14 @@ export default function ScheduleMeetingModal({
                     : 'No hay horarios disponibles para esta fecha'}
                 </p>
               )}
+              {/* Mostrar mensaje si no hay horarios disponibles después de filtrar */}
+              {availableSlots.length > 0 &&
+                availableSlots.filter(slot => slot.available).length === 0 && (
+                  <p className='text-sm text-muted-foreground col-span-3 text-center py-4'>
+                    No hay horarios disponibles para esta fecha con la duración
+                    seleccionada
+                  </p>
+                )}
             </div>
             {errors.time && (
               <p className='text-sm text-destructive mt-1'>{errors.time}</p>
