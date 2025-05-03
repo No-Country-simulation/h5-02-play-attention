@@ -16,7 +16,15 @@ export const useSchedules = () => {
     queryKey: ['schedules'],
     queryFn: async () => {
       try {
-        return await getSchedules();
+        const data = await getSchedules();
+
+        // El backend puede devolver { schedules: [...] } o directamente el array
+        const schedules = data.schedules || data;
+
+        console.log('Datos recibidos del backend:', data);
+        console.log('Reuniones extraídas:', schedules);
+
+        return schedules;
       } catch (error) {
         console.error('Error al obtener horarios:', error);
         throw new Error(error.message || 'Error al cargar horarios');

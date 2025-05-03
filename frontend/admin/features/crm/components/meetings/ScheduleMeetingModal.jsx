@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { isSameDay } from 'date-fns';
 import {
   Calendar as CalendarIcon,
   Clock,
   Info,
-  ArrowRight
+  MapPin,
+  User,
+  FileText,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import {
@@ -18,14 +25,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/shared/ui/dialog';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter
-} from '@/shared/ui/sheet';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { Textarea } from '@/shared/ui/textarea';
@@ -45,8 +44,10 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/shared/ui/tooltip';
-import TimeSlotSelector from './TimeSlotSelector';
+import { Badge } from '@/shared/ui/badge';
 import { calculateEndTime } from '../../lib/utils/timeSlots';
+import { useSchedules } from '../../lib/hooks/useSchedules';
+import { apiToClientSchedule } from '../../lib/adapters/schedule-adapter';
 
 // Opciones de duración
 const DURATION_OPTIONS = [
@@ -58,9 +59,34 @@ const DURATION_OPTIONS = [
   { value: '120', label: '2 horas' }
 ];
 
+// Horarios disponibles por defecto (en un caso real se obtendrían del backend)
+const DEFAULT_TIME_SLOTS = [
+  '08:00',
+  '08:30',
+  '09:00',
+  '09:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  '12:00',
+  '12:30',
+  '13:00',
+  '13:30',
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
+  '17:00',
+  '17:30',
+  '18:00'
+];
+
 /**
  * Modal para programar una nueva reunión o editar una existente
- * Implementa un selector de horarios estilo Calendly
+ * Implementa un wizard de 3 pasos estilo Calendly
  */
 export default function ScheduleMeetingModal({
   isOpen,
@@ -71,10 +97,14 @@ export default function ScheduleMeetingModal({
   preselectedLead,
   meeting = null
 }) {
+  // Estado actual del wizard (1, 2 o 3)
+  const [currentStep, setCurrentStep] = useState(1);
+
+  // Datos del formulario
   const [formData, setFormData] = useState({
     title: '',
     date: preselectedDate || new Date(),
-    time: '09:00',
+    time: '',
     leadId: preselectedLead || '',
     location: '',
     description: '',
@@ -82,53 +112,134 @@ export default function ScheduleMeetingModal({
     status: 'Pending'
   });
 
+  // Errores de validación
   const [errors, setErrors] = useState({});
-  const [timeSelectorOpen, setTimeSelectorOpen] = useState(false);
 
-  // Cuando se abre el modal con una reunión existente, cargar sus datos
+  // Slots de tiempo disponibles (filtrados según fecha y duración)
+  const [availableSlots, setAvailableSlots] = useState(DEFAULT_TIME_SLOTS);
+
+  // Obtener reuniones existentes para filtrar horarios ocupados
+  const { data: schedulesData = [], isLoading: isLoadingSchedules } =
+    useSchedules();
+
+  // Convertir datos de la API al formato del cliente
+  const existingMeetings = useMemo(() => {
+    // Si estamos editando una reunión existente, excluirla para no bloquear su propio horario
+    const meetings = Array.isArray(schedulesData)
+      ? schedulesData
+          .map(apiToClientSchedule)
+          .filter(m => Boolean(m) && (!meeting || m.id !== meeting.id))
+      : [];
+
+    console.log('Reuniones existentes para filtrar horarios:', meetings);
+    return meetings;
+  }, [schedulesData, meeting]);
+
+  // Cuando se abre el modal, inicializar datos
   useEffect(() => {
-    if (meeting) {
-      try {
-        // Convertir la fecha en un objeto Date
-        const meetingDate = new Date(meeting.date);
+    if (isOpen) {
+      if (meeting) {
+        // Edición: cargar datos de la reunión existente
+        try {
+          const meetingDate = new Date(meeting.date);
+          const hours = meetingDate.getHours().toString().padStart(2, '0');
+          const minutes = meetingDate.getMinutes().toString().padStart(2, '0');
+          const timeString = `${hours}:${minutes}`;
 
-        // Extraer solo la parte de la hora
-        const hours = meetingDate.getHours().toString().padStart(2, '0');
-        const minutes = meetingDate.getMinutes().toString().padStart(2, '0');
-        const timeString = `${hours}:${minutes}`;
+          setFormData({
+            title: meeting.title || '',
+            date: meetingDate,
+            time: timeString,
+            leadId: meeting.leadId || '',
+            location: meeting.location || '',
+            description: meeting.description || '',
+            duration: meeting.duration?.toString() || '30',
+            status: meeting.status || 'Pending'
+          });
 
-        // Actualizar formulario con los datos de la reunión
+          // Si es edición, empezar en el paso 2 (detalles)
+          setCurrentStep(2);
+        } catch (error) {
+          console.error('Error al cargar los datos de la reunión:', error);
+        }
+      } else {
+        // Nueva reunión: resetear formulario
         setFormData({
-          title: meeting.title || '',
-          date: meetingDate,
-          time: timeString,
-          leadId: meeting.leadId || '',
-          location: meeting.location || '',
-          description: meeting.description || '',
-          duration: meeting.duration || '30',
-          status: meeting.status || 'Pending'
+          title: '',
+          date: preselectedDate || new Date(),
+          time: '',
+          leadId: preselectedLead || '',
+          location: '',
+          description: '',
+          duration: '30',
+          status: 'Pending'
         });
-      } catch (error) {
-        console.error('Error al cargar los datos de la reunión:', error);
+        setCurrentStep(1);
       }
-    } else {
-      // Resetear el formulario cuando se abre para una nueva reunión
-      setFormData({
-        title: '',
-        date: preselectedDate || new Date(),
-        time: '09:00',
-        leadId: preselectedLead || '',
-        location: '',
-        description: '',
-        duration: '30',
-        status: 'Pending'
-      });
+      setErrors({});
     }
-
-    // Limpiar errores y resetear el estado
-    setErrors({});
-    setTimeSelectorOpen(false);
   }, [isOpen, meeting, preselectedDate, preselectedLead]);
+
+  // Filtrar los horarios ocupados para la fecha seleccionada
+  useEffect(() => {
+    if (currentStep === 1 && formData.date) {
+      // Verificar si es fin de semana
+      const dayOfWeek = formData.date.getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // No hay slots disponibles los fines de semana
+        setAvailableSlots([]);
+        return;
+      }
+
+      // Obtener todos los slots disponibles por defecto
+      const allSlots = [...DEFAULT_TIME_SLOTS];
+
+      // Identificar slots ocupados para esta fecha
+      const busySlots = new Set();
+
+      existingMeetings.forEach(existingMeeting => {
+        try {
+          const meetingDate = new Date(existingMeeting.date);
+
+          // Solo filtrar reuniones del mismo día
+          if (isSameDay(meetingDate, formData.date)) {
+            const existingHours = meetingDate
+              .getHours()
+              .toString()
+              .padStart(2, '0');
+            const existingMinutes = meetingDate
+              .getMinutes()
+              .toString()
+              .padStart(2, '0');
+            const timeSlot = `${existingHours}:${existingMinutes}`;
+
+            busySlots.add(timeSlot);
+            console.log(
+              `Horario ocupado: ${timeSlot} - ${existingMeeting.title}`
+            );
+          }
+        } catch (error) {
+          console.error('Error al procesar horario ocupado:', error);
+        }
+      });
+
+      // Marcar todos los slots con su estado de disponibilidad
+      const slotsWithAvailability = allSlots.map(slot => ({
+        time: slot,
+        available: !busySlots.has(slot)
+      }));
+
+      setAvailableSlots(slotsWithAvailability);
+
+      console.log(`Fecha seleccionada: ${formData.date.toDateString()}`);
+      console.log(`Horarios ocupados: ${Array.from(busySlots).join(', ')}`);
+      console.log(
+        `Total de horarios disponibles: ${
+          slotsWithAvailability.filter(s => s.available).length
+        }`
+      );
+    }
+  }, [formData.date, formData.duration, currentStep, existingMeetings]);
 
   // Actualizar formulario
   const handleChange = (field, value) => {
@@ -146,89 +257,80 @@ export default function ScheduleMeetingModal({
     }
   };
 
-  // Manejar cambio de duración
-  const handleDurationChange = duration => {
-    handleChange('duration', duration);
-
-    // Calcular nueva hora de fin si hay tiempo seleccionado
-    if (formData.time) {
-      const endTime = calculateEndTime(formData.time, parseInt(duration, 10));
-      console.log(
-        `Duración cambiada a ${duration} minutos. Hora de fin: ${endTime}`
-      );
-    }
-  };
-
-  // Manejar selección de horario
-  const handleTimeSelect = time => {
-    handleChange('time', time);
-
-    // Calcular hora de fin
-    const endTime = calculateEndTime(time, parseInt(formData.duration, 10));
-    console.log(`Horario seleccionado: ${time}. Hora de fin: ${endTime}`);
-  };
-
-  // Validar formulario
-  const validateForm = () => {
+  // Validar formulario por paso
+  const validateStep = step => {
     const newErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = 'El título es obligatorio';
+    if (step === 1) {
+      if (!formData.date) {
+        newErrors.date = 'Selecciona una fecha';
+      } else {
+        // Verificar si es fin de semana
+        const dayOfWeek = formData.date.getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          newErrors.date = 'No se pueden agendar reuniones en fines de semana';
+        }
+      }
+
+      if (!formData.time) {
+        newErrors.time = 'Selecciona un horario';
+      }
+      if (!formData.duration) {
+        newErrors.duration = 'Selecciona una duración';
+      }
     }
 
-    if (!formData.leadId) {
-      newErrors.leadId = 'Selecciona un cliente';
-    }
+    if (step === 2) {
+      if (!formData.title || !formData.title.trim()) {
+        newErrors.title = 'El título es obligatorio';
+      }
 
-    if (!formData.time) {
-      newErrors.time = 'Selecciona un horario';
+      // Validación estricta para el ID del lead (cliente)
+      if (!formData.leadId) {
+        newErrors.leadId = 'Selecciona un cliente (obligatorio)';
+      }
     }
 
     return newErrors;
   };
 
-  // Mostrar el selector de horarios
-  const handleShowTimeSelector = () => {
-    const formErrors = validateForm();
+  // Avanzar al siguiente paso
+  const handleNextStep = () => {
+    const stepErrors = validateStep(currentStep);
 
-    // Solo validamos título y cliente antes de mostrar el selector de horarios
-    if (formErrors.title || formErrors.leadId) {
-      setErrors(formErrors);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
       return;
     }
 
-    setTimeSelectorOpen(true);
+    setCurrentStep(prev => Math.min(prev + 1, 3));
+  };
+
+  // Retroceder al paso anterior
+  const handlePrevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
   // Enviar formulario
   const handleSubmit = () => {
-    const formErrors = validateForm();
-
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      return;
-    }
-
     // Construir fecha y hora combinadas
     const [hours, minutes] = formData.time.split(':');
     const meetingDate = new Date(formData.date);
     meetingDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
 
     // Calcular hora de fin
-    const endTimeString = calculateEndTime(
+    const [endHours, endMinutes] = calculateEndTime(
       formData.time,
       parseInt(formData.duration, 10)
-    );
-    const [endHours, endMinutes] = endTimeString.split(':');
+    ).split(':');
     const endDate = new Date(formData.date);
     endDate.setHours(parseInt(endHours, 10), parseInt(endMinutes, 10), 0);
 
-    // Crear o actualizar objeto de reunión
+    // Crear objeto de reunión
     const meetingData = {
       ...formData,
       date: meetingDate.toISOString(),
       endTime: endDate.toISOString(),
-      // Si es edición, mantener el mismo ID
       ...(meeting && { id: meeting.id })
     };
 
@@ -236,249 +338,391 @@ export default function ScheduleMeetingModal({
     onClose();
   };
 
-  // Renderizar formulario principal
-  const renderMainForm = () => (
-    <>
-      <div className='grid gap-4 py-4'>
-        <div className='grid gap-2'>
-          <Label htmlFor='title'>
-            Título <span className='text-red-500'>*</span>
+  // Renderizar indicador de pasos
+  const renderStepIndicator = () => (
+    <div className='flex items-center justify-center mb-6'>
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          currentStep === 1
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted text-muted-foreground'
+        }`}
+      >
+        1
+      </div>
+      <div className='h-1 w-10 bg-muted mx-1' />
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          currentStep === 2
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted text-muted-foreground'
+        }`}
+      >
+        2
+      </div>
+      <div className='h-1 w-10 bg-muted mx-1' />
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          currentStep === 3
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted text-muted-foreground'
+        }`}
+      >
+        3
+      </div>
+    </div>
+  );
+
+  // Paso 1: Selección de fecha, duración y horario
+  const renderStep1 = () => (
+    <div className='space-y-4'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        {/* Selección de fecha */}
+        <div>
+          <Label className='block mb-2'>
+            Fecha <span className='text-red-500'>*</span>
           </Label>
-          <Input
-            id='title'
-            placeholder='Ej: Reunión inicial con cliente'
-            value={formData.title}
-            onChange={e => handleChange('title', e.target.value)}
-            className={cn(errors.title && 'border-red-500')}
-          />
-          {errors.title && (
-            <span className='text-sm text-red-500'>{errors.title}</span>
+          <div className='border rounded-md p-3'>
+            <Calendar
+              mode='single'
+              selected={formData.date}
+              onSelect={date => handleChange('date', date)}
+              locale={es}
+              className='mx-auto'
+              disabled={{
+                before: new Date(),
+                // Deshabilitar fines de semana (0 = domingo, 6 = sábado)
+                dayOfWeek: [0, 6]
+              }}
+            />
+          </div>
+          {errors.date && (
+            <p className='text-sm text-destructive mt-1'>{errors.date}</p>
           )}
         </div>
 
-        <div className='grid gap-2'>
-          <Label htmlFor='leadId'>
-            Cliente <span className='text-red-500'>*</span>
-          </Label>
-          <Select
-            value={formData.leadId}
-            onValueChange={value => handleChange('leadId', value)}
-          >
-            <SelectTrigger className={cn(errors.leadId && 'border-red-500')}>
-              <SelectValue placeholder='Seleccionar cliente' />
-            </SelectTrigger>
-            <SelectContent>
-              {leads.length === 0 ? (
-                <div className='p-2 text-center text-sm text-muted-foreground'>
-                  No hay clientes disponibles
-                </div>
-              ) : (
-                leads.map(lead => (
-                  <SelectItem key={lead.id} value={lead.id}>
-                    {lead.name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-          {errors.leadId && (
-            <span className='text-sm text-red-500'>{errors.leadId}</span>
-          )}
-        </div>
-
-        <div className='grid gap-2'>
-          <Label htmlFor='location'>Ubicación</Label>
-          <Input
-            id='location'
-            placeholder='Ej: Oficina central, Google Meet, etc.'
-            value={formData.location}
-            onChange={e => handleChange('location', e.target.value)}
-          />
-        </div>
-
-        <div className='grid gap-2'>
-          <Label htmlFor='description'>Descripción</Label>
-          <Textarea
-            id='description'
-            placeholder='Detalles adicionales sobre la reunión'
-            value={formData.description}
-            onChange={e => handleChange('description', e.target.value)}
-            rows={3}
-          />
-        </div>
-
-        <div className='grid gap-2'>
-          <div className='flex items-center'>
-            <Label htmlFor='duration' className='mr-2'>
-              Duración
+        <div className='space-y-4'>
+          {/* Duración */}
+          <div>
+            <Label htmlFor='duration' className='block mb-2'>
+              Duración <span className='text-red-500'>*</span>
             </Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className='h-4 w-4 text-muted-foreground' />
-                </TooltipTrigger>
-                <TooltipContent side='right'>
-                  <p className='text-xs'>Tiempo estimado para la reunión</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Select
-            value={formData.duration}
-            onValueChange={handleDurationChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Seleccionar duración' />
-            </SelectTrigger>
-            <SelectContent>
-              {DURATION_OPTIONS.map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className='grid gap-2'>
-          <Label>
-            Fecha y hora <span className='text-red-500'>*</span>
-          </Label>
-          <div className='flex'>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant='outline'
-                  className={cn(
-                    'justify-start text-left font-normal flex-grow mr-2',
-                    !formData.date && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {formData.date ? (
-                    format(formData.date, 'PPP', { locale: es })
-                  ) : (
-                    <span>Seleccionar fecha</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
-                <Calendar
-                  mode='single'
-                  selected={formData.date}
-                  onSelect={date => handleChange('date', date)}
-                  initialFocus
-                  locale={es}
-                  disabled={date =>
-                    // Deshabilitar fechas pasadas y fines de semana
-                    date < new Date(new Date().setHours(0, 0, 0, 0)) ||
-                    date.getDay() === 0 ||
-                    date.getDay() === 6
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-            <Button
-              variant='outline'
-              className='flex items-center'
-              onClick={handleShowTimeSelector}
-              type='button'
+            <Select
+              value={formData.duration}
+              onValueChange={value => handleChange('duration', value)}
             >
-              <Clock className='mr-2 h-4 w-4' />
-              {formData.time ? formData.time : 'Seleccionar horario'}
-              <ArrowRight className='ml-2 h-4 w-4' />
-            </Button>
+              <SelectTrigger
+                id='duration'
+                className={errors.duration ? 'border-destructive' : ''}
+              >
+                <SelectValue placeholder='Seleccionar duración' />
+              </SelectTrigger>
+              <SelectContent>
+                {DURATION_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.duration && (
+              <p className='text-sm text-destructive mt-1'>{errors.duration}</p>
+            )}
           </div>
-          {errors.time && (
-            <span className='text-sm text-red-500'>{errors.time}</span>
-          )}
-        </div>
 
-        {formData.time && (
-          <div className='bg-muted p-3 rounded-md'>
-            <h4 className='text-sm font-medium mb-2'>Resumen de la reunión</h4>
-            <ul className='space-y-1 text-sm'>
-              <li>
-                <strong>Fecha:</strong>{' '}
-                {format(formData.date, 'PPP', { locale: es })}
-              </li>
-              <li>
-                <strong>Hora:</strong> {formData.time}
-              </li>
-              <li>
-                <strong>Duración:</strong>{' '}
-                {
-                  DURATION_OPTIONS.find(
-                    option => option.value === formData.duration
-                  )?.label
-                }
-              </li>
-            </ul>
+          {/* Horarios disponibles */}
+          <div>
+            <Label className='block mb-2'>
+              Horario disponible <span className='text-red-500'>*</span>
+            </Label>
+            <div className='grid grid-cols-3 gap-2 mt-1 max-h-[240px] overflow-y-auto p-1'>
+              {availableSlots.length > 0 ? (
+                availableSlots.map(slot => (
+                  <Button
+                    key={slot.time}
+                    type='button'
+                    size='sm'
+                    variant={
+                      formData.time === slot.time ? 'default' : 'outline'
+                    }
+                    className={`
+                      text-xs py-1 relative
+                      ${formData.time === slot.time ? 'bg-primary' : ''}
+                      ${!slot.available ? 'opacity-50' : ''}
+                    `}
+                    onClick={() =>
+                      slot.available && handleChange('time', slot.time)
+                    }
+                    disabled={!slot.available}
+                  >
+                    {slot.time}
+                    {!slot.available && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <AlertTriangle className='h-3 w-3 absolute -top-1 -right-1 text-amber-500' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className='text-xs'>Horario no disponible</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </Button>
+                ))
+              ) : (
+                <p className='text-sm text-muted-foreground col-span-3 text-center py-4'>
+                  {formData.date?.getDay() === 0 ||
+                  formData.date?.getDay() === 6
+                    ? 'No hay horarios disponibles en fines de semana. Por favor, selecciona un día laborable.'
+                    : 'No hay horarios disponibles para esta fecha'}
+                </p>
+              )}
+            </div>
+            {errors.time && (
+              <p className='text-sm text-destructive mt-1'>{errors.time}</p>
+            )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Paso 2: Detalles de la reunión
+  const renderStep2 = () => (
+    <div className='space-y-4'>
+      {/* Título */}
+      <div>
+        <Label htmlFor='title'>
+          Título <span className='text-red-500'>*</span>
+        </Label>
+        <Input
+          id='title'
+          placeholder='Ej: Reunión inicial con cliente'
+          value={formData.title}
+          onChange={e => handleChange('title', e.target.value)}
+          className={errors.title ? 'border-destructive' : ''}
+        />
+        {errors.title && (
+          <p className='text-sm text-destructive mt-1'>{errors.title}</p>
         )}
       </div>
 
-      <DialogFooter>
-        <Button variant='outline' onClick={onClose} className='mr-2'>
-          Cancelar
-        </Button>
-        <Button onClick={handleSubmit}>
-          {meeting ? 'Actualizar' : 'Agendar'}
-        </Button>
-      </DialogFooter>
-    </>
+      {/* Cliente */}
+      <div>
+        <Label htmlFor='leadId'>
+          Cliente <span className='text-red-500'>*</span>
+        </Label>
+        <Select
+          value={formData.leadId}
+          onValueChange={value => handleChange('leadId', value)}
+        >
+          <SelectTrigger
+            id='leadId'
+            className={errors.leadId ? 'border-destructive' : ''}
+          >
+            <SelectValue placeholder='Seleccionar cliente' />
+          </SelectTrigger>
+          <SelectContent>
+            {leads.map(lead => (
+              <SelectItem key={lead.id} value={lead.id}>
+                {lead.name || lead.email}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.leadId && (
+          <p className='text-sm text-destructive mt-1'>{errors.leadId}</p>
+        )}
+      </div>
+
+      {/* Ubicación */}
+      <div>
+        <Label htmlFor='location'>Ubicación</Label>
+        <Input
+          id='location'
+          placeholder='Ej: Oficina central, Google Meet, etc.'
+          value={formData.location}
+          onChange={e => handleChange('location', e.target.value)}
+        />
+      </div>
+
+      {/* Descripción */}
+      <div>
+        <Label htmlFor='description'>Descripción</Label>
+        <Textarea
+          id='description'
+          placeholder='Detalles adicionales sobre la reunión'
+          value={formData.description}
+          onChange={e => handleChange('description', e.target.value)}
+          rows={3}
+        />
+      </div>
+    </div>
   );
 
-  // Panel lateral para selección de horarios
-  const renderTimeSelector = () => (
-    <Sheet open={timeSelectorOpen} onOpenChange={setTimeSelectorOpen}>
-      <SheetContent className='sm:max-w-md overflow-y-auto'>
-        <SheetHeader>
-          <SheetTitle>Seleccionar horario</SheetTitle>
-          <SheetDescription>
-            Elige un horario disponible para tu reunión
-          </SheetDescription>
-        </SheetHeader>
+  // Paso 3: Resumen y confirmación
+  const renderStep3 = () => {
+    // Encontrar el cliente seleccionado
+    const selectedLead = leads.find(lead => lead.id === formData.leadId);
+    const leadName = selectedLead
+      ? selectedLead.name || selectedLead.email
+      : 'Cliente no seleccionado';
 
-        <div className='py-6'>
-          <TimeSlotSelector
-            selectedDate={formData.date}
-            duration={parseInt(formData.duration, 10)}
-            onSelectTime={time => {
-              handleTimeSelect(time);
-              setTimeSelectorOpen(false);
-            }}
-            selectedTime={formData.time}
-          />
+    // Encontrar la duración seleccionada
+    const durationLabel =
+      DURATION_OPTIONS.find(option => option.value === formData.duration)
+        ?.label || formData.duration + ' minutos';
+
+    // Calcular hora de fin
+    const endTime = calculateEndTime(
+      formData.time,
+      parseInt(formData.duration, 10)
+    );
+
+    return (
+      <div className='space-y-6'>
+        <div className='bg-muted/30 p-4 rounded-lg'>
+          <h3 className='font-medium text-lg mb-4'>Resumen de la reunión</h3>
+
+          <div className='space-y-3'>
+            <div className='flex items-start'>
+              <FileText className='h-5 w-5 mr-3 text-primary mt-0.5' />
+              <div>
+                <p className='text-sm text-muted-foreground'>Título</p>
+                <p className='font-medium'>{formData.title}</p>
+              </div>
+            </div>
+
+            <div className='flex items-start'>
+              <CalendarIcon className='h-5 w-5 mr-3 text-primary mt-0.5' />
+              <div>
+                <p className='text-sm text-muted-foreground'>Fecha y hora</p>
+                <p className='font-medium'>
+                  {formData.date &&
+                    format(formData.date, 'PPP', { locale: es })}
+                  {formData.time && `, ${formData.time} - ${endTime}`}
+                </p>
+                <Badge variant='outline' className='mt-1'>
+                  {durationLabel}
+                </Badge>
+              </div>
+            </div>
+
+            <div className='flex items-start'>
+              <User className='h-5 w-5 mr-3 text-primary mt-0.5' />
+              <div>
+                <p className='text-sm text-muted-foreground'>Cliente</p>
+                <p className='font-medium'>{leadName}</p>
+              </div>
+            </div>
+
+            {formData.location && (
+              <div className='flex items-start'>
+                <MapPin className='h-5 w-5 mr-3 text-primary mt-0.5' />
+                <div>
+                  <p className='text-sm text-muted-foreground'>Ubicación</p>
+                  <p>{formData.location}</p>
+                </div>
+              </div>
+            )}
+
+            {formData.description && (
+              <div className='flex items-start'>
+                <Info className='h-5 w-5 mr-3 text-primary mt-0.5' />
+                <div>
+                  <p className='text-sm text-muted-foreground'>Descripción</p>
+                  <p className='text-sm'>{formData.description}</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+    );
+  };
 
-        <SheetFooter className='flex justify-end w-full'>
-          <Button type='button' onClick={() => setTimeSelectorOpen(false)}>
-            Confirmar
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
+  // Renderizar contenido según paso actual
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return renderStep1();
+      case 2:
+        return renderStep2();
+      case 3:
+        return renderStep3();
+      default:
+        return null;
+    }
+  };
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className='sm:max-w-[500px]'>
-          <DialogHeader>
-            <DialogTitle>
-              {meeting ? 'Editar reunión' : 'Agendar nueva reunión'}
-            </DialogTitle>
-            <DialogDescription>
-              Complete los detalles de la reunión
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='sm:max-w-[600px] overflow-y-auto max-h-[90vh]'>
+        <DialogHeader>
+          <DialogTitle>
+            {meeting
+              ? 'Editar Reunión'
+              : currentStep === 1
+              ? 'Seleccionar Fecha y Hora'
+              : currentStep === 2
+              ? 'Detalles de la Reunión'
+              : 'Confirmar Reunión'}
+          </DialogTitle>
+          <DialogDescription>
+            {currentStep === 1
+              ? 'Escoge una fecha, duración y horario disponible para la reunión'
+              : currentStep === 2
+              ? 'Complete los detalles de la reunión'
+              : 'Revisa la información y confirma la reunión'}
+          </DialogDescription>
+        </DialogHeader>
 
-          {renderMainForm()}
-        </DialogContent>
-      </Dialog>
+        {/* Indicador de pasos */}
+        {renderStepIndicator()}
 
-      {renderTimeSelector()}
-    </>
+        {/* Contenido del paso actual */}
+        {renderStepContent()}
+
+        <DialogFooter className='flex justify-between mt-6'>
+          {/* Botones de navegación */}
+          <div>
+            {currentStep > 1 && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={handlePrevStep}
+                className='flex items-center gap-1'
+              >
+                <ArrowLeft className='h-4 w-4' />
+                Atrás
+              </Button>
+            )}
+          </div>
+
+          <div>
+            {currentStep < 3 ? (
+              <Button
+                type='button'
+                onClick={handleNextStep}
+                className='flex items-center gap-1'
+              >
+                Siguiente
+                <ArrowRight className='h-4 w-4' />
+              </Button>
+            ) : (
+              <Button
+                type='button'
+                onClick={handleSubmit}
+                className='flex items-center gap-1'
+              >
+                Confirmar
+                <Check className='h-4 w-4' />
+              </Button>
+            )}
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

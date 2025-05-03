@@ -42,6 +42,7 @@ import {
   clientToApiSchedule
 } from '../../lib/adapters/schedule-adapter';
 import { useCreateSchedule } from '../../lib/hooks/useSchedules';
+import { toast } from 'sonner';
 
 /**
  * Componente para visualizar métricas y gráficos de leads
@@ -74,9 +75,21 @@ export default function LeadDashboard({
 
   // Transformar datos de la API al formato del cliente
   const meetings = useMemo(() => {
-    return Array.isArray(schedulesData)
-      ? schedulesData.map(apiToClientSchedule).filter(Boolean)
-      : [];
+    if (!schedulesData) return [];
+
+    // Asegurarnos de que tenemos un array para mapear
+    const dataArray = Array.isArray(schedulesData) ? schedulesData : [];
+
+    console.log('Datos para transformar:', dataArray);
+
+    // Transformar cada elemento usando el adaptador
+    const transformedMeetings = dataArray
+      .map(apiToClientSchedule)
+      .filter(Boolean);
+
+    console.log('Reuniones transformadas:', transformedMeetings);
+
+    return transformedMeetings;
   }, [schedulesData]);
 
   // Custom hook para métricas
@@ -114,15 +127,38 @@ export default function LeadDashboard({
         meeting.client = lead.name;
       }
 
+      // Verificar datos obligatorios antes de intentar guardar
+      if (!meeting.leadId) {
+        throw new Error('El ID del lead es obligatorio');
+      }
+
+      if (!meeting.date) {
+        throw new Error('La fecha de inicio es obligatoria');
+      }
+
+      console.log(
+        'Datos originales de la reunión:',
+        JSON.stringify(meeting, null, 2)
+      );
+
       // Convertir al formato de la API
       const apiData = clientToApiSchedule(meeting);
 
+      console.log(
+        'Datos convertidos para el backend:',
+        JSON.stringify(apiData, null, 2)
+      );
+
       // Crear nueva reunión usando React Query
-      await createScheduleMutation.mutateAsync(apiData);
+      const result = await createScheduleMutation.mutateAsync(apiData);
+      console.log('Respuesta del backend:', result);
 
       setShowMeetingModal(false);
+      toast.success('Reunión agendada correctamente');
     } catch (error) {
       console.error('Error al guardar la reunión:', error);
+      // Mostrar error al usuario
+      toast.error(`Error al guardar la reunión: ${error.message}`);
     }
   };
 

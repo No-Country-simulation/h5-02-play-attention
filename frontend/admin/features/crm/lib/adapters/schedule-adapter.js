@@ -17,16 +17,25 @@ export const apiToClientSchedule = apiSchedule => {
       console.warn('Advertencia: reunión sin ID', apiSchedule);
     }
 
+    // El backend puede enviar la fecha como date o startTime
+    const meetingDate =
+      apiSchedule.date || apiSchedule.startTime || new Date().toISOString();
+
+    // El backend puede enviar el ID del lead como leadId o lead
+    const leadId = apiSchedule.leadId || apiSchedule.lead || '';
+
+    // El backend puede enviar la ubicación como location o place
+    const location = apiSchedule.location || apiSchedule.place || '';
+
     return {
       id: id,
       title: apiSchedule.title || '',
-      date:
-        apiSchedule.date || apiSchedule.startTime || new Date().toISOString(),
+      date: meetingDate,
       endTime: apiSchedule.endTime || null,
       duration: apiSchedule.duration?.toString() || '30',
-      leadId: apiSchedule.leadId || apiSchedule.lead || '',
+      leadId: leadId,
       leadName: apiSchedule.leadName || apiSchedule.client || '',
-      location: apiSchedule.location || apiSchedule.place || '',
+      location: location,
       description: apiSchedule.description || '',
       status: apiSchedule.status || 'Pending',
       createdAt: apiSchedule.createdAt,
@@ -47,21 +56,41 @@ export const clientToApiSchedule = clientSchedule => {
   if (!clientSchedule) return null;
 
   try {
-    // Construir el objeto para la API
+    // Verificar leadId obligatorio
+    if (!clientSchedule.leadId) {
+      console.error(
+        'Error: leadId es obligatorio para crear/actualizar una reunión'
+      );
+      throw new Error('El ID del lead es obligatorio');
+    }
+
+    // Verificar fecha obligatoria
+    if (!clientSchedule.date) {
+      console.error(
+        'Error: date es obligatorio para crear/actualizar una reunión'
+      );
+      throw new Error('La fecha de inicio es obligatoria');
+    }
+
+    // Construir el objeto para la API con los nombres de campos correctos
     return {
-      id: clientSchedule.id,
       title: clientSchedule.title,
+      description: clientSchedule.description || '',
+      // Enviar fecha como startTime y date para asegurar compatibilidad
+      startTime: clientSchedule.date,
       date: clientSchedule.date,
       endTime: clientSchedule.endTime,
+      // Enviar leadId como lead (nombre esperado por el backend)
+      lead: clientSchedule.leadId,
       duration: parseInt(clientSchedule.duration, 10),
-      leadId: clientSchedule.leadId,
-      location: clientSchedule.location,
-      description: clientSchedule.description,
-      status: clientSchedule.status || 'Pending'
+      status: clientSchedule.status || 'Pending',
+      place: clientSchedule.location || '',
+      // Si hay un ID existente, incluirlo para actualizaciones
+      ...(clientSchedule.id && { id: clientSchedule.id })
     };
   } catch (error) {
     console.error('Error al convertir formato para API:', error);
-    return null;
+    throw error; // Propagar el error para que pueda ser manejado por el componente
   }
 };
 

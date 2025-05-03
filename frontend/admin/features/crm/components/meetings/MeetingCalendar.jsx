@@ -62,13 +62,28 @@ export default function MeetingCalendar({
   const upcomingMeetings = meetings
     .filter(meeting => {
       try {
-        const meetingDate = new Date(meeting.date);
+        // Intentar obtener la fecha de la reunión (usando date o startTime)
+        const dateField = meeting.date || meeting.startTime;
+        if (!dateField) {
+          return false;
+        }
+
+        const meetingDate = new Date(dateField);
         return isBefore(new Date(), meetingDate) || isToday(meetingDate);
       } catch (e) {
+        console.error(
+          'Error al procesar fecha para próximas reuniones:',
+          e,
+          meeting
+        );
         return false;
       }
     })
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .sort((a, b) => {
+      const dateA = new Date(a.date || a.startTime);
+      const dateB = new Date(b.date || b.startTime);
+      return dateA - dateB;
+    })
     .slice(0, 3); // Limitar a 3 reuniones para mostrar
 
   // Cambiar al mes anterior
@@ -90,11 +105,30 @@ export default function MeetingCalendar({
 
   // Contar reuniones por día
   const getMeetingsForDay = day => {
+    if (!meetings || !Array.isArray(meetings) || meetings.length === 0) {
+      return [];
+    }
+
     return meetings.filter(meeting => {
       try {
-        const meetingDate = new Date(meeting.date);
-        return isSameDay(meetingDate, day);
+        // Intentar obtener la fecha de la reunión (usando date o startTime)
+        const dateField = meeting.date || meeting.startTime;
+        if (!dateField) {
+          console.warn('Reunión sin fecha:', meeting);
+          return false;
+        }
+
+        const meetingDate = new Date(dateField);
+        const isSame = isSameDay(meetingDate, day);
+
+        // Mostrar para depuración solo si la reunión es del día actual
+        if (isToday(day) && isSame) {
+          console.log('Reunión encontrada para hoy:', meeting);
+        }
+
+        return isSame;
       } catch (e) {
+        console.error('Error al procesar fecha de reunión:', e, meeting);
         return false;
       }
     });
@@ -128,6 +162,9 @@ export default function MeetingCalendar({
     return <CalendarSkeleton />;
   }
 
+  // Mostrar mensaje si no hay reuniones
+  const showNoMeetingsMessage = !meetings || meetings.length === 0;
+
   return (
     <div className='h-full flex flex-col'>
       <div className='flex-none'>
@@ -151,126 +188,146 @@ export default function MeetingCalendar({
           </div>
         </div>
 
-        {/* Grid del calendario */}
-        <div className='grid grid-cols-7 gap-1 text-center'>
-          {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
-            <div
-              key={day}
-              className='text-xs font-medium py-1 text-muted-foreground'
+        {showNoMeetingsMessage ? (
+          <div className='flex flex-col items-center justify-center p-8 text-center space-y-4 bg-muted/10 rounded-md'>
+            <p className='text-muted-foreground text-sm'>
+              No hay reuniones agendadas
+            </p>
+            <Button
+              size='sm'
+              onClick={() => onAddMeeting(new Date())}
+              className='flex items-center gap-1'
             >
-              {day}
-            </div>
-          ))}
+              <Plus className='h-4 w-4' />
+              Agendar Reunión
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Grid del calendario */}
+            <div className='grid grid-cols-7 gap-1 text-center'>
+              {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
+                <div
+                  key={day}
+                  className='text-xs font-medium py-1 text-muted-foreground'
+                >
+                  {day}
+                </div>
+              ))}
 
-          {/* Celdas vacías para ajustar el inicio del mes */}
-          {Array.from({
-            length:
-              new Date(monthStart).getDay() === 0
-                ? 6
-                : new Date(monthStart).getDay() - 1
-          }).map((_, i) => (
-            <div key={`empty-${i}`} className='h-9 rounded-md' />
-          ))}
+              {/* Celdas vacías para ajustar el inicio del mes */}
+              {Array.from({
+                length:
+                  new Date(monthStart).getDay() === 0
+                    ? 6
+                    : new Date(monthStart).getDay() - 1
+              }).map((_, i) => (
+                <div key={`empty-${i}`} className='h-9 rounded-md' />
+              ))}
 
-          {/* Días del mes */}
-          {days.map(day => {
-            // Obtener reuniones para este día
-            const dayMeetings = getMeetingsForDay(day);
-            const hasMeetings = dayMeetings.length > 0;
-            const meetingCount = dayMeetings.length;
-            const isSelected = isSameDay(day, selectedDate);
+              {/* Días del mes */}
+              {days.map(day => {
+                // Obtener reuniones para este día
+                const dayMeetings = getMeetingsForDay(day);
+                const hasMeetings = dayMeetings.length > 0;
+                const meetingCount = dayMeetings.length;
+                const isSelected = isSameDay(day, selectedDate);
 
-            return (
-              <Popover
-                key={day.toString()}
-                open={isSelected && popoverOpen && hasMeetings}
-                onOpenChange={setPopoverOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={isSelected ? 'default' : 'ghost'}
-                    size='sm'
-                    className={`h-9 w-full relative text-xs font-medium ${
-                      !isSameMonth(day, currentDate)
-                        ? 'text-muted-foreground opacity-50'
-                        : ''
-                    } ${
-                      isToday(day) && !isSelected
-                        ? 'border-2 border-primary'
-                        : ''
-                    }`}
-                    onClick={() => handleDayClick(day)}
+                return (
+                  <Popover
+                    key={day.toString()}
+                    open={isSelected && popoverOpen && hasMeetings}
+                    onOpenChange={setPopoverOpen}
                   >
-                    <span>{format(day, 'd')}</span>
-                    {hasMeetings && (
-                      <div className='absolute -bottom-1 left-1/2 -translate-x-1/2'>
-                        {meetingCount > 1 ? (
-                          <Badge
-                            variant='outline'
-                            className='text-[9px] h-3 min-w-3 flex items-center justify-center bg-primary/20 hover:bg-primary/20 p-0'
-                          >
-                            {meetingCount}
-                          </Badge>
-                        ) : (
-                          <span className='w-2 h-2 bg-primary rounded-full inline-block'></span>
-                        )}
-                      </div>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-64 p-2' align='center'>
-                  <div className='text-xs'>
-                    <div className='flex items-center justify-between mb-2'>
-                      <div className='flex items-center font-medium text-sm'>
-                        <CalendarIcon className='h-3 w-3 mr-1' />
-                        {format(day, 'PPP', { locale: es })}
-                      </div>
+                    <PopoverTrigger asChild>
                       <Button
-                        variant='ghost'
+                        variant={isSelected ? 'default' : 'ghost'}
                         size='sm'
-                        className='h-6 px-2 text-xs'
-                        onClick={() => handleAddMeetingOnDate(day)}
+                        className={`h-9 w-full relative text-xs font-medium ${
+                          !isSameMonth(day, currentDate)
+                            ? 'text-muted-foreground opacity-50'
+                            : ''
+                        } ${
+                          isToday(day) && !isSelected
+                            ? 'border-2 border-primary'
+                            : ''
+                        }`}
+                        onClick={() => handleDayClick(day)}
                       >
-                        <Plus className='h-3 w-3 mr-1' />
-                        Añadir
-                      </Button>
-                    </div>
-
-                    <ScrollArea className='h-[180px]'>
-                      {dayMeetings.map(meeting => (
-                        <div
-                          key={meeting.id}
-                          className='mb-2 p-2 rounded-md bg-muted/50 last:mb-0'
-                        >
-                          <div className='font-medium'>{meeting.title}</div>
-                          <div className='flex items-center text-muted-foreground'>
-                            <Clock className='h-3 w-3 mr-1' />
-                            {formatTime(meeting.date)}
-                            {meeting.duration && (
-                              <span className='ml-1'>
-                                ({meeting.duration} min)
-                              </span>
+                        <span>{format(day, 'd')}</span>
+                        {hasMeetings && (
+                          <div className='absolute -bottom-1 left-1/2 -translate-x-1/2'>
+                            {meetingCount > 1 ? (
+                              <Badge
+                                variant='outline'
+                                className='text-[9px] h-3 min-w-3 flex items-center justify-center bg-primary/20 hover:bg-primary/20 p-0'
+                              >
+                                {meetingCount}
+                              </Badge>
+                            ) : (
+                              <span className='w-2 h-2 bg-primary rounded-full inline-block'></span>
                             )}
                           </div>
-                          <div className='flex items-center text-muted-foreground'>
-                            <UserIcon className='h-3 w-3 mr-1' />
-                            {meeting.leadName || 'Sin cliente'}
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-64 p-2' align='center'>
+                      <div className='text-xs'>
+                        <div className='flex items-center justify-between mb-2'>
+                          <div className='flex items-center font-medium text-sm'>
+                            <CalendarIcon className='h-3 w-3 mr-1' />
+                            {format(day, 'PPP', { locale: es })}
                           </div>
-                          {meeting.location && (
-                            <div className='flex items-center text-muted-foreground'>
-                              <MapPin className='h-3 w-3 mr-1' />
-                              {meeting.location}
-                            </div>
-                          )}
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='h-6 px-2 text-xs'
+                            onClick={() => handleAddMeetingOnDate(day)}
+                          >
+                            <Plus className='h-3 w-3 mr-1' />
+                            Añadir
+                          </Button>
                         </div>
-                      ))}
-                    </ScrollArea>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            );
-          })}
-        </div>
+
+                        <ScrollArea className='h-[180px]'>
+                          {dayMeetings.map(meeting => (
+                            <div
+                              key={meeting.id}
+                              className='mb-2 p-2 rounded-md bg-muted/50 last:mb-0'
+                            >
+                              <div className='font-medium'>{meeting.title}</div>
+                              <div className='flex items-center text-muted-foreground'>
+                                <Clock className='h-3 w-3 mr-1' />
+                                {formatTime(meeting.date)}
+                                {meeting.duration && (
+                                  <span className='ml-1'>
+                                    ({meeting.duration} min)
+                                  </span>
+                                )}
+                              </div>
+                              {meeting.leadName && (
+                                <div className='flex items-center text-muted-foreground'>
+                                  <UserIcon className='h-3 w-3 mr-1' />
+                                  {meeting.leadName}
+                                </div>
+                              )}
+                              {meeting.location && (
+                                <div className='flex items-center text-muted-foreground'>
+                                  <MapPin className='h-3 w-3 mr-1' />
+                                  {meeting.location}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </ScrollArea>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Próximas reuniones */}
