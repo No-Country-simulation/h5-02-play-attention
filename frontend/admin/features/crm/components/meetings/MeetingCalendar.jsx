@@ -329,7 +329,6 @@ export default function MeetingCalendar({
           </>
         )}
       </div>
-
     </div>
   );
 }
