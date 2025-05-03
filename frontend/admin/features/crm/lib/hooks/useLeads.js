@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { leadsApi } from '../api';
+import { leadsApi } from '../api/leads';
 import { leadsAdapter } from '../adapters';
 import { toast } from 'sonner';
 
@@ -89,7 +89,7 @@ export function useUpdateLeadStatus() {
 
       // Importamos las funciones del archivo de configuración
       const { mapSourceToBackend, mapUserTypeToService } = await import(
-        '../api/config'
+        '../api/leads/config'
       );
 
       // Crear payload manteniendo los datos del lead y actualizando el estado
@@ -149,7 +149,7 @@ export function useUpdateLeadNewsletter() {
 
       // Importamos las funciones del archivo de configuración
       const { mapSourceToBackend, mapUserTypeToService } = await import(
-        '../api/config'
+        '../api/leads/config'
       );
 
       // Crear payload manteniendo los datos del lead y actualizando newsletter

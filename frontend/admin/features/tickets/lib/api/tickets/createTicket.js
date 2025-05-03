@@ -79,9 +79,7 @@ export async function createTicket(ticketData) {
       mappedData.priority = 'medium';
     }
 
-    // Log para depuración
-    console.log('Prioridad final enviada:', mappedData.priority);
-    console.log('Origen del ticket enviado:', mappedData.ticket_origin);
+  
 
     // Verificar ID de usuario asignado
     if (mappedData.assigned_to) {

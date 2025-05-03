@@ -45,7 +45,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/ui/dropdown-menu';
-import DeleteConfirmationModal from '@/shared/ui/modals/DeleteConfirmationModal';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 import TicketPagination from './TicketPagination';
 
@@ -69,8 +68,6 @@ export default function TicketList({
 }) {
   const router = useRouter();
   const [hoveredRow, setHoveredRow] = useState(null);
-  const [ticketToDelete, setTicketToDelete] = useState(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Formatear la fecha para mostrarla en formato legible
   const formatDate = dateString => {
@@ -131,28 +128,6 @@ export default function TicketList({
       default:
         return 'text-gray-600 border-gray-200';
     }
-  };
-
-  // Función para manejar la intención de eliminar
-  const handleDeleteClick = (e, ticket) => {
-    e.stopPropagation(); // Prevenir que se seleccione el ticket
-    setTicketToDelete(ticket);
-    setDeleteModalOpen(true);
-  };
-
-  // Función para confirmar eliminación
-  const confirmDelete = async () => {
-    if (ticketToDelete && onDeleteTicket) {
-      await onDeleteTicket(ticketToDelete.id);
-      setDeleteModalOpen(false);
-      setTicketToDelete(null);
-    }
-  };
-
-  // Función para cancelar eliminación
-  const cancelDelete = () => {
-    setDeleteModalOpen(false);
-    setTicketToDelete(null);
   };
 
   // Renderizar el contenido basado en el estado de carga y los datos
@@ -324,13 +299,6 @@ export default function TicketList({
                             <Edit className='mr-2 h-4 w-4' />
                             Ver detalle
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className='text-red-600 focus:text-red-600'
-                            onClick={e => handleDeleteClick(e, ticket)}
-                          >
-                            <Trash2 className='mr-2 h-4 w-4' />
-                            Eliminar
-                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -422,11 +390,13 @@ export default function TicketList({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuItem
-                      className='text-red-600 focus:text-red-600'
-                      onClick={e => handleDeleteClick(e, ticket)}
+                      onClick={e => {
+                        e.stopPropagation();
+                        onSelectTicket(ticket);
+                      }}
                     >
-                      <Trash2 className='mr-2 h-4 w-4' />
-                      Eliminar
+                      <Edit className='mr-2 h-4 w-4' />
+                      Ver detalle
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -476,17 +446,6 @@ export default function TicketList({
           />
         </div>
       )}
-
-      {/* Modal de confirmación para eliminar ticket */}
-      <DeleteConfirmationModal
-        isOpen={deleteModalOpen}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-        title={`Eliminar ticket: ${ticketToDelete?.subject || ''}`}
-        description='¿Estás seguro de que deseas eliminar este ticket? Esta acción no se puede deshacer.'
-        confirmText='Eliminar'
-        cancelText='Cancelar'
-      />
     </Card>
   );
 }

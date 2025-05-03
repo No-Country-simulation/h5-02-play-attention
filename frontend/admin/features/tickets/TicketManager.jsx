@@ -350,7 +350,6 @@ export default function TicketManager() {
           <TicketList
             tickets={ticketListData.tickets}
             onSelectTicket={handleSelectTicket}
-            onDeleteTicket={handleDeleteTicket}
             isLoading={isLoading && demoTickets.length === 0}
             // Ya no necesitamos paginación
             totalTickets={ticketListData.total}

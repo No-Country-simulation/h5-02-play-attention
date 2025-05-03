@@ -4,7 +4,7 @@
  */
 
 import { API_URL, handleResponseError } from './config';
-import { engagementToApiAdapter } from '../adapters/engagements.adapter';
+import { engagementToApiAdapter } from '../../adapters/engagements.adapter';
 
 /**
  * Crea un nuevo contacto para un lead

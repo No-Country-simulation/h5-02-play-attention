@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { engagementsApi } from '../api';
+import { engagementsApi } from '../api/leads';
 import { toast } from 'sonner';
 
 /**

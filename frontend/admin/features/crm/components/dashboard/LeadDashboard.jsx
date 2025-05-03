@@ -28,7 +28,6 @@ import {
 import { generateLeadsPDF } from '../../lib/adapters/pdf-adapter';
 import MeetingCalendar from '../meetings/MeetingCalendar';
 import ScheduleMeetingModal from '../meetings/ScheduleMeetingModal';
-import { useMeetingsStore } from '../../lib/store/meetings-store';
 import { useLeadMetrics } from './hooks/useLeadMetrics';
 import { useLeadCharts } from './hooks/useLeadCharts';
 import { DashboardSkeleton } from './skeletons/DashboardSkeleton';
@@ -37,6 +36,12 @@ import { TimeRangeSelector } from './filters/TimeRangeSelector';
 import { ActionButtons } from './buttons/ActionButtons';
 import { ChartCard } from './charts/ChartCard';
 import { FollowUpLeadsList } from './lists/FollowUpLeadsList';
+import { useSchedules } from '../../lib/hooks/useSchedules';
+import {
+  apiToClientSchedule,
+  clientToApiSchedule
+} from '../../lib/adapters/schedule-adapter';
+import { useCreateSchedule } from '../../lib/hooks/useSchedules';
 
 /**
  * Componente para visualizar métricas y gráficos de leads
@@ -60,24 +65,25 @@ export default function LeadDashboard({
     conversionChart: useRef(null)
   };
 
-  // Obtenemos las reuniones del store
-  const {
-    meetings,
-    isLoading: meetingsLoading,
-    fetchMeetings,
-    addMeeting
-  } = useMeetingsStore();
+  // Obtenemos las reuniones usando React Query
+  const { data: schedulesData = [], isLoading: meetingsLoading } =
+    useSchedules();
+
+  // Mutación para crear reuniones
+  const createScheduleMutation = useCreateSchedule();
+
+  // Transformar datos de la API al formato del cliente
+  const meetings = useMemo(() => {
+    return Array.isArray(schedulesData)
+      ? schedulesData.map(apiToClientSchedule).filter(Boolean)
+      : [];
+  }, [schedulesData]);
 
   // Custom hook para métricas
   const metrics = useLeadMetrics(leads, timeRange, isLoading);
 
   // Custom hook para gráficos
   useLeadCharts(chartRefs, metrics, isLoading);
-
-  // Cargar reuniones al montar el componente
-  useEffect(() => {
-    fetchMeetings();
-  }, [fetchMeetings]);
 
   // Manejar exportación
   const handleExport = async () => {
@@ -108,7 +114,13 @@ export default function LeadDashboard({
         meeting.client = lead.name;
       }
 
-      await addMeeting(meeting);
+      // Convertir al formato de la API
+      const apiData = clientToApiSchedule(meeting);
+
+      // Crear nueva reunión usando React Query
+      await createScheduleMutation.mutateAsync(apiData);
+
+      setShowMeetingModal(false);
     } catch (error) {
       console.error('Error al guardar la reunión:', error);
     }
@@ -269,12 +281,14 @@ export default function LeadDashboard({
         leads={leads.filter(lead => lead.status === 'nuevo')}
       />
 
-      {/* Modal para agendar reuniones */}
+      {/* Modal para crear/editar reunión */}
       <ScheduleMeetingModal
         isOpen={showMeetingModal}
         onClose={() => setShowMeetingModal(false)}
         onSave={handleSaveMeeting}
         leads={leads}
+        preselectedDate={null}
+        preselectedLead={null}
       />
     </div>
   );

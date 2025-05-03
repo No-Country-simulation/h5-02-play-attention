@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   format,
   startOfMonth,
@@ -10,7 +10,9 @@ import {
   isSameDay,
   parseISO,
   isBefore,
-  isToday
+  isToday,
+  addMonths,
+  subMonths
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -19,19 +21,14 @@ import {
   UserIcon,
   MapPin,
   Plus,
+  ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/popover';
+import { ScrollArea } from '@/shared/ui/scroll-area';
 
 /**
  * Componente que muestra un calendario para visualizar y gestionar reuniones
@@ -53,9 +50,10 @@ export default function MeetingCalendar({
   // Filtrar reuniones de la fecha seleccionada
   const selectedDateMeetings = meetings.filter(meeting => {
     try {
-      const meetingDate = parseISO(meeting.date);
+      const meetingDate = new Date(meeting.date);
       return isSameDay(meetingDate, selectedDate);
     } catch (e) {
+      console.error('Error al procesar fecha de reunión:', e);
       return false;
     }
   });
@@ -64,35 +62,23 @@ export default function MeetingCalendar({
   const upcomingMeetings = meetings
     .filter(meeting => {
       try {
-        const meetingDate = parseISO(meeting.date);
+        const meetingDate = new Date(meeting.date);
         return isBefore(new Date(), meetingDate) || isToday(meetingDate);
       } catch (e) {
         return false;
       }
     })
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  // Limitar a 2 reuniones para mostrar
-  const displayMeetings = upcomingMeetings.slice(0, 2);
-  // Comprobar si hay más reuniones que las mostradas
-  const hasMoreMeetings = upcomingMeetings.length > 2;
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 3); // Limitar a 3 reuniones para mostrar
 
   // Cambiar al mes anterior
   const prevMonth = () => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() - 1);
-      return newDate;
-    });
+    setCurrentDate(subMonths(currentDate, 1));
   };
 
   // Cambiar al mes siguiente
   const nextMonth = () => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + 1);
-      return newDate;
-    });
+    setCurrentDate(addMonths(currentDate, 1));
   };
 
   // Obtener fecha actual
@@ -106,7 +92,8 @@ export default function MeetingCalendar({
   const getMeetingsForDay = day => {
     return meetings.filter(meeting => {
       try {
-        return isSameDay(parseISO(meeting.date), day);
+        const meetingDate = new Date(meeting.date);
+        return isSameDay(meetingDate, day);
       } catch (e) {
         return false;
       }
@@ -116,7 +103,8 @@ export default function MeetingCalendar({
   // Formatear hora
   const formatTime = dateString => {
     try {
-      return format(parseISO(dateString), 'HH:mm');
+      const date = new Date(dateString);
+      return format(date, 'HH:mm');
     } catch (e) {
       return '';
     }
@@ -129,11 +117,11 @@ export default function MeetingCalendar({
     setPopoverOpen(dayMeetings.length > 0);
   };
 
-  // Manejar "Ver más reuniones"
-  const handleViewAllMeetings = () => {
-    // Aquí se podría navegar a una vista de calendario completa
-    console.log('Ver todas las reuniones');
-    // Por ejemplo: router.push('/meetings');
+  // Mostrar formulario para agendar reunión
+  const handleAddMeetingOnDate = date => {
+    if (onAddMeeting) {
+      onAddMeeting(date);
+    }
   };
 
   if (isLoading) {
@@ -143,45 +131,33 @@ export default function MeetingCalendar({
   return (
     <div className='h-full flex flex-col'>
       <div className='flex-none'>
-        <div className='flex justify-between items-center'>
+        <div className='flex justify-between items-center mb-4'>
           <div className='flex items-center'>
-            <CalendarIcon className='h-4 w-4 mr-1 text-primary' />
-            <span className='text-sm font-medium'>
+            <CalendarIcon className='h-5 w-5 mr-2 text-primary' />
+            <span className='text-lg font-medium'>
               {format(currentDate, 'MMMM yyyy', { locale: es })}
             </span>
           </div>
-          <div className='flex space-x-1'>
-            <Button
-              variant='outline'
-              size='sm'
-              className='h-7 w-7 p-0'
-              onClick={prevMonth}
-            >
-              &lt;
+          <div className='flex space-x-2'>
+            <Button variant='outline' size='sm' onClick={prevMonth}>
+              <ChevronLeft className='h-4 w-4' />
             </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              className='h-7 text-xs px-2'
-              onClick={goToToday}
-            >
+            <Button variant='outline' size='sm' onClick={goToToday}>
               Hoy
             </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              className='h-7 w-7 p-0'
-              onClick={nextMonth}
-            >
-              &gt;
+            <Button variant='outline' size='sm' onClick={nextMonth}>
+              <ChevronRight className='h-4 w-4' />
             </Button>
           </div>
         </div>
 
         {/* Grid del calendario */}
-        <div className='grid grid-cols-7 gap-1 text-center mt-3'>
+        <div className='grid grid-cols-7 gap-1 text-center'>
           {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
-            <div key={day} className='text-xs font-medium py-1'>
+            <div
+              key={day}
+              className='text-xs font-medium py-1 text-muted-foreground'
+            >
               {day}
             </div>
           ))}
@@ -193,7 +169,7 @@ export default function MeetingCalendar({
                 ? 6
                 : new Date(monthStart).getDay() - 1
           }).map((_, i) => (
-            <div key={`empty-${i}`} className='h-7 rounded-md' />
+            <div key={`empty-${i}`} className='h-9 rounded-md' />
           ))}
 
           {/* Días del mes */}
@@ -214,7 +190,7 @@ export default function MeetingCalendar({
                   <Button
                     variant={isSelected ? 'default' : 'ghost'}
                     size='sm'
-                    className={`h-7 w-full relative text-xs font-medium ${
+                    className={`h-9 w-full relative text-xs font-medium ${
                       !isSameMonth(day, currentDate)
                         ? 'text-muted-foreground opacity-50'
                         : ''
@@ -231,147 +207,147 @@ export default function MeetingCalendar({
                         {meetingCount > 1 ? (
                           <Badge
                             variant='outline'
-                            className='text-[9px] h-3 min-w-3 flex items-center justify-center bg-secondary/20 hover:bg-secondary/20 p-0'
+                            className='text-[9px] h-3 min-w-3 flex items-center justify-center bg-primary/20 hover:bg-primary/20 p-0'
                           >
                             {meetingCount}
                           </Badge>
                         ) : (
-                          <span className='w-2 h-2 bg-secondary/70 rounded-full inline-block'></span>
+                          <span className='w-2 h-2 bg-primary rounded-full inline-block'></span>
                         )}
                       </div>
                     )}
                   </Button>
                 </PopoverTrigger>
-                {hasMeetings && (
-                  <PopoverContent className='w-64 p-2' align='center'>
-                    <div className='text-xs'>
-                      <div className='flex items-center font-medium mb-2'>
+                <PopoverContent className='w-64 p-2' align='center'>
+                  <div className='text-xs'>
+                    <div className='flex items-center justify-between mb-2'>
+                      <div className='flex items-center font-medium text-sm'>
                         <CalendarIcon className='h-3 w-3 mr-1' />
-                        Reuniones de{' '}
-                        {format(day, "d 'de' MMMM", { locale: es })}:
+                        {format(day, 'PPP', { locale: es })}
                       </div>
-                      <div className='space-y-1 max-h-[150px] overflow-y-auto'>
-                        {dayMeetings.map(meeting => (
-                          <div
-                            key={meeting.id}
-                            className='px-2 py-1 border border-primary/20 bg-primary/5 rounded-md flex justify-between items-start'
-                          >
-                            <span className='font-medium'>{meeting.title}</span>
-                            <div className='flex items-center text-muted-foreground'>
-                              <Clock className='h-2.5 w-2.5 mr-1' />
-                              <span>{formatTime(meeting.date)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='h-6 px-2 text-xs'
+                        onClick={() => handleAddMeetingOnDate(day)}
+                      >
+                        <Plus className='h-3 w-3 mr-1' />
+                        Añadir
+                      </Button>
                     </div>
-                  </PopoverContent>
-                )}
+
+                    <ScrollArea className='h-[180px]'>
+                      {dayMeetings.map(meeting => (
+                        <div
+                          key={meeting.id}
+                          className='mb-2 p-2 rounded-md bg-muted/50 last:mb-0'
+                        >
+                          <div className='font-medium'>{meeting.title}</div>
+                          <div className='flex items-center text-muted-foreground'>
+                            <Clock className='h-3 w-3 mr-1' />
+                            {formatTime(meeting.date)}
+                            {meeting.duration && (
+                              <span className='ml-1'>
+                                ({meeting.duration} min)
+                              </span>
+                            )}
+                          </div>
+                          <div className='flex items-center text-muted-foreground'>
+                            <UserIcon className='h-3 w-3 mr-1' />
+                            {meeting.leadName || 'Sin cliente'}
+                          </div>
+                          {meeting.location && (
+                            <div className='flex items-center text-muted-foreground'>
+                              <MapPin className='h-3 w-3 mr-1' />
+                              {meeting.location}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </ScrollArea>
+                  </div>
+                </PopoverContent>
               </Popover>
             );
           })}
         </div>
       </div>
 
-      {/* Espacio flexible (limitado) entre calendario y próximas reuniones */}
-      <div className='h-4'></div>
+      {/* Próximas reuniones */}
+      <div className='mt-6'>
+        <h3 className='text-sm font-medium mb-2 flex items-center'>
+          <Clock className='h-4 w-4 mr-1 text-primary' />
+          Próximas reuniones
+        </h3>
 
-      {/* Próximas reuniones - limitado a altura fija */}
-      <div className='flex-none'>
-        <div className='flex items-center justify-between mb-2'>
-          <div className='text-xs font-medium'>Próximas reuniones</div>
-          <Button
-            variant='outline'
-            size='sm'
-            className='h-7 px-2 text-xs flex items-center gap-1'
-            onClick={onAddMeeting}
-          >
-            <Plus className='h-3 w-3' />
-            Agregar
-          </Button>
-        </div>
-        <div className='space-y-1.5'>
-          {displayMeetings.length > 0 ? (
-            <>
-              {displayMeetings.map(meeting => (
-                <div
-                  key={meeting.id}
-                  className='p-2 border rounded-md text-xs border-muted bg-card'
-                >
-                  <div className='font-medium mb-1'>
-                    {meeting.title || 'Reunión sin título'}
-                  </div>
-                  <div className='flex justify-between text-muted-foreground'>
-                    <div className='flex items-center'>
-                      <Clock className='h-3 w-3 mr-1' />
-                      <span>{formatTime(meeting.date)}</span>
-                    </div>
-                    <div className='flex items-center'>
-                      <UserIcon className='h-3 w-3 mr-1' />
-                      <span>{meeting.client || 'Cliente'}</span>
-                    </div>
-                  </div>
+        {upcomingMeetings.length === 0 ? (
+          <div className='text-sm text-center text-muted-foreground py-3'>
+            No hay reuniones programadas
+          </div>
+        ) : (
+          <div className='space-y-2'>
+            {upcomingMeetings.map(meeting => (
+              <div
+                key={meeting.id}
+                className='p-2 rounded-md bg-muted/30 text-sm'
+              >
+                <div className='font-medium'>{meeting.title}</div>
+                <div className='flex items-center text-muted-foreground text-xs'>
+                  <CalendarIcon className='h-3 w-3 mr-1' />
+                  {format(new Date(meeting.date), 'PPP, HH:mm', { locale: es })}
                 </div>
-              ))}
-              {hasMoreMeetings && (
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='w-full h-7 text-xs text-muted-foreground flex items-center justify-center'
-                  onClick={handleViewAllMeetings}
-                >
-                  Ver todas ({upcomingMeetings.length})
-                  <ChevronRight className='h-3 w-3 ml-1' />
-                </Button>
-              )}
-            </>
-          ) : (
-            <div className='text-xs text-center text-muted-foreground py-2'>
-              No hay reuniones programadas
-            </div>
-          )}
-        </div>
+                <div className='flex items-center text-muted-foreground text-xs'>
+                  <UserIcon className='h-3 w-3 mr-1' />
+                  {meeting.leadName || 'Sin cliente'}
+                </div>
+              </div>
+            ))}
+
+            <Button
+              variant='outline'
+              size='sm'
+              className='w-full text-xs'
+              onClick={() => handleAddMeetingOnDate(new Date())}
+            >
+              <Plus className='h-3 w-3 mr-1' />
+              Nueva reunión
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// Esqueleto para estado de carga
+// Skeleton para el estado de carga
 function CalendarSkeleton() {
   return (
-    <div className='space-y-4 flex flex-col h-full'>
-      <div className='flex-none'>
-        <div className='flex justify-between items-center'>
-          <Skeleton className='h-5 w-32' />
-          <div className='flex space-x-1'>
-            <Skeleton className='h-7 w-7' />
-            <Skeleton className='h-7 w-14' />
-            <Skeleton className='h-7 w-7' />
-          </div>
-        </div>
-
-        <div className='grid grid-cols-7 gap-1 text-center mt-3'>
-          {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
-            <div key={day} className='text-xs font-medium py-1'>
-              {day}
-            </div>
-          ))}
-
-          {Array.from({ length: 31 }).map((_, i) => (
-            <Skeleton key={`day-${i}`} className='h-8 w-full rounded-md' />
-          ))}
+    <div className='h-full'>
+      <div className='flex justify-between items-center mb-4'>
+        <Skeleton className='h-6 w-32' />
+        <div className='flex space-x-2'>
+          <Skeleton className='h-8 w-8' />
+          <Skeleton className='h-8 w-16' />
+          <Skeleton className='h-8 w-8' />
         </div>
       </div>
 
-      <div className='flex-grow'></div>
+      <div className='grid grid-cols-7 gap-1 text-center'>
+        {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
+          <div key={day} className='text-xs font-medium py-1'>
+            {day}
+          </div>
+        ))}
 
-      <div className='flex-none mt-2'>
-        <div className='flex items-center justify-between mb-2'>
-          <Skeleton className='h-4 w-32' />
-          <Skeleton className='h-5 w-16' />
-        </div>
+        {Array.from({ length: 35 }).map((_, i) => (
+          <Skeleton key={i} className='h-9 w-full' />
+        ))}
+      </div>
+
+      <div className='mt-6'>
+        <Skeleton className='h-5 w-40 mb-3' />
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={`meeting-${i}`} className='h-14 w-full mb-1.5' />
+          <Skeleton key={i} className='h-16 w-full mb-2' />
         ))}
       </div>
     </div>
