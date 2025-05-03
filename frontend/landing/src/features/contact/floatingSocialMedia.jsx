@@ -15,7 +15,7 @@ export const FloatingSocialMedia = () => {
       name: "Instagram",
       icon: (
         <svg
-          className="h-5 w-5 md:h-6 md:w-6"
+          className="h-6 w-6 md:h-7 md:w-7" // Aumentado de h-5 w-5 a h-6 w-6
           viewBox="0 0 50 50"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +41,7 @@ export const FloatingSocialMedia = () => {
       name: "WhatsApp",
       icon: (
         <svg
-          className="h-5 w-5 md:h-6 md:w-6"
+          className="h-6 w-6 md:h-7 md:w-7" // Aumentado de h-5 w-5 a h-6 w-6
           viewBox="0 0 50 50"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -62,23 +62,15 @@ export const FloatingSocialMedia = () => {
   ];
 
   return (
-    <div className="fixed right-4 bottom-4 md:right-5 md:bottom-5 z-50 flex flex-col items-end gap-2 md:gap-3">
+    <div className="  fixed right-4 bottom-4 md:right-5 md:bottom-5 z-50 flex flex-col items-end gap-2 md:gap-6">
       {/* Menú desplegable */}
       <div
-        className={`flex flex-col gap-2 md:gap-3 transition-all duration-300 ease-in-out ${
+        className={`flex flex-col gap-2 md:gap-6 transition-all duration-300 ease-in-out ${
           isOpen
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-8 pointer-events-none"
         }`}
       >
-        {/* Botón estático para agregar más redes */}
-        <button
-          className="w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg bg-[#5C3983] flex items-center justify-center text-white cursor-default"
-          aria-label="Agregar más redes sociales"
-        >
-          <Plus className="h-5 w-5 md:h-6 md:w-6" />
-        </button>
-
         {socialLinks.map((link) => (
           <a
             key={link.name}
@@ -86,7 +78,7 @@ export const FloatingSocialMedia = () => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={link.name}
-            className={`w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center bg-white backdrop-blur-sm border border-gray-200 transition-colors ${link.color} text-gray-700`}
+            className={`w-14 h-14 md:w-16 md:h-16 rounded-full shadow-lg shadow-[#C5C5D9] flex items-center justify-center bg-white backdrop-blur-sm border border-gray-200 transition-colors ${link.color} text-gray-700`} // Aumentado de w-12 h-12 a w-14 h-14
           >
             {link.icon}
           </a>
@@ -96,15 +88,15 @@ export const FloatingSocialMedia = () => {
       {/* Botón hamburguesa */}
       <button
         onClick={toggleMenu}
-        className="w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg bg-[#5C3983] hover:bg-[#C5C5D9] transition-all flex items-center justify-center text-white"
+        className="w-14 h-14 md:w-16 md:h-16 rounded-full shadow-lg bg-[#5C3983] hover:bg-[#C5C5D9] hover: transition-all flex items-center justify-center text-white" // Aumentado de w-12 h-12 a w-14 h-14
         aria-label={
           isOpen ? "Cerrar menú redes sociales" : "Abrir menú redes sociales"
         }
       >
         {isOpen ? (
-          <X className="h-5 w-5 md:h-6 md:w-6" />
+          <X className="h-6 w-6 md:h-7 md:w-7" /> // Aumentado de h-5 w-5 a h-6 w-6
         ) : (
-          <Menu className="h-5 w-5 md:h-6 md:w-6" />
+          <Menu className="h-6 w-6 md:h-7 md:w-7" /> // Aumentado de h-5 w-5 a h-6 w-6
         )}
       </button>
     </div>
