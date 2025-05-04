@@ -287,8 +287,7 @@ export default function LeadManager() {
               className='flex items-center whitespace-nowrap'
             >
               <Calendar className='h-4 w-4 mr-2' />
-              <span className='hidden sm:inline'>Calendario</span>
-              <span className='sm:hidden'>Agenda</span>
+              <span className=' sm:inline'>Calendario</span>
             </TabsTrigger>
             <TabsTrigger
               value='list'

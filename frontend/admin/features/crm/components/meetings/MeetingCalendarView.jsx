@@ -196,7 +196,7 @@ export default function MeetingCalendarView() {
       </div>
 
       {/* Contenido principal con tabs */}
-      <Tabs defaultValue='list' className='w-full'>
+      <Tabs defaultValue='week' className='w-full'>
         <TabsList className='mb-3 h-8'>
           <TabsTrigger value='month' className='text-xs h-6 px-3'>
             <CalendarIcon className='h-3.5 w-3.5 mr-1.5' />
