@@ -56,41 +56,36 @@ export const clientToApiSchedule = clientSchedule => {
   if (!clientSchedule) return null;
 
   try {
-    // Verificar leadId obligatorio
-    if (!clientSchedule.leadId) {
-      console.error(
-        'Error: leadId es obligatorio para crear/actualizar una reunión'
-      );
-      throw new Error('El ID del lead es obligatorio');
+    // Construir fecha ISO 8601 completa combinando fecha y hora
+    let meetingDate;
+    if (clientSchedule.date instanceof Date) {
+      meetingDate = clientSchedule.date;
+    } else if (typeof clientSchedule.date === 'string') {
+      meetingDate = new Date(clientSchedule.date);
+    } else {
+      meetingDate = new Date();
     }
 
-    // Verificar fecha obligatoria
-    if (!clientSchedule.date) {
-      console.error(
-        'Error: date es obligatorio para crear/actualizar una reunión'
-      );
-      throw new Error('La fecha de inicio es obligatoria');
+    // Si recibimos la hora del cliente como string (HH:MM), actualizar la fecha
+    if (clientSchedule.time && typeof clientSchedule.time === 'string') {
+      const [hours, minutes] = clientSchedule.time.split(':');
+      meetingDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
     }
 
-    // Construir el objeto para la API con los nombres de campos correctos
+    // Datos a enviar al servidor
     return {
-      title: clientSchedule.title,
+      id: clientSchedule.id,
+      title: clientSchedule.title || '',
+      date: meetingDate.toISOString(),
+      duration: clientSchedule.duration?.toString() || '30',
+      leadId: clientSchedule.leadId || null,
+      location: clientSchedule.location || '',
       description: clientSchedule.description || '',
-      // Enviar fecha como startTime y date para asegurar compatibilidad
-      startTime: clientSchedule.date,
-      date: clientSchedule.date,
-      endTime: clientSchedule.endTime,
-      // Enviar leadId como lead (nombre esperado por el backend)
-      lead: clientSchedule.leadId,
-      duration: parseInt(clientSchedule.duration, 10),
-      status: clientSchedule.status || 'Pending',
-      place: clientSchedule.location || '',
-      // Si hay un ID existente, incluirlo para actualizaciones
-      ...(clientSchedule.id && { id: clientSchedule.id })
+      status: clientSchedule.status || 'Pending'
     };
   } catch (error) {
-    console.error('Error al convertir formato para API:', error);
-    throw error; // Propagar el error para que pueda ser manejado por el componente
+    console.error('Error al convertir formato de reunión para API:', error);
+    return null;
   }
 };
 

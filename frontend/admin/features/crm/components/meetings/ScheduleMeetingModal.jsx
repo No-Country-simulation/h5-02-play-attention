@@ -532,7 +532,7 @@ export default function ScheduleMeetingModal({
             <Label className='block mb-2'>
               Horario disponible <span className='text-red-500'>*</span>
             </Label>
-            <div className='grid grid-cols-3 gap-2 mt-1 max-h-[240px] overflow-y-auto p-1'>
+            <div className='grid grid-cols-3 gap-2 mt-1 max-h-[200px] overflow-y-auto p-1'>
               {availableSlots.length > 0 ? (
                 // Filtrar para mostrar solo los horarios disponibles
                 availableSlots
@@ -581,27 +581,27 @@ export default function ScheduleMeetingModal({
 
   // Paso 2: Detalles de la reunión
   const renderStep2 = () => (
-    <div className='space-y-4'>
+    <div className='space-y-3'>
       {/* Título */}
       <div>
-        <Label htmlFor='title'>
+        <Label htmlFor='title' className='block mb-1'>
           Título <span className='text-red-500'>*</span>
         </Label>
         <Input
           id='title'
-          placeholder='Ej: Reunión inicial con cliente'
+          placeholder='Ej. Presentación de propuesta'
           value={formData.title}
           onChange={e => handleChange('title', e.target.value)}
           className={errors.title ? 'border-destructive' : ''}
         />
         {errors.title && (
-          <p className='text-sm text-destructive mt-1'>{errors.title}</p>
+          <p className='text-xs text-destructive mt-1'>{errors.title}</p>
         )}
       </div>
 
       {/* Cliente */}
       <div>
-        <Label htmlFor='leadId'>
+        <Label htmlFor='leadId' className='block mb-1'>
           Cliente <span className='text-red-500'>*</span>
         </Label>
         <Select
@@ -612,41 +612,68 @@ export default function ScheduleMeetingModal({
             id='leadId'
             className={errors.leadId ? 'border-destructive' : ''}
           >
-            <SelectValue placeholder='Seleccionar cliente' />
+            <SelectValue placeholder='Selecciona un cliente' />
           </SelectTrigger>
           <SelectContent>
             {leads.map(lead => (
               <SelectItem key={lead.id} value={lead.id}>
-                {lead.name || lead.email}
+                {lead.name || lead.email || 'Cliente sin nombre'}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         {errors.leadId && (
-          <p className='text-sm text-destructive mt-1'>{errors.leadId}</p>
+          <p className='text-xs text-destructive mt-1'>{errors.leadId}</p>
         )}
       </div>
 
-      {/* Ubicación */}
-      <div>
-        <Label htmlFor='location'>Ubicación</Label>
-        <Input
-          id='location'
-          placeholder='Ej: Oficina central, Google Meet, etc.'
-          value={formData.location}
-          onChange={e => handleChange('location', e.target.value)}
-        />
+      <div className='grid grid-cols-2 gap-3'>
+        {/* Ubicación */}
+        <div>
+          <Label htmlFor='location' className='block mb-1'>
+            Ubicación
+          </Label>
+          <Input
+            id='location'
+            placeholder='Ej. Oficina central, Zoom, etc.'
+            value={formData.location}
+            onChange={e => handleChange('location', e.target.value)}
+          />
+        </div>
+
+        {/* Estado */}
+        <div>
+          <Label htmlFor='status' className='block mb-1'>
+            Estado
+          </Label>
+          <Select
+            value={formData.status}
+            onValueChange={value => handleChange('status', value)}
+          >
+            <SelectTrigger id='status'>
+              <SelectValue placeholder='Seleccionar estado' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='Pending'>Pendiente</SelectItem>
+              <SelectItem value='Completed'>Completada</SelectItem>
+              <SelectItem value='Cancelled'>Cancelada</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Descripción */}
       <div>
-        <Label htmlFor='description'>Descripción</Label>
+        <Label htmlFor='description' className='block mb-1'>
+          Descripción
+        </Label>
         <Textarea
           id='description'
           placeholder='Detalles adicionales sobre la reunión'
           value={formData.description}
           onChange={e => handleChange('description', e.target.value)}
-          rows={3}
+          rows={2}
+          className='resize-none'
         />
       </div>
     </div>
@@ -672,58 +699,60 @@ export default function ScheduleMeetingModal({
     );
 
     return (
-      <div className='space-y-6'>
-        <div className='bg-muted/30 p-4 rounded-lg'>
-          <h3 className='font-medium text-lg mb-4'>Resumen de la reunión</h3>
+      <div className='space-y-3'>
+        <div className='bg-muted/30 p-3 rounded-lg'>
+          <h3 className='font-medium mb-2'>Resumen de la reunión</h3>
 
-          <div className='space-y-3'>
+          <div className='space-y-2'>
             <div className='flex items-start'>
-              <FileText className='h-5 w-5 mr-3 text-primary mt-0.5' />
-              <div>
-                <p className='text-sm text-muted-foreground'>Título</p>
-                <p className='font-medium'>{formData.title}</p>
+              <FileText className='h-4 w-4 mr-2 text-primary mt-0.5' />
+              <div className='flex-1 min-w-0'>
+                <p className='text-xs text-muted-foreground'>Título</p>
+                <p className='font-medium truncate'>{formData.title}</p>
               </div>
             </div>
 
             <div className='flex items-start'>
-              <CalendarIcon className='h-5 w-5 mr-3 text-primary mt-0.5' />
+              <CalendarIcon className='h-4 w-4 mr-2 text-primary mt-0.5' />
               <div>
-                <p className='text-sm text-muted-foreground'>Fecha y hora</p>
-                <p className='font-medium'>
-                  {formData.date &&
-                    format(formData.date, 'PPP', { locale: es })}
-                  {formData.time && `, ${formData.time} - ${endTime}`}
-                </p>
-                <Badge variant='outline' className='mt-1'>
-                  {durationLabel}
-                </Badge>
+                <p className='text-xs text-muted-foreground'>Fecha y hora</p>
+                <div className='flex items-center gap-2'>
+                  <p className='font-medium'>
+                    {formData.date &&
+                      format(formData.date, 'PPP', { locale: es })}
+                    {formData.time && `, ${formData.time} - ${endTime}`}
+                  </p>
+                  <Badge variant='outline' className='text-[10px] h-4 px-1'>
+                    {durationLabel}
+                  </Badge>
+                </div>
               </div>
             </div>
 
             <div className='flex items-start'>
-              <User className='h-5 w-5 mr-3 text-primary mt-0.5' />
-              <div>
-                <p className='text-sm text-muted-foreground'>Cliente</p>
-                <p className='font-medium'>{leadName}</p>
+              <User className='h-4 w-4 mr-2 text-primary mt-0.5' />
+              <div className='flex-1 min-w-0'>
+                <p className='text-xs text-muted-foreground'>Cliente</p>
+                <p className='font-medium truncate'>{leadName}</p>
               </div>
             </div>
 
             {formData.location && (
               <div className='flex items-start'>
-                <MapPin className='h-5 w-5 mr-3 text-primary mt-0.5' />
-                <div>
-                  <p className='text-sm text-muted-foreground'>Ubicación</p>
-                  <p>{formData.location}</p>
+                <MapPin className='h-4 w-4 mr-2 text-primary mt-0.5' />
+                <div className='flex-1 min-w-0'>
+                  <p className='text-xs text-muted-foreground'>Ubicación</p>
+                  <p className='truncate'>{formData.location}</p>
                 </div>
               </div>
             )}
 
             {formData.description && (
               <div className='flex items-start'>
-                <Info className='h-5 w-5 mr-3 text-primary mt-0.5' />
-                <div>
-                  <p className='text-sm text-muted-foreground'>Descripción</p>
-                  <p className='text-sm'>{formData.description}</p>
+                <Info className='h-4 w-4 mr-2 text-primary mt-0.5' />
+                <div className='flex-1 min-w-0'>
+                  <p className='text-xs text-muted-foreground'>Descripción</p>
+                  <p className='line-clamp-2 text-sm'>{formData.description}</p>
                 </div>
               </div>
             )}

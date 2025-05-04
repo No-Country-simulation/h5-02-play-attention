@@ -72,21 +72,10 @@ export default function DailyCalendarView({
     return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
   };
 
-  // Obtener un color basado en el título de la reunión (para identificación visual)
-  const getMeetingColor = title => {
-    const colors = [
-      'bg-blue-100 border-blue-300 text-blue-700',
-      'bg-emerald-100 border-emerald-300 text-emerald-700',
-      'bg-amber-100 border-amber-300 text-amber-700',
-      'bg-rose-100 border-rose-300 text-rose-700',
-      'bg-indigo-100 border-indigo-300 text-indigo-700'
-    ];
-
-    // Usar el string del título para determinar un índice
-    const sum = title
-      .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return colors[sum % colors.length];
+  // Obtener color para las reuniones (siempre violeta/primary como color de la aplicación)
+  const getMeetingColor = () => {
+    // Usar siempre el color principal (violeta)
+    return 'bg-primary/20 border-primary/30 text-primary';
   };
 
   // Posicionar la reunión en la grilla de horas
@@ -266,7 +255,7 @@ export default function DailyCalendarView({
                 const position = getMeetingPosition(meeting);
                 if (!position.valid) return null;
 
-                const colorClasses = getMeetingColor(meeting.title);
+                const colorClasses = getMeetingColor();
 
                 return (
                   <Popover

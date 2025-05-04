@@ -283,14 +283,6 @@ export default function LeadManager() {
               <span className='sm:hidden'>Panel</span>
             </TabsTrigger>
             <TabsTrigger
-              value='list'
-              className='flex items-center whitespace-nowrap'
-            >
-              <List className='h-4 w-4 mr-2' />
-              <span className='hidden sm:inline'>Lista de Leads</span>
-              <span className='sm:hidden'>Lista</span>
-            </TabsTrigger>
-            <TabsTrigger
               value='calendar'
               className='flex items-center whitespace-nowrap'
             >
@@ -298,6 +290,15 @@ export default function LeadManager() {
               <span className='hidden sm:inline'>Calendario</span>
               <span className='sm:hidden'>Agenda</span>
             </TabsTrigger>
+            <TabsTrigger
+              value='list'
+              className='flex items-center whitespace-nowrap'
+            >
+              <List className='h-4 w-4 mr-2' />
+              <span className='hidden sm:inline'>Lista de Leads</span>
+              <span className='sm:hidden'>Lista</span>
+            </TabsTrigger>
+   
           </TabsList>
         </div>
 
