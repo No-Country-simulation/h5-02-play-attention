@@ -6,7 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { SocketIOAdapter } from './socket-io.adapter';
 
-const corsOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+const corsOrigins = ['http://localhost:3000', 'http://localhost:5173','http://localhost:5174'];
 
 dotenv.config();
 async function bootstrap() {

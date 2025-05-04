@@ -1,10 +1,11 @@
-import { OnModuleInit, Logger, Inject, forwardRef } from "@nestjs/common";
+import {  Logger, Inject, forwardRef } from "@nestjs/common";
 import { 
     WebSocketGateway, 
     WebSocketServer,
     SubscribeMessage,
     ConnectedSocket,
     MessageBody,
+    OnGatewayConnection,
 
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
@@ -15,12 +16,9 @@ import { NotificationsService } from "./notifications.service";
 import { Notification } from "./schema/notifications.schema";
 
 @WebSocketGateway({
-    cors: {
-        origin: ['http://localhost:3000', 'http://localhost:5173'],
-        credentials: true
-    }
+    namespace:'/notifications',
 })
-export class NotificationsGateway implements OnModuleInit{
+export class NotificationsGateway implements OnGatewayConnection {
     @WebSocketServer()
     public server: Server;
     private readonly logger = new Logger(NotificationsGateway.name);
@@ -35,12 +33,10 @@ export class NotificationsGateway implements OnModuleInit{
         this.wsGuard = new WsGuard(jwtService, configService);
     }
 
-    onModuleInit() {
-        this.logger.log('Gateway inicializado');
-        
-        this.server.on("connection", async (socket: Socket) => {
+  async handleConnection(@ConnectedSocket() socket: Socket) {
+            this.logger.log(`Cliente intentando conectar - ID: ${socket.id}`);
             try {
-                this.logger.log(`Cliente intentando conectar - ID: ${socket.id}`);
+        
                 
                 // Autenticar el socket
                 const isAuthenticated = await this.wsGuard.authenticateSocket(socket);
@@ -73,7 +69,7 @@ export class NotificationsGateway implements OnModuleInit{
                 this.logger.error(`Error en la conexión para socket ${socket.id}:`, error);
                 socket.disconnect();
             }
-        });
+        ;
     }
 
     @SubscribeMessage('notificationView')
