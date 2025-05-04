@@ -4,7 +4,9 @@ import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SocketIOAdapter } from './socket-io.adapter';
 
+const corsOrigins = ['http://localhost:3000', 'http://localhost:5173'];
 
 dotenv.config();
 async function bootstrap() {
@@ -36,13 +38,16 @@ async function bootstrap() {
   );
   
   app.enableCors({
-    origin: true,
+    origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'playAttentionToken'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
     credentials: true,
     maxAge: 3600
   });
+
+  // Configurar el adaptador de Socket.IO con CORS
+  app.useWebSocketAdapter(new SocketIOAdapter(app));
 
   await app.listen(3000);
 }

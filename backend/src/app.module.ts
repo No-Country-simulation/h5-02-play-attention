@@ -19,6 +19,7 @@ import { SupportMessagesModule } from './support-messages/support-messages.modul
 import { TokenModule } from './token/token.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { SupportTicketModule } from './support-ticket/support-ticket.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SupportTicketModule } from './support-ticket/support-ticket.module';
     ScheduleModule,
     TokenModule,
     SupportTicketModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
