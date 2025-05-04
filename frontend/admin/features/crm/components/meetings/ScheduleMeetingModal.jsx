@@ -599,10 +599,10 @@ export default function ScheduleMeetingModal({
         )}
       </div>
 
-      {/* Cliente */}
+      {/* Lead */}
       <div>
         <Label htmlFor='leadId' className='block mb-1'>
-          Cliente <span className='text-red-500'>*</span>
+          Lead <span className='text-red-500'>*</span>
         </Label>
         <Select
           value={formData.leadId}
@@ -612,12 +612,12 @@ export default function ScheduleMeetingModal({
             id='leadId'
             className={errors.leadId ? 'border-destructive' : ''}
           >
-            <SelectValue placeholder='Selecciona un cliente' />
+            <SelectValue placeholder='Selecciona un lead' />
           </SelectTrigger>
           <SelectContent>
             {leads.map(lead => (
               <SelectItem key={lead.id} value={lead.id}>
-                {lead.name || lead.email || 'Cliente sin nombre'}
+                {lead.name || lead.email || 'Lead sin nombre'}
               </SelectItem>
             ))}
           </SelectContent>
@@ -685,7 +685,7 @@ export default function ScheduleMeetingModal({
     const selectedLead = leads.find(lead => lead.id === formData.leadId);
     const leadName = selectedLead
       ? selectedLead.name || selectedLead.email
-      : 'Cliente no seleccionado';
+      : 'Lead no seleccionado';
 
     // Encontrar la duración seleccionada
     const durationLabel =
@@ -732,7 +732,7 @@ export default function ScheduleMeetingModal({
             <div className='flex items-start'>
               <User className='h-4 w-4 mr-2 text-primary mt-0.5' />
               <div className='flex-1 min-w-0'>
-                <p className='text-xs text-muted-foreground'>Cliente</p>
+                <p className='text-xs text-muted-foreground'>Lead</p>
                 <p className='font-medium truncate'>{leadName}</p>
               </div>
             </div>

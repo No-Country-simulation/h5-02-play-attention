@@ -22,7 +22,9 @@ import {
   Clock,
   User,
   MapPin,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { ScrollArea } from '@/shared/ui/scroll-area';
@@ -41,7 +43,9 @@ const DEFAULT_END_HOUR = 23; // 11 PM
 export default function DailyCalendarView({
   meetings = [],
   isLoading = false,
-  onAddMeeting
+  onAddMeeting,
+  onEditMeeting,
+  onDeleteMeeting
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedMeeting, setSelectedMeeting] = useState(null);
@@ -97,9 +101,8 @@ export default function DailyCalendarView({
       }
 
       // Calcular posición vertical (tiempo)
-      // Ajustar para las nuevas alturas: 24px por hora completa, 12px por media hora
       const totalVisibleHours = visibleEndHour - visibleStartHour + 1;
-      const totalHeightPx = totalVisibleHours * 36; // 24px + 12px por cada hora
+      const totalHeightPx = totalVisibleHours * 36; // 36px por hora (24px hora + 12px media hora)
 
       const startMinutesFromVisibleStart =
         (hours - visibleStartHour) * 60 + minutes;
@@ -110,6 +113,8 @@ export default function DailyCalendarView({
       const durationMinutes = meeting.duration
         ? parseInt(meeting.duration, 10)
         : 30;
+
+      // Corregir el cálculo de la altura para que refleje correctamente la duración
       const heightPx = (durationMinutes / 60) * 36; // 36px por hora
       const heightPercentage = (heightPx / totalHeightPx) * 100;
 
@@ -144,6 +149,22 @@ export default function DailyCalendarView({
   const handleMeetingClick = meeting => {
     setSelectedMeeting(meeting);
     setPopoverOpen(true);
+  };
+
+  // Manejar edición de reunión
+  const handleEditMeeting = meeting => {
+    if (onEditMeeting) {
+      onEditMeeting(meeting);
+      setPopoverOpen(false);
+    }
+  };
+
+  // Manejar eliminación de reunión
+  const handleDeleteMeeting = meeting => {
+    if (onDeleteMeeting) {
+      onDeleteMeeting(meeting.id);
+      setPopoverOpen(false);
+    }
   };
 
   // Manejar click en la grilla para añadir reunión
@@ -304,12 +325,10 @@ export default function DailyCalendarView({
                         </p>
                       </div>
                       <div className='p-2 space-y-1.5'>
-                        {meeting.leadName && (
-                          <div className='flex items-center text-xs text-muted-foreground'>
-                            <User className='h-3 w-3 mr-1.5' />
-                            <span>{meeting.leadName}</span>
-                          </div>
-                        )}
+                        <div className='flex items-center text-xs text-muted-foreground'>
+                          <User className='h-3 w-3 mr-1.5' />
+                          <span>Lead: {meeting.leadName || 'Sin lead'}</span>
+                        </div>
                         {meeting.location && (
                           <div className='flex items-center text-xs text-muted-foreground'>
                             <MapPin className='h-3 w-3 mr-1.5' />
@@ -321,6 +340,28 @@ export default function DailyCalendarView({
                             {meeting.description}
                           </p>
                         )}
+
+                        {/* Acciones de la reunión */}
+                        <div className='flex justify-end gap-2 mt-2 pt-2 border-t'>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='h-7 text-[10px] px-2 gap-1'
+                            onClick={() => handleEditMeeting(meeting)}
+                          >
+                            <Edit className='h-3 w-3' />
+                            Editar
+                          </Button>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='h-7 text-[10px] px-2 gap-1 text-destructive border-destructive/50 hover:bg-destructive/10'
+                            onClick={() => handleDeleteMeeting(meeting)}
+                          >
+                            <Trash2 className='h-3 w-3' />
+                            Borrar
+                          </Button>
+                        </div>
                       </div>
                     </PopoverContent>
                   </Popover>

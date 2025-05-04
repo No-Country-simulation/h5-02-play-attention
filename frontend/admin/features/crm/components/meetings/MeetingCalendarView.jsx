@@ -235,6 +235,8 @@ export default function MeetingCalendarView() {
             meetings={meetings}
             isLoading={schedulesLoading}
             onAddMeeting={handleAddMeeting}
+            onEditMeeting={handleEditMeeting}
+            onDeleteMeeting={handleDeleteMeeting}
           />
         </TabsContent>
 
@@ -244,6 +246,8 @@ export default function MeetingCalendarView() {
             meetings={meetings}
             isLoading={schedulesLoading}
             onAddMeeting={handleAddMeeting}
+            onEditMeeting={handleEditMeeting}
+            onDeleteMeeting={handleDeleteMeeting}
           />
         </TabsContent>
 
@@ -359,8 +363,7 @@ export default function MeetingCalendarView() {
                           <div className='flex items-center gap-1'>
                             <AlertCircle className='h-3 w-3 flex-shrink-0' />
                             <span className='truncate'>
-                              Cliente:{' '}
-                              {meeting.leadName || 'Sin cliente asignado'}
+                              Lead: {meeting.leadName || 'Sin lead asignado'}
                             </span>
                           </div>
 
@@ -426,7 +429,7 @@ export default function MeetingCalendarView() {
                             <div className='flex items-center gap-1'>
                               <AlertCircle className='h-3 w-3 flex-shrink-0' />
                               <span>
-                                Cliente: {meeting.leadName || 'Sin cliente'}
+                                Lead: {meeting.leadName || 'Sin lead'}
                               </span>
                             </div>
 

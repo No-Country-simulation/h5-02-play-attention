@@ -22,7 +22,29 @@ export const apiToClientSchedule = apiSchedule => {
       apiSchedule.date || apiSchedule.startTime || new Date().toISOString();
 
     // El backend puede enviar el ID del lead como leadId o lead
-    const leadId = apiSchedule.leadId || apiSchedule.lead || '';
+    const leadId =
+      apiSchedule.leadId ||
+      (apiSchedule.lead && apiSchedule.lead._id) ||
+      (typeof apiSchedule.lead === 'string' ? apiSchedule.lead : '');
+
+    // Extraer nombre del lead que puede venir en diferentes estructuras
+    let leadName = '';
+    if (apiSchedule.leadName) {
+      // Si ya viene leadName directamente
+      leadName = apiSchedule.leadName;
+    } else if (apiSchedule.client) {
+      // Si viene como client (compatibilidad con versiones anteriores)
+      leadName = apiSchedule.client;
+    } else if (apiSchedule.lead) {
+      // Si lead es un objeto con fullname o email
+      if (typeof apiSchedule.lead === 'object') {
+        leadName =
+          apiSchedule.lead.fullname ||
+          apiSchedule.lead.name ||
+          apiSchedule.lead.email ||
+          '';
+      }
+    }
 
     // El backend puede enviar la ubicación como location o place
     const location = apiSchedule.location || apiSchedule.place || '';
@@ -34,7 +56,7 @@ export const apiToClientSchedule = apiSchedule => {
       endTime: apiSchedule.endTime || null,
       duration: apiSchedule.duration?.toString() || '30',
       leadId: leadId,
-      leadName: apiSchedule.leadName || apiSchedule.client || '',
+      leadName: leadName,
       location: location,
       description: apiSchedule.description || '',
       status: apiSchedule.status || 'Pending',
