@@ -53,6 +53,10 @@ export class CreateLeadDto {
     @IsNotEmpty()
     relation: string;
 
+    @ApiProperty({example: true, description: 'Campo para que el usuario se suscriba a la newsletter'})
+    @IsBoolean()
+    newsletter: boolean;
+
 }
 
 export class UpdateLeadDto extends PartialType(CreateLeadDto) {}
@@ -98,8 +102,7 @@ export class CreateLeadFromLandingDto {
     @IsNotEmpty()
     relation: string;
 
-    @ApiProperty({example: true, description: 'Campo opcional para que el usuario se suscriba a la newsletter'})
+    @ApiProperty({example: true, description: 'Campo para que el usuario se suscriba a la newsletter'})
     @IsBoolean()
-    @IsOptional()
     newsletter: boolean;
 }
