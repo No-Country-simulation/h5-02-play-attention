@@ -5,8 +5,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { SocketIOAdapter } from './socket-io.adapter';
+import { ConfigService } from '@nestjs/config';
 
-const corsOrigins = ['http://localhost:3000', 'http://localhost:5173','http://localhost:5174'];
+const corsOrigins = [new ConfigService().get('FRONTEND_URL')];
 
 dotenv.config();
 async function bootstrap() {
