@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/shared/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/shared/ui/accordion";
 
 export function FaqSection() {
   const [openItems, setOpenItems] = useState(["item-1"]);
@@ -74,6 +79,14 @@ export function FaqSection() {
   const handleValueChange = (value) => {
     setOpenItems(value);
   };
+
+  const handleOpenItem = (itemId) => {
+    const newOpenItems = openItems.includes(itemId)
+      ? openItems.filter((i) => i !== itemId)
+      : [...openItems, itemId];
+    setOpenItems(newOpenItems);
+  };
+
   return (
     <div className="py-12">
       <div className="relative overflow-hidden px-4 lg:px-20 m-0">
@@ -96,6 +109,7 @@ export function FaqSection() {
                   <div
                     key={item.id}
                     className="bg-white rounded-lg border border-gray-200 shadow-sm"
+                    onClick={() => handleOpenItem(item.id)}
                   >
                     <Accordion
                       type="multiple"
@@ -109,12 +123,7 @@ export function FaqSection() {
                             {item.question}
                           </AccordionTrigger>
                           <button
-                            onClick={() => {
-                              const newOpenItems = openItems.includes(item.id)
-                                ? openItems.filter((i) => i !== item.id)
-                                : [...openItems, item.id];
-                              setOpenItems(newOpenItems);
-                            }}
+                            onClick={() => handleOpenItem(item.id)}
                             className="flex-shrink-0 p-1"
                           >
                             {openItems.includes(item.id) ? (
@@ -138,6 +147,7 @@ export function FaqSection() {
                   <div
                     key={item.id}
                     className="bg-white rounded-lg border border-gray-200 shadow-sm"
+                    onClick={() => handleOpenItem(item.id)}
                   >
                     <Accordion
                       type="multiple"
@@ -151,12 +161,7 @@ export function FaqSection() {
                             {item.question}
                           </AccordionTrigger>
                           <button
-                            onClick={() => {
-                              const newOpenItems = openItems.includes(item.id)
-                                ? openItems.filter((i) => i !== item.id)
-                                : [...openItems, item.id];
-                              setOpenItems(newOpenItems);
-                            }}
+                            onClick={() => handleOpenItem(item.id)}
                             className="flex-shrink-0 p-1"
                           >
                             {openItems.includes(item.id) ? (
