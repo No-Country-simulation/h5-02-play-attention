@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react';
-import { mockEducationalMaterials } from '../mocks/mockData';
-/**
- * Custom hook to fetch and manage educational materials data
- */
+import { fetchEducationalMaterials } from '../../../../shared/lib/api/content/api';
+
+const getFileSize = async url => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      const bytes = parseInt(contentLength);
+      const mb = (bytes / (1024 * 1024)).toFixed(1);
+      return `${mb} MB`;
+    }
+    return '---';
+  } catch (error) {
+    console.error('Error getting file size:', error);
+    return '---';
+  }
+};
+
 export function useEducationalMaterials() {
   const [materials, setMaterials] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -13,15 +27,47 @@ export function useEducationalMaterials() {
       setIsLoading(true);
       setError(null);
       try {
-        // Uncomment this and remove the mock data when the API is ready
-        // const data = await fetchEducationalMaterials();
+        const data = await fetchEducationalMaterials();
+        const filteredData = data.filter(
+          item => item.category?.name === 'Material Eductaivo'
+        );
 
-        // Using mock data for development
-        // This simulates an API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const data = mockEducationalMaterials;
+        // Get file sizes for all materials
+        const materialsWithSizes = await Promise.all(
+          filteredData.map(async item => {
+            const fileSize = item.url ? await getFileSize(item.url) : '---';
+            const date = new Date(item.createdAt);
+            const formattedDate = `${date.getDate()} de ${
+              [
+                'Ene',
+                'Feb',
+                'Mar',
+                'Abr',
+                'May',
+                'Jun',
+                'Jul',
+                'Ago',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dic'
+              ][date.getMonth()]
+            } ${date.getFullYear()}`;
 
-        setMaterials(data);
+            return {
+              id: item._id,
+              title: item.title,
+              description: item.description,
+              type: item.type || 'PDF',
+              date: formattedDate,
+              rawDate: item.createdAt,
+              size: fileSize,
+              url: item.url
+            };
+          })
+        );
+
+        setMaterials(materialsWithSizes);
       } catch (err) {
         setError('Error al cargar los materiales educativos');
         console.error(err);
@@ -34,20 +80,15 @@ export function useEducationalMaterials() {
   }, []);
 
   const handleDownload = (material, action = 'view') => {
-    // Implementation for downloading or viewing the material
-    console.log(
-      `${action === 'view' ? 'Visualizando' : 'Descargando'} material:`,
-      material
-    );
-
     if (action === 'view') {
-      if (material.url && material.url !== '#') {
+      if (
+        material.type.toLowerCase() !== 'pdf' &&
+        material.url &&
+        material.url !== '#'
+      ) {
         window.open(material.url, '_blank');
-      } else {
-        alert(`Visualizando: ${material.title}`);
       }
     } else {
-      // Download action
       if (material.url && material.url !== '#') {
         const link = document.createElement('a');
         link.href = material.url;

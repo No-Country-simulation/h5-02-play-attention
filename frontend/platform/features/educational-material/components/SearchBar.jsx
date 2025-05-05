@@ -1,60 +1,86 @@
-'use client';
-
 import React from 'react';
-import { Input } from '@/shared/ui/input';
-import { Button } from '@/shared/ui/button';
+import TuneIcon from '@mui/icons-material/Tune';
 
-/**
- * Search bar component for filtering educational materials
- */
-export function SearchBar({ searchQuery, onSearchChange, onSearch }) {
-  const handleSubmit = e => {
-    e.preventDefault();
-    onSearch();
+export function SearchBar({
+  searchQuery,
+  onSearchChange,
+  onSearch,
+  fileType,
+  onFileTypeChange,
+  dateSort,
+  onDateSortChange
+}) {
+  const handleKeyDown = e => {
+    if (e.key === 'Enter') {
+      onSearch();
+    }
   };
 
+  const fileTypes = ['Todos', 'PDF', 'VIDEO', 'IMAGEN', 'DOC'];
+
   return (
-    <div className='flex gap-2 mb-4'>
-      <div className='relative flex-grow'>
-        <Input
-          type='text'
-          placeholder='Buscar por título, descripción o palabras clave'
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          className='w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-1 focus:ring-indigo-500'
-        />
-        <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-          <svg
-            className='h-4 w-4 text-gray-400'
-            xmlns='http://www.w3.org/2000/svg'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
-            />
-          </svg>
+    <div className='mb-6'>
+      <div className='flex items-center gap-2'>
+        <div className='relative flex-grow'>
+          <input
+            type='text'
+            value={searchQuery}
+            onChange={e => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder='Buscar por título, descripción o etiqueta'
+            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+          />
+          <div className='absolute inset-y-0 right-0 flex items-center pr-3'>
+            <svg
+              className='h-5 w-5 text-gray-400'
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 20 20'
+              fill='currentColor'
+              aria-hidden='true'
+            >
+              <path
+                fillRule='evenodd'
+                d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z'
+                clipRule='evenodd'
+              />
+            </svg>
+          </div>
         </div>
-      </div>
-      <div className='flex gap-2'>
-        <Button
-          variant='default'
-          onClick={onSearch}
-          className='bg-indigo-600 text-white hover:bg-indigo-700'
-        >
-          Buscar
-        </Button>
-        <Button
-          variant='outline'
-          onClick={() => onSearchChange('')}
-          className='border-gray-300 hover:bg-gray-50 text-gray-700'
-        >
-          Todos
-        </Button>
+
+        {/* Selector de Tipo */}
+        <div className='relative'>
+          <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
+          <TuneIcon />
+            Tipo
+          </button>
+          <select
+            value={fileType}
+            onChange={e => onFileTypeChange(e.target.value)}
+            className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+          >
+            {fileTypes.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Selector de Fecha */}
+        <div className='relative'>
+          <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
+            <TuneIcon />
+            fecha
+          </button>
+          <select
+            value={dateSort}
+            onChange={e => onDateSortChange(e.target.value)}
+            className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+          >
+            <option value='newest'>Más reciente primero</option>
+            <option value='oldest'>Más antiguo primero</option>
+          </select>
+        </div>
       </div>
     </div>
   );
