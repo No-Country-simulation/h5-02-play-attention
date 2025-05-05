@@ -99,7 +99,7 @@ export class AuthService {
       }),
       this.eventEmitter.emit(
         USER_EVENTS.FORGOT_PASSWORD,
-        new UserForgotPasswordEvent(user.email, generatedToken),
+        new UserForgotPasswordEvent(user.email, generatedToken,user.role),
       ),
     ]);
 
@@ -139,7 +139,7 @@ export class AuthService {
       }),
       this.eventEmitter.emit(
         USER_EVENTS.USER_CREATED,
-        new UserRegisteredEvent(fullname, email, password),
+        new UserRegisteredEvent(fullname, email, password, role),
       ),
     ]);
 
@@ -165,6 +165,7 @@ export class AuthService {
             registerDto.fullname,
             registerDto.email,
             registerDto.password,
+            registerDto.role
           ),
         ),
       ]);

@@ -10,4 +10,11 @@ export default () => ({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   },
+  frontend:{
+    landing_url: process.env.FRONTEND_URL,
+    platform_url: process.env.FRONTEND_PLATFORM_URL,
+    crm_url: process.env.FRONTEND_CRM_URL,
+  }
+
+
 }); 
