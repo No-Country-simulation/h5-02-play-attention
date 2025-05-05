@@ -60,7 +60,7 @@ export function DemoVideosSection() {
             onClick={() => scrollToSection("contact")}
             className="min-w-3xs mt-2"
           >
-            ¡Pídelo ahora mismo!
+            Empezar ahora
           </Button>
         </div>
       </div>

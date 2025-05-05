@@ -60,7 +60,7 @@ export function OperationSection() {
             onClick={() => scrollToSection("contact")}
             className="min-w-3xs mt-2"
           >
-            ¡Pídelo ahora mismo!
+            Solicitar info
           </Button>
         </div>
       </div>
