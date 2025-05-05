@@ -224,7 +224,9 @@ export default function ScheduleMeetingModal({
       const dayOfWeek = formData.date.getDay();
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         // No hay slots disponibles los fines de semana
-        setAvailableSlots([]);
+        if (availableSlots.length !== 0) {
+          setAvailableSlots([]);
+        }
         return;
       }
 
@@ -311,7 +313,13 @@ export default function ScheduleMeetingModal({
         };
       });
 
-      setAvailableSlots(slotsWithAvailability);
+      // Comparar si los slots realmente cambiaron para evitar re-renders innecesarios
+      const currentSlotsString = JSON.stringify(availableSlots);
+      const newSlotsString = JSON.stringify(slotsWithAvailability);
+
+      if (currentSlotsString !== newSlotsString) {
+        setAvailableSlots(slotsWithAvailability);
+      }
 
       console.log(`Fecha seleccionada: ${formData.date.toDateString()}`);
       console.log(

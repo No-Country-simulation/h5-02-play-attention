@@ -519,7 +519,7 @@ export default function Dashboard() {
               description='Crear o editar contenido del sitio'
               icon={FileText}
               color='content'
-              link='/content/new'
+              link='/content'
             />
           </div>
         </TabsContent>
