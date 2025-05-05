@@ -13,9 +13,15 @@ export class SocketIOAdapter extends IoAdapter {
 
   createIOServer(port: number, options?: ServerOptions) {
     const corsOrigins = [
-      this.configService.get<string>('FRONTEND_URL'),
-      this.configService.get<string>('FRONTEND_CRM_URL'),
-      this.configService.get<string>('FRONTEND_PLATFORM_URL'),
+     // this.configService.get<string>('FRONTEND_URL'),
+     // this.configService.get<string>('FRONTEND_CRM_URL'),
+     // this.configService.get<string>('FRONTEND_PLATFORM_URL'),
+     "http://localhost:3000",
+     "http://localhost:5173",
+     "https://crm-admin-platform.vercel.app",
+        "https://playatenttion-platform.vercel.app",
+"https://play-attention.vercel.app",
+
     ].filter(Boolean); 
 
     const server = super.createIOServer(port, {

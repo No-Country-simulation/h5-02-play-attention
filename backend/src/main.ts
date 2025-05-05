@@ -17,6 +17,7 @@ async function bootstrap() {
     configService.get<string>('FRONTEND_CRM_URL'),
     configService.get<string>('FRONTEND_PLATFORM_URL'),
   ].filter(Boolean);
+  console.log(corsOrigins)
  
   const config = new DocumentBuilder()
     .setTitle('Play Attention')
@@ -45,7 +46,13 @@ async function bootstrap() {
   );
   
   app.enableCors({
-    origin: corsOrigins,
+    origin: [
+        "http://localhost:3000",
+     "http://localhost:5173",
+     "https://crm-admin-platform.vercel.app",
+        "https://playatenttion-platform.vercel.app",
+"https://play-attention.vercel.app",
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'playAttentionToken'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
