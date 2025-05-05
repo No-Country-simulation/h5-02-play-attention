@@ -1,42 +1,37 @@
 'use client';
 
-import { FileText, Download } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/shared/ui/card';
+import React from 'react';
+import { Button } from '@/shared/ui/button';
 
-export default function MaterialCard({ material }) {
+/**
+ * Card component for displaying an educational material item
+ */
+export function MaterialCard({ material, onDownload }) {
   return (
-    <Card key={material.id}>
-      <CardHeader className='pb-3'>
-        <div className='flex items-center space-x-3'>
-          <div className='bg-blue-100 p-2 rounded-full'>
-            <FileText className='h-5 w-5 text-blue-700' />
-          </div>
-          <CardTitle>{material.title}</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <CardDescription className='mb-4'>
-          {material.description}
-        </CardDescription>
-        <div className='flex justify-between items-center text-sm text-gray-500'>
-          <span>
-            {material.type.toUpperCase()} · {material.size}
-          </span>
-          <a
-            href={material.downloadUrl}
-            className='flex items-center text-blue-600 hover:text-blue-800'
-          >
-            <Download size={16} className='mr-1' />
-            Descargar
-          </a>
-        </div>
-      </CardContent>
-    </Card>
+    <tr className='hover:bg-gray-50'>
+      <td className='py-4 px-4 text-gray-900 border-b border-gray-200'>
+        {material.title}
+      </td>
+      <td className='py-4 px-4 text-center border-b border-gray-200'>
+        <span className='bg-indigo-100 rounded px-2 py-1 text-xs text-indigo-800'>
+          {material.type}
+        </span>
+      </td>
+      <td className='py-4 px-4 text-center border-b border-gray-200'>
+        {material.date}
+      </td>
+      <td className='py-4 px-4 text-center border-b border-gray-200'>
+        {material.size}
+      </td>
+      <td className='py-4 px-4 text-right border-b border-gray-200'>
+        <Button
+          size='sm'
+          onClick={() => onDownload(material, 'view')}
+          className='bg-indigo-600 text-white hover:bg-indigo-700 rounded-md'
+        >
+          Ver
+        </Button>
+      </td>
+    </tr>
   );
 }

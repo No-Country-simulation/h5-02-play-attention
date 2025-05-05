@@ -15,21 +15,7 @@ export default function AppHeader() {
   return (
     <header className='w-full bg-white border-b border-gray-200 h-16 px-4 sticky top-0 z-10'>
       <div className='flex h-full items-center justify-between'>
-        {/* Menú móvil y logo */}
-        <div className='flex items-center gap-4'>
-          {/* Menú móvil */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className='md:hidden p-2 rounded-md hover:bg-gray-100'>
-                <Menu className='h-5 w-5' />
-                <span className='sr-only'>Menú</span>
-              </button>
-            </SheetTrigger>
-            <SheetContent side='left' className='p-0'>
-              <Sidebar isMobile={true} />
-            </SheetContent>
-          </Sheet>
-        </div>
+        <div></div>
 
         {/* Acciones del header */}
         <div className='flex items-center gap-2'>
