@@ -13,6 +13,8 @@ export default function ContentFormModal({
   onClose,
   onSuccess
 }) {
+  console.log('Modal recibiendo initialData:', initialData);
+
   // Función para manejar la cancelación desde el formulario
   const handleCancel = () => {
     if (onClose) onClose();

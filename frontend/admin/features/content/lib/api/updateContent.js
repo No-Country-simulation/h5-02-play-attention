@@ -30,7 +30,11 @@ export async function updateContent(id, formData) {
       formDataObj.append('title', formData.title);
       formDataObj.append('description', formData.content || '');
       formDataObj.append('type', mapContentTypeToBackend(formData.type));
+
+      // Verificar y usar el categoryId
+      console.log('FormData - categoryId a enviar:', formData.categoryId);
       formDataObj.append('category', formData.categoryId);
+
       formDataObj.append('published', formData.status === 'Publicado');
 
       if (formData.youtubeId) {
@@ -74,6 +78,7 @@ export async function updateContent(id, formData) {
     };
 
     // Log para depuración
+    console.log('JSON - categoryId a enviar:', formData.categoryId);
     console.log('Enviando payload al backend:', JSON.stringify(payload));
 
     const response = await fetch(`${API_URL}/resources/${id}`, {

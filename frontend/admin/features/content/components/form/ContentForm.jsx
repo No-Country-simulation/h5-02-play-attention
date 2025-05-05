@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useRef, useEffect } from 'react';
 import { useContentForm } from './hooks/useContentForm';
 import { useFileHandling } from './hooks/useFileHandling';
 import { useLinkHandling } from './hooks/useLinkHandling';
@@ -15,6 +16,9 @@ import { LinkModal } from './modals/LinkModal';
  * y la UI a componentes individuales
  */
 export default function ContentForm({ initialData, onCancel, onSuccess }) {
+  // Referencias para el control directo de elementos DOM
+  const categorySelectRef = useRef(null);
+
   // Hook para manejar el formulario
   const {
     formData,
@@ -28,6 +32,20 @@ export default function ContentForm({ initialData, onCancel, onSuccess }) {
     loadingCategories,
     typeOptions
   } = useContentForm(initialData, onCancel, onSuccess);
+
+  // Controlar directamente el valor del select de categoría
+  useEffect(() => {
+    if (categorySelectRef.current && formData.categoryId) {
+      // Si el valor en la UI es diferente al estado, corregirlo
+      if (categorySelectRef.current.value !== formData.categoryId) {
+        console.log(
+          'Corrigiendo select de categoría desde UI:',
+          formData.categoryId
+        );
+        categorySelectRef.current.value = formData.categoryId;
+      }
+    }
+  }, [formData.categoryId]);
 
   // Hook para manejar archivos
   const {
@@ -149,7 +167,27 @@ export default function ContentForm({ initialData, onCancel, onSuccess }) {
                 id='categoryId'
                 name='categoryId'
                 value={formData.categoryId}
-                onChange={handleChange}
+                ref={categorySelectRef}
+                onChange={e => {
+                  // Capturar el valor actual
+                  const selectedValue = e.target.value;
+                  console.log(`Cambiando categoría a: ${selectedValue}`);
+
+                  // Aplicar el cambio al estado local primero
+                  const selectedCategory = categories.find(
+                    c => c.id === selectedValue
+                  );
+                  setFormData(prev => ({
+                    ...prev,
+                    categoryId: selectedValue,
+                    category: selectedCategory?.name || prev.category
+                  }));
+
+                  // Como respaldo, asegurarse que el DOM refleje el cambio
+                  if (categorySelectRef.current) {
+                    categorySelectRef.current.value = selectedValue;
+                  }
+                }}
                 className={`w-full p-2 border ${
                   errors.category ? 'border-red-500' : 'border-gray-300'
                 } rounded-md`}
