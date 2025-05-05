@@ -7,11 +7,17 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { SocketIOAdapter } from './socket-io.adapter';
 import { ConfigService } from '@nestjs/config';
 
-const corsOrigins = [new ConfigService().get('FRONTEND_URL')];
 
 dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
+  const corsOrigins = [
+    configService.get<string>('FRONTEND_URL'),
+    configService.get<string>('FRONTEND_CRM_URL'),
+    configService.get<string>('FRONTEND_PLATFORM_URL'),
+  ].filter(Boolean);
+ 
   const config = new DocumentBuilder()
     .setTitle('Play Attention')
     .setDescription('Gestión de endpoints para Play Attention')
