@@ -1,115 +1,127 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState } from "react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/shared/ui/sidebar";
 import {
   LayoutDashboard,
+  Newspaper,
   FileText,
   Video,
   BookOpen,
-  Medal,
+  PenTool,
   MessageCircle,
   Settings,
-  ChevronLeft,
-  ChevronRight,
-  Images,
-  PenTool
-} from 'lucide-react';
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { UserMenu } from "@/features/auth";
 
-/**
- * Componente de sidebar para la navegación principal
- * @param {Object} props - Propiedades del componente
- * @param {boolean} props.isMobile - Indica si se está renderizando en el menú móvil
- * @returns {JSX.Element} Componente de React
- */
-export default function Sidebar({ isMobile = false }) {
-  const [expanded, setExpanded] = useState(!isMobile);
+export function SidebarApp() {
+  const [showContentItems, setShowContentItems] = useState(false);
 
-  const menuItems = [
-    { name: 'Panel de control', icon: LayoutDashboard, path: '/dashboard' },
+  // Orden de los items principales
+  const mainItems = [
+    { name: "Panel de control", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "Actividades", icon: PenTool, path: "/activities" },
+    { name: "Soporte", icon: MessageCircle, path: "/support" },
+    { name: "Configuración", icon: Settings, path: "/settings" },
+  ];
+
+  // Items de contenido que se mostrarán/ocultarán
+  const contentItems = [
     {
-      name: 'Material Educativo',
+      name: "Material educativo",
       icon: FileText,
-      path: '/educational-material'
+      path: "/educational-material",
     },
-    { name: 'Tutoriales', icon: Video, path: '/tutorials' },
-    { name: 'Artículos Médicos', icon: BookOpen, path: '/medical-articles' },
-    { name: 'Videos de Demostración', icon: Video, path: '/demo-videos' },
-    {
-      name: 'Material de Marketing',
-      icon: Images,
-      path: '/marketing-material'
-    },
-    { name: 'Actividades', icon: PenTool, path: '/activities' },
-    { name: 'Soporte', icon: MessageCircle, path: '/support' },
-    { name: 'Configuración', icon: Settings, path: '/settings' }
+    { name: "Tutoriales", icon: Video, path: "/tutorials" },
+    { name: "Artículos médicos", icon: BookOpen, path: "/medical-articles" },
+    { name: "Videos de demostración", icon: Video, path: "/demo-videos" },
   ];
 
   return (
-    <aside
-      className={`${
-        isMobile ? 'h-full' : 'h-screen sticky top-0 left-0'
-      } bg-[#4a148c] transition-all duration-300 ${
-        expanded ? 'w-64' : 'w-20'
-      } ${isMobile ? 'w-full' : ''}`}
-    >
-      <div className='flex flex-col h-full'>
-        {/* Logo and toggle */}
-        <div className='flex items-center justify-between p-4 border-b border-purple-800'>
-          {expanded ? (
-            <div className='flex items-center'>
-              <Image
-                src='/svgs/logos/logologin.svg'
-                alt='Play Attention Logo'
-                width={120}
-                height={40}
-                priority
-                className='h-8 w-auto'
-              />
-            </div>
-          ) : (
-            <div className='flex justify-center w-full'>
-              <div className='w-8 h-8 rounded-full bg-white flex items-center justify-center'>
-                <span className='text-purple-900 font-bold text-sm'>PA</span>
-              </div>
-            </div>
-          )}
-          {!isMobile && (
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className='p-1 rounded-full hover:bg-purple-700 text-white'
-            >
-              {expanded ? (
-                <ChevronLeft className='h-6 w-6' />
-              ) : (
-                <ChevronRight className='h-6 w-6' />
-              )}
-            </button>
-          )}
-        </div>
+    <Sidebar variant="default" className="text-xl">
+      <SidebarHeader className="flex justify-start items-start">
+        <Image
+          src="/svgs/logos/logo.svg"
+          width={280}
+          height={64}
+          className="w-fit px-2 h-12 mb-8"
+          alt="Logo"
+        />
+      </SidebarHeader>
 
-        {/* Navigation menu */}
-        <nav className='flex-1 overflow-y-auto py-4'>
-          <ul className='space-y-2 px-2'>
-            {menuItems.map(item => (
-              <li key={item.name}>
-                <Link
-                  href={item.path}
-                  className='flex items-center p-2 text-white rounded-lg hover:bg-purple-700'
-                >
-                  {item.icon && (
-                    <div className='w-6 h-6 mr-3 flex justify-center items-center'>
-                      <item.icon className='h-5 w-5' />
-                    </div>
-                  )}
-                  {(expanded || isMobile) && <span>{item.name}</span>}
+      <SidebarContent>
+        <SidebarMenu className="space-y-1 p-2">
+          {/* 1. Panel de control (siempre visible) */}
+          <SidebarMenuItem>
+            <Link href="/dashboard" className="w-full">
+              <SidebarMenuButton className="px-4 h-11 w-full justify-start">
+                <LayoutDashboard className="w-5 h-5 mr-3" />
+                <span>Panel de control</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+
+          {/* 2. Contenido (con funcionalidad expandible) */}
+          <SidebarMenuItem>
+            <div
+              onClick={() => setShowContentItems(!showContentItems)}
+              className="w-full cursor-pointer"
+            >
+              <SidebarMenuButton className="px-4 h-11 w-full justify-between">
+                <div className="flex items-center">
+                  <Newspaper className="w-4 h-4 mr-4" />
+                  <span>Contenido</span>
+                </div>
+                {showContentItems ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </SidebarMenuButton>
+            </div>
+          </SidebarMenuItem>
+
+          {/* Items de contenido (aparecen/desaparecen) */}
+          {showContentItems &&
+            contentItems.map((item, index) => (
+              <SidebarMenuItem key={`content-${index}`}>
+                <Link href={item.path} className="w-full">
+                  <SidebarMenuButton className="px-4 h-11 w-full justify-start">
+                    <item.icon className="w-5 h-5 mr-3" />
+                    <span>{item.name}</span>
+                  </SidebarMenuButton>
                 </Link>
-              </li>
+              </SidebarMenuItem>
             ))}
-          </ul>
-        </nav>
-      </div>
-    </aside>
+
+          {/* 3. Resto de items principales */}
+          {mainItems.slice(1).map((item, index) => (
+            <SidebarMenuItem key={`main-${index}`}>
+              <Link href={item.path} className="w-full">
+                <SidebarMenuButton className="px-4 h-11 w-full justify-start">
+                  <item.icon className="w-5 h-5 mr-3" />
+                  <span>{item.name}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter className="border-t border-gray-200 flex md:hidden w-full">
+        <UserMenu />
+      </SidebarFooter>
+    </Sidebar>
   );
 }

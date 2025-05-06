@@ -1,5 +1,5 @@
-import EducationalMaterialPage from '@/features/educational-material/EducationalMaterialPage';
+import EducationalMaterial from '@/features/educational-material/EducationalMaterial.jsx';
 
 export default function EducationalMaterialRoute() {
-  return <EducationalMaterialPage />;
+  return <EducationalMaterial />;
 }
