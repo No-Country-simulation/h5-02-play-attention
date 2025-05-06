@@ -18,21 +18,22 @@ import {
   BookOpen,
   PenTool,
   MessageCircle,
-  Settings,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { UserMenu } from "@/features/auth";
+import { usePathname } from "next/navigation";
 
 export function SidebarApp() {
   const [showContentItems, setShowContentItems] = useState(false);
+  const pathname = usePathname();
 
   // Orden de los items principales
   const mainItems = [
     { name: "Panel de control", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "Actividades", icon: PenTool, path: "/activities" },
+    /* { name: "Actividades", icon: PenTool, path: "/activities" }, */
     { name: "Soporte", icon: MessageCircle, path: "/support" },
   ];
 
@@ -47,6 +48,9 @@ export function SidebarApp() {
     { name: "Artículos médicos", icon: BookOpen, path: "/medical-articles" },
     { name: "Videos de demostración", icon: Video, path: "/demo-videos" },
   ];
+
+  const isActive = (path) =>
+    pathname === path || pathname.startsWith(`${path}/`);
 
   return (
     <Sidebar variant="default" className="text-xl">
@@ -65,7 +69,10 @@ export function SidebarApp() {
           {/* 1. Panel de control (siempre visible) */}
           <SidebarMenuItem>
             <Link href="/dashboard" className="w-full">
-              <SidebarMenuButton className="px-4 h-11 w-full justify-start">
+              <SidebarMenuButton
+                className="px-4 h-11 w-full justify-start"
+                isActive={isActive(mainItems[0].path)}
+              >
                 <LayoutDashboard className="w-5 h-5 mr-3" />
                 <span>Panel de control</span>
               </SidebarMenuButton>
@@ -97,7 +104,10 @@ export function SidebarApp() {
             contentItems.map((item, index) => (
               <SidebarMenuItem key={`content-${index}`}>
                 <Link href={item.path} className="w-full">
-                  <SidebarMenuButton className="px-4 h-11 w-full justify-start">
+                  <SidebarMenuButton
+                    className="px-4 h-11 w-full justify-start"
+                    isActive={isActive(item.path)}
+                  >
                     <item.icon className="w-5 h-5 mr-3" />
                     <span>{item.name}</span>
                   </SidebarMenuButton>
@@ -109,7 +119,10 @@ export function SidebarApp() {
           {mainItems.slice(1).map((item, index) => (
             <SidebarMenuItem key={`main-${index}`}>
               <Link href={item.path} className="w-full">
-                <SidebarMenuButton className="px-4 h-11 w-full justify-start">
+                <SidebarMenuButton
+                  className="px-4 h-11 w-full justify-start"
+                  isActive={isActive(item.path)}
+                >
                   <item.icon className="w-5 h-5 mr-3" />
                   <span>{item.name}</span>
                 </SidebarMenuButton>
