@@ -130,9 +130,9 @@
   --sidebar: #330764;
   --sidebar-foreground: oklch(0.985 0.001 106.423);
   --sidebar-primary: #330764;
-  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-accent: #b8b8d1;
-  --sidebar-accent-foreground: #330764;
+  --sidebar-primary-foreground: #f5f5f5;
+  --sidebar-accent: #5c3983;
+  --sidebar-accent-foreground: #f5f5f5;
   --sidebar-border: #b8b8d1;
   --sidebar-ring: oklch(0.709 0.01 56.259);
   --sidebar-dark-purple: #1e0339; /* Violeta más oscuro para iconos */
