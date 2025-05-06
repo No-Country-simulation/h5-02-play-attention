@@ -16,7 +16,7 @@ export class NotificationsEventHandler {
     private readonly _wsGateway: NotificationsGateway,
   ) {}
 
-  @OnEvent(NOTIFICATIONS.CREATE_SINLGE)
+  @OnEvent(NOTIFICATIONS.CREATE_SINGLE)
   async handleNotificationCreatedEvent(payload: CreateNotificationDto) {
     await this.notificationsService.createNotification(payload);
   }
