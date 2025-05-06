@@ -71,7 +71,7 @@ function UserMenu() {
 
   return (
     // Solo mostrar en vista de escritorio
-    <div className='hidden md:block'>
+    <div>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <button className='flex items-center space-x-2 rounded-full focus:outline-none'>
