@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X, Plus } from "lucide-react";
+import { Menu, X, Plus, MessagesSquare } from "lucide-react";
 
 export const FloatingSocialMedia = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +34,7 @@ export const FloatingSocialMedia = () => {
           />
         </svg>
       ),
-      url: "https://instagram.com/tu_usuario",
+      url: "https://www.instagram.com/direct/t/100827541499487",
       color: "hover:bg-white",
     },
     {
@@ -56,7 +56,7 @@ export const FloatingSocialMedia = () => {
           />
         </svg>
       ),
-      url: "https://wa.me/tunumerodewhatsapp",
+      url: "https://wa.me/56940551892",
       color: "hover:bg-white",
     },
   ];
@@ -96,7 +96,7 @@ export const FloatingSocialMedia = () => {
         {isOpen ? (
           <X className="h-6 w-6 md:h-7 md:w-7" /> // Aumentado de h-5 w-5 a h-6 w-6
         ) : (
-          <Menu className="h-6 w-6 md:h-7 md:w-7" /> // Aumentado de h-5 w-5 a h-6 w-6
+          <MessagesSquare className="h-6 w-6 md:h-7 md:w-7" /> // Aumentado de h-5 w-5 a h-6 w-6
         )}
       </button>
     </div>
