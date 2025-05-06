@@ -99,7 +99,7 @@ export class AuthService {
       }),
       this.eventEmitter.emit(
         USER_EVENTS.FORGOT_PASSWORD,
-        new UserForgotPasswordEvent(user.email, generatedToken,user.role),
+        new UserForgotPasswordEvent(user.email, generatedToken, user.role),
       ),
     ]);
 
@@ -129,19 +129,18 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [user] = await Promise.all([
-      this.userService.create({
-        fullname,
-        email,
-        password: hashedPassword,
-        role,
-        service,
-      }),
-      this.eventEmitter.emit(
-        USER_EVENTS.USER_CREATED,
-        new UserRegisteredEvent(fullname, email, password, role),
-      ),
-    ]);
+    const user = await this.userService.create({
+      fullname,
+      email,
+      password: hashedPassword,
+      role,
+      service,
+    });
+
+    this.eventEmitter.emit(
+      USER_EVENTS.USER_REGISTERED,
+      new UserRegisteredEvent(fullname, email, password, role),
+    );
 
     return { message: 'Cuenta registrada con éxito', user };
   }
@@ -154,24 +153,19 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
     try {
-      const [user] = await Promise.all([
-        this.userService.create({
-          ...registerDto,
-          password: hashedPassword,
-        }),
-        this.eventEmitter.emit(
-          USER_EVENTS.USER_CREATED,
-          new UserRegisteredEvent(
-            registerDto.fullname,
-            registerDto.email,
-            registerDto.password,
-            registerDto.role
-          ),
-        ),
-      ]);
+      const user = await this.userService.create({
+        ...registerDto,
+        password: hashedPassword,
+      });
 
-      this.logger.log(
-        `Usuario registrado y evento emitido para ${registerDto.email}`,
+      this.eventEmitter.emit(
+        USER_EVENTS.USER_REGISTERED,
+        new UserRegisteredEvent(
+          registerDto.fullname,
+          registerDto.email,
+          registerDto.password,
+          registerDto.role,
+        ),
       );
       return { message: 'Cuenta registrada con éxito', user };
     } catch (error) {

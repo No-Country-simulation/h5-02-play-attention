@@ -1,60 +1,37 @@
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Injectable, Logger } from '@nestjs/common';
-import { MailService } from '../mail/mail.service';
-import {
-  UserForgotPasswordEvent,
-  UserRegisteredEvent,
-} from 'src/system-events/user.event';
-import { USER_EVENTS } from 'src/system-events/event-names';
-import { ConfigService } from '@nestjs/config';
+import { UserRegisteredEvent } from 'src/system-events/user.event';
+import { NOTIFICATIONS, USER_EVENTS } from 'src/system-events/event-names';
+import { CreateNotificationDto } from 'src/notifications/dto/create-notification.dto';
+import { SystemListenerHelper } from './system-listeners.helper';
 
 @Injectable()
 export class UserListener {
   private readonly logger = new Logger(UserListener.name);
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly mailService: MailService,
+    private readonly _eventEmitter: EventEmitter2,
+    private readonly _helper: SystemListenerHelper,
   ) {}
 
-  @OnEvent(USER_EVENTS.USER_CREATED)
+  @OnEvent(USER_EVENTS.USER_REGISTERED)
   async handleUserCreated(event: UserRegisteredEvent) {
-    const url = event.role=== "User" ?
-      `${this.configService.get('frontend.platform_url')}` : 
-      `${this.configService.get('frontend.crm_url')}`;
-    
-
+    const notification = {
+      message: `Nuevo usuario registrado ${event.fullname} como ${event.role}`,
+      title: 'Nuevo usuario registrado',
+      type: 'Info',
+      userId: '',
+    } as CreateNotificationDto;
     try {
-      await this.mailService.sendTemplateEmail('REGISTER_EMAIL', event.email, {
-        fullname: event.fullname,
-        password: event.password,
-        email: event.email,
-        url,
-      });
-      this.logger.log(`Email de registro enviado a ${event.email}`);
+      const { notifications } = await this._helper.generateNotifications(
+        'Admin',
+        notification,
+      );
+      this._eventEmitter.emit(NOTIFICATIONS.CREATE_MANY, notifications);
+      this._eventEmitter.emit(NOTIFICATIONS.WS_SEND_MANY, notifications);
     } catch (error) {
       this.logger.error(
         `Error al enviar email de registro a ${event.email}:`,
-        error,
-      );
-    }
-  }
-
-  @OnEvent(USER_EVENTS.FORGOT_PASSWORD)
-  async handleSendToken(event: UserForgotPasswordEvent) {
-    const url = event.role=== "User" ?
-      `${this.configService.get('frontend.platform_url')}/reset-password` : 
-      `${this.configService.get('frontend.crm_url')}/reset-password`;
-
-    try {
-      await this.mailService.sendTemplateEmail('FORGOT_PASSWORD', event.email, {
-        token: event.token,
-        url,
-      });
-      this.logger.log(`Email con token enviado a ${event.email}`);
-    } catch (error) {
-      this.logger.error(
-        `Error al enviar email con el token a ${event.email}:`,
         error,
       );
     }

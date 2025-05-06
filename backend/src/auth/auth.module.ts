@@ -6,10 +6,11 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailModule } from '../mail/mail.module';
 import { TokenModule } from '../token/token.module';
+import { AuthListener } from './auth.listener';
 
 @Global()
 @Module({
-  providers: [AuthService, JwtService],
+  providers: [AuthService, JwtService, AuthListener],
   controllers: [AuthController],
   imports: [
     UsersModule,
