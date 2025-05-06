@@ -5,10 +5,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Leads, LeadsSchema } from './schema/leads.model';
 import { EngagementsModule } from 'src/engagements/engagements.module';
 import { MailModule } from 'src/mail/mail.module';
-import { LeadCreatedListener } from 'src/system-listeners/lead-created.listener';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { LeadsListener } from './leads.listener';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     NotificationsModule,
   ],
   controllers: [LeadsController],
-  providers: [LeadsService, LeadCreatedListener],
+  providers: [LeadsService, LeadsListener],
   exports: [LeadsService],
 })
 export class LeadsModule {}
