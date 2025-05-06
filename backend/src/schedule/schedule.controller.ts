@@ -9,7 +9,7 @@ import {  UserDocument } from '../users/schema/user.schema';
 import { Request } from 'express';
 
 interface RequestWithUser extends Request {
-  user: UserDocument;
+  user: string;
 }
 
 @ApiTags('schedule')
@@ -27,6 +27,7 @@ export class ScheduleController {
     @Body() createScheduleDto: CreateScheduleDto,
     @Req() req: RequestWithUser
   ) {
+
     const schedule = await this.scheduleService.create(createScheduleDto, req.user);
     return {
       message: 'Horario creado correctamente',

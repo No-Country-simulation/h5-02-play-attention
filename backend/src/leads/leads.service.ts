@@ -30,7 +30,7 @@ export class LeadsService {
             
             this.eventEmitter.emit(
                 LEAD_EVENTS.LEAD_CREATED,
-                new LeadCreatedEvent(newLead._id.toString(), createLeadDto.email, createLeadDto.fullname)
+                new LeadCreatedEvent(newLead._id, createLeadDto.email, createLeadDto.fullname)
             );
             
             this.logger.log(`Lead creado exitosamente: ${newLead._id}`);

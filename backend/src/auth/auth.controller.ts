@@ -4,7 +4,6 @@ import {
   Get,
   Param,
   Post,
-  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -15,8 +14,8 @@ import { AuthGuard } from './auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { ConfirmTokenDto } from './dto/confirmToken.dto';
-import { ChangePasswordDto, TokenDto } from './dto/changePassword';
-import { Token } from '../token/schema/token.schema';
+import { ChangePasswordDto } from './dto/changePassword';
+
 
 @ApiTags('auth')
 @Controller('api/auth')

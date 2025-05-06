@@ -8,6 +8,7 @@ import { MailModule } from 'src/mail/mail.module';
 import { LeadCreatedListener } from 'src/system-listeners/lead-created.listener';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UsersModule } from 'src/users/users.module';
     MailModule,
     AuthModule,
     UsersModule,
+    NotificationsModule,
   ],
   controllers: [LeadsController],
   providers: [LeadsService, LeadCreatedListener],

@@ -9,6 +9,7 @@ import { SupportTicketRepository } from 'src/support-ticket/support-ticket.repos
 import { UsersService } from 'src/users/users.service';
 import { SupportTickets, SupportTicketSchema } from 'src/support-ticket/schema/support-ticket.schema';
 import { User, UserSchema } from 'src/users/schema/user.schema';
+import { ChatGateway } from './support-messages.gateway';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { User, UserSchema } from 'src/users/schema/user.schema';
       }
     ])
   ],
-  providers: [SupportMessagesService, SupportTicketService, SupportTicketRepository, UsersService],
+  providers: [SupportMessagesService, SupportTicketService, SupportTicketRepository, UsersService,ChatGateway],
   controllers: [SupportMessagesController]
 })
 export class SupportMessagesModule {}

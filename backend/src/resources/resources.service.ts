@@ -35,6 +35,12 @@ export class ResourcesService {
           throw new BadRequestException('La URL proporcionada no es válida');
         }
       }
+      if(createResourceDto.category){
+        const category = await this.categoriesModel.findById(createResourceDto.category);
+        if (!category) {
+          throw new BadRequestException('La categoría no existe');
+        }
+      }
       
       const newResource = new this.resourceModel({
         title: createResourceDto.title,
@@ -58,9 +64,50 @@ export class ResourcesService {
       throw new BadRequestException('Error al crear el recurso: ' + error.message);
     }
   }
-  async update(id: string, updateResourceDto: UpdateResourceDto): Promise<Resource> {
-    const resource = await this.resourceModel.findByIdAndUpdate(id, updateResourceDto, { new: true });
-    return resource;
+  async update(id: string, updateResourceDto: UpdateResourceDto, file?: Express.Multer.File): Promise<Resource> {
+    const resource = await this.resourceModel.findById(id);
+    if (!resource) {
+      throw new BadRequestException(`Recurso con ID ${id} no encontrado`);
+    }
+
+    try {
+      let url: string | undefined;
+      
+      if ((file || updateResourceDto.url) && resource.url && resource.url.includes('cloudinary')) {
+        await this.uploadService.deleteFile(resource.url);
+      }
+
+      if (file) {
+        const uploadResult = await this.uploadService.uploadFile(file);
+        url = uploadResult.secure_url;
+      } else if (updateResourceDto.url) {
+        try {
+          new URL(updateResourceDto.url);
+          url = updateResourceDto.url;
+        } catch (error) {
+          throw new BadRequestException('La URL proporcionada no es válida');
+        }
+      }
+
+      const updateData = {
+        ...updateResourceDto,
+        ...(url && { url })
+      };
+
+      const updatedResource = await this.resourceModel.findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { new: true }
+      ).populate('category');
+
+      if (!updatedResource) {
+        throw new BadRequestException('Error al actualizar el recurso');
+      }
+
+      return updatedResource;
+    } catch (error) {
+      throw new BadRequestException('Error al actualizar el recurso: ' + error.message);
+    }
   }
 
   async findAllPublished(published: boolean): Promise<Resource[]> {
@@ -76,14 +123,20 @@ export class ResourcesService {
   }
 
   async remove(id: string): Promise<Resource> {
-    const resource = await this.resourceModel.findByIdAndDelete(id).exec();
+    const resource = await this.resourceModel.findById(id);
     if (!resource) {
       throw new BadRequestException(`Recurso con ID ${id} no encontrado`);
     }
+
+    if (resource.url && resource.url.includes('cloudinary')) {
+      await this.uploadService.deleteFile(resource.url);
+    }
+
+    await this.resourceModel.deleteOne({ _id: id });
     return resource;
   }
 
-  async findAll () {
+  async findAll() {
     return this.resourceModel.find().exec();
   }
 }

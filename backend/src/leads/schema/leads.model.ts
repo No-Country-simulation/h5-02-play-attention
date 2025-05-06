@@ -80,7 +80,7 @@ export class Leads {
 
     @Prop({
         type: Boolean,
-        required: false
+        required: true
     })
     newsletter: boolean;
 }
