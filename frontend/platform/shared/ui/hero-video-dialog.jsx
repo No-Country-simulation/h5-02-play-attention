@@ -36,7 +36,7 @@ export default function PlayTutorialButton({
   config = {
     youtube: {
       playerVars: {
-        autoplay: 1,
+        autoplay: 1, // Cambiado a 1 para autoplay
         cc_load_policy: 1,
         cc_lang_pref: "es",
         subtitlesLang: "es",
@@ -62,6 +62,7 @@ export default function PlayTutorialButton({
   const [volume, setVolume] = useState(0.8);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [hasSeeked, setHasSeeked] = useState(false);
+  const [isReady, setIsReady] = useState(false); // Nuevo estado para controlar cuando el player está listo
   const playerRef = useRef(null);
 
   useEffect(() => {
@@ -113,6 +114,12 @@ export default function PlayTutorialButton({
     setHasSeeked(false);
     setIsDialogOpen(false);
     setIsPlaying(false);
+    setIsReady(false); // Resetear el estado de listo al cerrar
+  };
+
+  const handleReady = () => {
+    setIsReady(true);
+    setIsPlaying(true); // Auto-play cuando está listo
   };
 
   const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -158,7 +165,7 @@ export default function PlayTutorialButton({
                     url={videoSrc}
                     width="100%"
                     height="100%"
-                    playing={isPlaying}
+                    playing={isPlaying && isReady} // Solo reproducir si está listo
                     controls={false}
                     config={config}
                     progressInterval={1000}
@@ -171,6 +178,7 @@ export default function PlayTutorialButton({
                       if (onProgressUpdate) onProgressUpdate(100);
                       setIsPlaying(false);
                     }}
+                    onReady={handleReady} // Nuevo manejador para cuando el player está listo
                     volume={volume}
                     muted={muted}
                     playbackRate={playbackRate}
@@ -178,6 +186,7 @@ export default function PlayTutorialButton({
                   />
                 </div>
 
+                {/* Resto del código permanece igual */}
                 <div className="rounded-b-2xl border-2 border-t-0 border-white bg-neutral-900 p-4">
                   <div className="mb-4 px-2">
                     <Slider
