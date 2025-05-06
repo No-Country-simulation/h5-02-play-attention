@@ -3,10 +3,11 @@ import {
   FaFilePdf,
   FaFileWord,
   FaFilePowerpoint,
-  FaFileImage
+  FaFileImage,
+  FaVideo,
+  FaYoutube
 } from 'react-icons/fa';
-import { IoEyeOutline } from 'react-icons/io5';
-import { FiDownload, FiEye } from 'react-icons/fi';
+import { FiDownload, FiEye, FiX } from 'react-icons/fi';
 
 const getFileIcon = type => {
   const iconProps = { className: 'w-4 h-4 mr-1' };
@@ -21,23 +22,73 @@ const getFileIcon = type => {
       return <FaFilePowerpoint {...iconProps} className='text-orange-500' />;
     case 'image':
       return <FaFileImage {...iconProps} className='text-green-500' />;
+    case 'video':
+      return <FaVideo {...iconProps} className='text-purple-500' />;
+    case 'youtube':
+      return <FaYoutube {...iconProps} className='text-red-600' />;
     default:
       return <FaFilePdf {...iconProps} className='text-gray-500' />;
   }
 };
 
-export function MaterialsTable({ materials, onDownload }) {
-  const [selectedPDF, setSelectedPDF] = useState(null);
+// Función para extraer el ID de un video de YouTube de una URL
+const getYoutubeVideoId = url => {
+  if (!url) return null;
 
+  // Patrones para URLs de YouTube
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/i, // youtube.com/watch?v=XXXX
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^/?]+)/i, // youtube.com/embed/XXXX
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^/?]+)/i, // youtu.be/XXXX
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([^/?]+)/i // youtube.com/v/XXXX
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+};
+
+// Función para verificar si una URL es de YouTube
+const isYoutubeUrl = url => {
+  return getYoutubeVideoId(url) !== null;
+};
+
+export function MaterialsTable({ materials, onDownload }) {
+  const [selectedMedia, setSelectedMedia] = useState(null);
+
+  // Esta función manejará la visualización según el tipo de archivo
   const handleView = material => {
     if (material.type.toLowerCase() === 'pdf') {
-      setSelectedPDF(material.url);
+      // Para PDFs, no hacemos nada porque el botón está deshabilitado
+      return;
+    } else if (
+      material.type.toLowerCase() === 'video' ||
+      material.type.toLowerCase() === 'image' ||
+      isYoutubeUrl(material.url)
+    ) {
+      // Para videos, YouTube e imágenes, abrimos el modal
+      setSelectedMedia({
+        ...material,
+        isYoutube: isYoutubeUrl(material.url),
+        youtubeId: getYoutubeVideoId(material.url)
+      });
     } else {
+      // Para otros tipos de archivos, los abrimos según la función onDownload
       onDownload(material, 'view');
     }
   };
 
-  // Vista para dispositivos móviles - tarjetas
+  // Cierra el modal
+  const closeModal = () => {
+    setSelectedMedia(null);
+  };
+
+  // Vista para dispositivos móviles y tablets - tarjetas
   const MobileView = () => (
     <div className='space-y-4'>
       {materials.map(material => (
@@ -76,9 +127,21 @@ export function MaterialsTable({ materials, onDownload }) {
                 <FiDownload className='w-4 h-4' />
                 <span>Descargar</span>
               </button>
+
+              {/* Siempre mostramos el botón Ver, pero deshabilitado para PDFs */}
               <button
                 onClick={() => handleView(material)}
-                className='flex-1 py-2 px-3 flex justify-center items-center gap-1 text-xs bg-primary text-white rounded-md'
+                className={`flex-1 py-2 px-3 flex justify-center items-center gap-1 text-xs rounded-md ${
+                  material.type.toLowerCase() === 'pdf'
+                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    : 'bg-primary text-white'
+                }`}
+                disabled={material.type.toLowerCase() === 'pdf'}
+                title={
+                  material.type.toLowerCase() === 'pdf'
+                    ? 'La vista previa de PDFs estará disponible próximamente'
+                    : 'Ver archivo'
+                }
               >
                 <FiEye className='w-4 h-4' />
                 <span>Ver</span>
@@ -143,12 +206,25 @@ export function MaterialsTable({ materials, onDownload }) {
                 <button
                   onClick={() => onDownload(material, 'download')}
                   className='inline-flex items-center px-2 py-1.5 text-xs font-medium rounded-md border focus:outline-none'
+                  title='Descargar archivo'
                 >
                   <FiDownload className='w-4 h-4' />
                 </button>
+
+                {/* Siempre mostramos el botón Ver, pero deshabilitado para PDFs */}
                 <button
                   onClick={() => handleView(material)}
-                  className='inline-flex items-center px-6 py-1.5 bg-primary text-white text-xs font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                  className={`inline-flex items-center px-6 py-1.5 text-xs font-medium rounded-md ${
+                    material.type.toLowerCase() === 'pdf'
+                      ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                      : 'bg-primary text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                  }`}
+                  disabled={material.type.toLowerCase() === 'pdf'}
+                  title={
+                    material.type.toLowerCase() === 'pdf'
+                      ? 'La vista previa de PDFs estará disponible próximamente'
+                      : 'Ver archivo'
+                  }
                 >
                   Ver
                 </button>
@@ -160,55 +236,118 @@ export function MaterialsTable({ materials, onDownload }) {
     </div>
   );
 
+  // Modal para mostrar video o imagen
+  const MediaViewerModal = () => {
+    if (!selectedMedia) return null;
+
+    const isVideo = selectedMedia.type.toLowerCase() === 'video';
+    const isImage = selectedMedia.type.toLowerCase() === 'image';
+    const isYoutube = selectedMedia.isYoutube;
+
+    return (
+      <div className='fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4'>
+        <div className='bg-white rounded-lg w-full max-w-5xl flex flex-col overflow-hidden'>
+          <div className='flex justify-between items-center p-4 border-b'>
+            <h3 className='font-medium'>
+              {selectedMedia.title}{' '}
+              <span className='text-sm text-gray-500'>
+                ({isYoutube ? 'YOUTUBE' : selectedMedia.type.toUpperCase()})
+              </span>
+            </h3>
+            <button
+              onClick={closeModal}
+              className='text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100'
+              title='Cerrar'
+            >
+              <FiX className='w-5 h-5' />
+            </button>
+          </div>
+
+          <div className='flex-1 bg-black flex items-center justify-center'>
+            {isVideo && !isYoutube && (
+              <video
+                className='max-h-[70vh] max-w-full'
+                controls
+                autoPlay
+                src={selectedMedia.url}
+              >
+                Tu navegador no soporta la reproducción de video.
+              </video>
+            )}
+
+            {isYoutube && selectedMedia.youtubeId && (
+              <div className='w-full h-[70vh] flex items-center justify-center'>
+                <iframe
+                  width='100%'
+                  height='100%'
+                  src={`https://www.youtube.com/embed/${selectedMedia.youtubeId}?autoplay=1`}
+                  title={selectedMedia.title}
+                  frameBorder='0'
+                  allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
+
+            {isImage && (
+              <img
+                src={selectedMedia.url}
+                alt={selectedMedia.title}
+                className='max-h-[70vh] max-w-full object-contain'
+              />
+            )}
+          </div>
+
+          {selectedMedia.description && (
+            <div className='p-4 border-t'>
+              <p className='text-sm text-gray-600'>
+                {selectedMedia.description}
+              </p>
+            </div>
+          )}
+
+          <div className='p-4 border-t flex justify-end'>
+            {!isYoutube && (
+              <button
+                onClick={() => onDownload(selectedMedia, 'download')}
+                className='py-2 px-4 bg-primary text-white rounded-md flex items-center gap-2'
+              >
+                <FiDownload className='w-4 h-4' />
+                <span>Descargar</span>
+              </button>
+            )}
+
+            {isYoutube && (
+              <a
+                href={`https://www.youtube.com/watch?v=${selectedMedia.youtubeId}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='py-2 px-4 bg-red-600 text-white rounded-md flex items-center gap-2'
+              >
+                <FaYoutube className='w-4 h-4' />
+                <span>Ver en YouTube</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
-      {/* Vista móvil */}
-      <div className='md:hidden'>
+      {/* Vista móvil y tablets */}
+      <div className='lg:hidden'>
         <MobileView />
       </div>
 
       {/* Vista desktop */}
-      <div className='hidden md:block'>
+      <div className='hidden lg:block'>
         <DesktopView />
       </div>
 
-      {/* Visor de PDF - común para ambas vistas */}
-      {selectedPDF && (
-        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'>
-          <div className='bg-white rounded-lg w-full max-w-5xl h-[80vh] flex flex-col'>
-            <div className='flex justify-between items-center p-4 border-b'>
-              <h3 className='font-medium'>Visualizador de PDF</h3>
-              <button
-                onClick={() => setSelectedPDF(null)}
-                className='text-gray-500 hover:text-gray-700 text-xl'
-              >
-                ✕
-              </button>
-            </div>
-            <div className='flex-1 w-full h-full'>
-              <object
-                data={selectedPDF}
-                type='application/pdf'
-                className='w-full h-full'
-              >
-                <div className='flex flex-col items-center justify-center p-8 text-center'>
-                  <p className='text-red-500 mb-4'>
-                    No se puede mostrar el PDF en el navegador
-                  </p>
-                  <a
-                    href={selectedPDF}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='px-4 py-2 bg-primary text-white rounded'
-                  >
-                    Abrir en nueva pestaña
-                  </a>
-                </div>
-              </object>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal para videos e imágenes */}
+      {selectedMedia && <MediaViewerModal />}
     </>
   );
 }

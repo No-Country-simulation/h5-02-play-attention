@@ -10,7 +10,7 @@ import { useEducationalMaterials } from './lib/hooks/useEducationalMaterials';
  * Responsible for displaying and managing educational materials
  */
 export default function EducationalMaterial() {
-  const { materials, isLoading, error, handleDownload } =
+  const { materials, isLoading, error, handleDownload, validateMaterial } =
     useEducationalMaterials();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMaterials, setFilteredMaterials] = useState([]);
@@ -110,6 +110,7 @@ export default function EducationalMaterial() {
         <MaterialsTable
           materials={filteredMaterials}
           onDownload={handleDownload}
+          validateMaterial={validateMaterial}
         />
       )}
     </div>

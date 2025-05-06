@@ -23,8 +23,8 @@ export function SearchBar({
 
   return (
     <div className='mb-6'>
-      {/* Vista móvil: Búsqueda simple + botón de filtros */}
-      <div className='md:hidden'>
+      {/* Vista móvil y tablet: Búsqueda simple + botón de filtros */}
+      <div className='lg:hidden'>
         <div className='flex items-center gap-2 mb-3'>
           <div className='relative flex-grow'>
             <input
@@ -59,7 +59,7 @@ export function SearchBar({
           </button>
         </div>
 
-        {/* Filtros expandibles para móvil */}
+        {/* Filtros expandibles para móvil y tablet */}
         {showFilters && (
           <div className='flex flex-col gap-3 mb-3 bg-gray-50 p-3 rounded-md'>
             {/* Selector de Tipo */}
@@ -109,7 +109,7 @@ export function SearchBar({
       </div>
 
       {/* Vista desktop: Búsqueda y filtros en línea */}
-      <div className='hidden md:block'>
+      <div className='hidden lg:block'>
         <div className='flex items-center gap-2'>
           <div className='relative flex-grow'>
             <input
