@@ -20,9 +20,9 @@ export default function PageHeader({ sectionKey }) {
   };
 
   return (
-    <div className="mb-8">
-      <h1 className="text-3xl font-bold mb-6">{title}</h1>
-      <p className="text-gray-600">{description}</p>
+    <div className=" h-[20vh] flex flex-col justify-center">
+      <h1 className="text-4xl font-bold mb-2">{title}</h1>
+      <p className="text-gray-600 text-lg">{description}</p>
     </div>
   );
 }
