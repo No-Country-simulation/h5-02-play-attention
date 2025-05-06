@@ -19,9 +19,10 @@ export class UserListener {
 
   @OnEvent(USER_EVENTS.USER_CREATED)
   async handleUserCreated(event: UserRegisteredEvent) {
-    const url =
-      this.configService.get('FRONTEND_URL') ||
-      'https://playatenttion-platform.vercel.app/';
+    const url = event.role=== "User" ?
+      `${this.configService.get('frontend.platform_url')}` : 
+      `${this.configService.get('frontend.crm_url')}`;
+    
 
     try {
       await this.mailService.sendTemplateEmail('REGISTER_EMAIL', event.email, {
@@ -41,9 +42,9 @@ export class UserListener {
 
   @OnEvent(USER_EVENTS.FORGOT_PASSWORD)
   async handleSendToken(event: UserForgotPasswordEvent) {
-    const url =
-      `${this.configService.get('FRONTEND_URL')}/reset-password` ||
-      'https://playatenttion-platform.vercel.app/reset-password';
+    const url = event.role=== "User" ?
+      `${this.configService.get('frontend.platform_url')}/reset-password` : 
+      `${this.configService.get('frontend.crm_url')}/reset-password`;
 
     try {
       await this.mailService.sendTemplateEmail('FORGOT_PASSWORD', event.email, {
