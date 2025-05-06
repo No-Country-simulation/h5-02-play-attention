@@ -34,7 +34,6 @@ export function SidebarApp() {
     { name: "Panel de control", icon: LayoutDashboard, path: "/dashboard" },
     { name: "Actividades", icon: PenTool, path: "/activities" },
     { name: "Soporte", icon: MessageCircle, path: "/support" },
-    { name: "Configuración", icon: Settings, path: "/settings" },
   ];
 
   // Items de contenido que se mostrarán/ocultarán

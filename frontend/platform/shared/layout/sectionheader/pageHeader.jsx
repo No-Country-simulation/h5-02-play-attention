@@ -11,6 +11,11 @@ const pageMetadata = {
     description:
       "Documentos, presentaciones y guías para usar Play Attention de manera efectiva.",
   },
+  medicalArticles: {
+    title: "Artículos Médicos",
+    description:
+      "Explora y accede a artículos médicos para mejorar tus habilidades",
+  },
 };
 
 export default function PageHeader({ sectionKey }) {

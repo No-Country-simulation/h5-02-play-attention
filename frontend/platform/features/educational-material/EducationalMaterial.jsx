@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { SearchBar } from './components/SearchBar';
 import { MaterialsTable } from './components/MaterialsTable';
 import { useEducationalMaterials } from './lib/hooks/useEducationalMaterials';
+import PageHeader from '@/shared/layout/sectionheader/pageHeader';
 
 /**
  * Main Educational Material component
@@ -58,14 +59,15 @@ export default function EducationalMaterial() {
 
   return (
     <div className='w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8'>
-      <div className='mb-4 sm:mb-6'>
+  {/*     <div className='mb-4 sm:mb-6'>
         <h1 className='text-xl sm:text-2xl font-bold text-gray-900'>
           Material Educativo
         </h1>
         <p className='text-sm sm:text-base text-gray-600 mt-1'>
           Explora y accede a recursos educativos para mejorar tus habilidades
         </p>
-      </div>
+      </div> */}
+      <PageHeader sectionKey={'materialEducativo'} />
 
       <SearchBar
         searchQuery={searchQuery}

@@ -28,8 +28,9 @@ export function useMedicalArticles() {
       setError(null);
       try {
         const data = await fetchEducationalMaterials();
+        console.log(data);
         const filteredData = data.filter(
-          item => item.category?.name === 'Material Eductaivo'
+          item => item.category?.name === 'Artículos Médicos'
         );
 
         // Get file sizes for all materials
