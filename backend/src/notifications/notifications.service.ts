@@ -3,8 +3,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Notification, NotificationDocument } from "./schema/notifications.schema";
 import { Model, Types } from "mongoose";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
-import { NotificationsGateway } from "./notifications.gateway";
-import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class NotificationsService {
@@ -13,23 +11,12 @@ export class NotificationsService {
     constructor(
         @InjectModel(Notification.name)
         private readonly notificationModel: Model<NotificationDocument>,
-        @Inject(forwardRef(() => NotificationsGateway))
-        private readonly notificationsGateway: NotificationsGateway
     ) {}
 
   async createNotification(createNotificationDto: CreateNotificationDto): Promise<Notification> {
-    try {
-        this.logger.log('Creando notificación:', createNotificationDto);
-        
+    try {        
         const notification = new this.notificationModel(createNotificationDto);
         await notification.save();
-
-
-        await this.notificationsGateway.sendToUser(
-            createNotificationDto.userId.toString(),
-            'newNotification',
-             notification 
-        );
 
         return notification;
     } catch (error) {
@@ -80,6 +67,15 @@ export class NotificationsService {
             this.logger.debug(`Notificación ${notificationId} eliminada`);
         } catch (error) {
             this.logger.error(`Error al eliminar notificación ${notificationId}:`, error);  
+            throw error;
+        }
+    }
+
+    async bulkCreateNoOrder(notifications: CreateNotificationDto[]) {
+        try {
+            await this.notificationModel.insertMany(notifications, {ordered: false})
+        } catch (error) {
+            this.logger.error(`Error al crear varias notificaciones`, error);  
             throw error;
         }
     }
