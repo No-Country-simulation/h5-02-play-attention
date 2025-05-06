@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { SidebarApp } from "@/shared/layout/sidebar/sidebar";
-import AppHeader from "@/shared/layout/appheader/header";
-import { Toaster } from "@/shared/ui/sonner";
-import { SidebarProvider, SidebarTrigger } from "@/shared/ui/sidebar";
+import { SidebarApp } from '@/shared/layout/sidebar/sidebar';
+import SidebarMobile from '@/shared/layout/sidebar/components/SidebarMobile';
+import AppHeader from '@/shared/layout/appheader/header';
+import { Toaster } from '@/shared/ui/sonner';
+import { SidebarProvider, SidebarTrigger } from '@/shared/ui/sidebar';
 
 /**
  * Layout para todas las páginas autenticadas
@@ -11,20 +12,27 @@ import { SidebarProvider, SidebarTrigger } from "@/shared/ui/sidebar";
  */
 export default function AuthenticatedLayout({ children }) {
   return (
-    <div className="flex min-h-screen">
+    <div className='flex min-h-screen'>
       <SidebarProvider
         style={{
-          "--sidebar-width": "18rem",
-          "--sidebar-width-mobile": "16rem",
+          '--sidebar-width': '18rem',
+          '--sidebar-width-mobile': '16rem'
         }}
       >
-        <SidebarApp/>
+        {/* Sidebar principal para desktop */}
+        <div className='hidden md:block'>
+          <SidebarApp />
+        </div>
+
+        {/* Sidebar mobile para tablets y móviles */}
+        <SidebarMobile />
+
         {/* Contenedor principal a la derecha del sidebar */}
-        <div className="flex-1 flex flex-col">
+        <div className='flex-1 flex flex-col'>
           <AppHeader>
-          <SidebarTrigger />
+            <SidebarTrigger className='md:hidden' />
           </AppHeader>
-          <main className="flex-1 overflow-auto px-4 pt-4 pb-6 relative">
+          <main className='flex-1 overflow-auto px-4 pt-4 pb-6 relative'>
             {children}
             <Toaster />
           </main>
