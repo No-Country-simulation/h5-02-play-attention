@@ -68,26 +68,9 @@ export class LeadsService {
         }
     }
 
-    async findAll(page: number = 1, limit: number = 10) {
+    async findAll() {
         try {
-            const skip = (page - 1) * limit;
-            const [leads, total] = await Promise.all([
-                this.leadsModel.find()
-                    .skip(skip)
-                    .limit(limit)
-                    .exec(),
-                this.leadsModel.countDocuments()
-            ]);
-            
-            return {
-                data: leads,
-                meta: {
-                    total,
-                    page,
-                    limit,
-                    totalPages: Math.ceil(total / limit)
-                }
-            };
+            return this.leadsModel.find().exec();
         } catch (error) {
             this.logger.error(`Error al obtener leads: ${error.message}`);
             throw new BadRequestException('Error al obtener el listado de leads');
