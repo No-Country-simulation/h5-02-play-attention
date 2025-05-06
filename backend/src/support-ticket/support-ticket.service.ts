@@ -4,6 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SupportTicketRepository } from './support-ticket.repository';
 import { ISupportTicketService } from './interfaces/support-ticket.service.int';
 import {
@@ -15,6 +16,7 @@ import { UsersService } from '../users/users.service';
 import { GetTicketsFilterDto } from './dto/get-ticket.dto';
 import { PaginationResponseDto } from '../common/dtos/pagination.dto';
 import { UpdateSupportTicketDto } from './dto/update-ticket.dto';
+import { SUP_TICKETS } from 'src/system-events/event-names';
 
 @Injectable()
 export class SupportTicketService implements ISupportTicketService {
@@ -22,6 +24,7 @@ export class SupportTicketService implements ISupportTicketService {
   constructor(
     private readonly _repository: SupportTicketRepository,
     private readonly _userService: UsersService,
+    private readonly _emitter: EventEmitter2,
   ) {}
 
   async userCreateSupportTicket(
@@ -30,12 +33,13 @@ export class SupportTicketService implements ISupportTicketService {
   ): Promise<{ ok: boolean }> {
     await this._userService.findById(userId);
     try {
-      await this._repository.createSupportTicket({
+      const newTicket = await this._repository.createSupportTicket({
         ...dto,
         created_by: userId,
         ticket_origin: 'user_plataform',
         user_id: userId,
       });
+      this._emitter.emit(SUP_TICKETS.USER_CREATED, newTicket);
       return { ok: true };
     } catch (error) {
       this.logger.error(error, error.stack);

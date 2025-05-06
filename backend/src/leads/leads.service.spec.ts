@@ -10,8 +10,6 @@ import { CreateLeadDto } from './dto/leads.dto';
 
 describe('LeadsService', () => {
   let service: LeadsService;
-  let mailService: MailService;
-  let engagementService: EngagementService;
   let leadModel: Model<any>;
   let eventEmitter: EventEmitter2;
 
@@ -23,6 +21,7 @@ describe('LeadsService', () => {
     relation: 'Padre',
     service: 'xD',
     status: 'Active',
+    newsletter: false,
   };
   beforeEach(async () => {
     const leadsModelMock = {
@@ -61,8 +60,6 @@ describe('LeadsService', () => {
     }).compile();
 
     service = module.get<LeadsService>(LeadsService);
-    mailService = module.get<MailService>(MailService);
-    engagementService = module.get<EngagementService>(EngagementService);
     leadModel = module.get(getModelToken(Leads.name));
     eventEmitter = module.get(EventEmitter2);
   });
