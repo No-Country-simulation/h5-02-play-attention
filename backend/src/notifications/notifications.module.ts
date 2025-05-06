@@ -1,39 +1,29 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { NotificationsGateway } from "./notifications.gateway";
 import { NotificationsService } from "./notifications.service";
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from "@nestjs/mongoose";
 import { NotificationSchema, Notification } from "./schema/notifications.schema";
 import { UsersModule } from "../users/users.module";
 import { NotificationsController } from "./notifications.controller";
+import { NotificationsEventHandler } from "./notifications.listener";
+import { MailModule } from "src/mail/mail.module";
+import { WsGuard } from "src/auth/ws.guard";
+import { TokenModule } from "src/token/token.module";
 
 @Module({
     imports: [
         forwardRef(() => UsersModule),
         MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]),
         ConfigModule,
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get('jwt.secret'),
-                signOptions: { 
-                    expiresIn: '1d' 
-                },
-            }),
-            inject: [ConfigService],
-        }),
+        TokenModule,
+        MailModule,
     ],
     providers: [
-        {
-            provide: NotificationsGateway,
-            useClass: NotificationsGateway
-        },
-        {
-            provide: NotificationsService,
-            useClass: NotificationsService
-        }
-
+        NotificationsGateway,
+        NotificationsService,
+        NotificationsEventHandler,
+        WsGuard,
     ],
     controllers: [NotificationsController],
     exports: [NotificationsService, NotificationsGateway]

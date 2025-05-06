@@ -1,6 +1,7 @@
 import { Controller, Get, Logger, Param, Query, Req, UseGuards } from "@nestjs/common";
 import { NotificationsService } from "./notifications.service";
 import { AuthGuard } from "../auth/auth.guard";
+import { ApiBearerAuth } from "@nestjs/swagger";
 
 
 interface RequestWithUser extends Request {
@@ -11,6 +12,7 @@ export class NotificationsController {
     private readonly logger = new Logger(NotificationsController.name);
     constructor(private readonly notificationsService: NotificationsService) {}
 
+    @ApiBearerAuth('playAttentionToken')
     @UseGuards(AuthGuard)
     @Get()
     getNotifications(@Req() req: RequestWithUser) {

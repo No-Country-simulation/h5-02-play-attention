@@ -1,4 +1,4 @@
-import {  Logger, Inject, forwardRef } from "@nestjs/common";
+import {  Logger } from "@nestjs/common";
 import { 
     WebSocketGateway, 
     WebSocketServer,
@@ -6,83 +6,65 @@ import {
     ConnectedSocket,
     MessageBody,
     OnGatewayConnection,
-
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { WsGuard } from "../auth/ws.guard";
-import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
 import { NotificationsService } from "./notifications.service";
 import { Notification } from "./schema/notifications.schema";
 
 @WebSocketGateway({
-    namespace:'/notifications',
+    namespace:'notifications',
 })
 export class NotificationsGateway implements OnGatewayConnection {
     @WebSocketServer()
     public server: Server;
     private readonly logger = new Logger(NotificationsGateway.name);
-    private readonly wsGuard: WsGuard;
 
     constructor(
-        private readonly jwtService: JwtService,
-        private readonly configService: ConfigService,
-        @Inject(forwardRef(() => NotificationsService))
-        private readonly notificationsService: NotificationsService
-    ) {
-        this.wsGuard = new WsGuard(jwtService, configService);
-    }
+        private readonly notificationsService: NotificationsService,
+        private readonly _wsGuard: WsGuard,
+    ) {}
 
-  async handleConnection(@ConnectedSocket() socket: Socket) {
-            this.logger.log(`Cliente intentando conectar - ID: ${socket.id}`);
-            try {
-        
-                
-                // Autenticar el socket
-                const isAuthenticated = await this.wsGuard.authenticateSocket(socket);
-                this.logger.log(`Resultado de autenticación para ${socket.id}: ${isAuthenticated ? 'Exitosa' : 'Fallida'}`);
-
-                if (!isAuthenticated) {
-                    this.logger.warn(`Cliente ${socket.id} no autenticado - Desconectando`);
-                    socket.disconnect();
-                    return;
-                }
-
-                const user = socket['user'];
-                this.logger.log(`Usuario autenticado: ${JSON.stringify(user)}`);
-                
-                await socket.join(`user_${user}`);
-                this.logger.log(`Usuario ${user} unido a su sala personal`);
-                
-                socket.emit('connectionStatus', { 
-                    status: 'connected',
-                    userId: user,
-                    socketId: socket.id,
-                    timestamp: new Date()
-                });
-
-                socket.on("disconnect", () => {
-                    this.logger.log(`Cliente desconectado - ID: ${socket.id}`);
-                });
-
-            } catch (error) {
-                this.logger.error(`Error en la conexión para socket ${socket.id}:`, error);
+    async handleConnection(@ConnectedSocket() socket: Socket) {
+        this.logger.log(`Cliente intentando conectar - ID: ${socket.id}`);
+        try {
+            // Autenticar el socket
+            const isAuthenticated = await this._wsGuard.authenticateSocket(socket);
+            this.logger.log(`Resultado de autenticación para ${socket.id}: ${isAuthenticated ? 'Exitosa' : 'Fallida'}`);
+            if (!isAuthenticated) {
+                this.logger.warn(`Cliente ${socket.id} no autenticado - Desconectando`);
                 socket.disconnect();
+                return;
             }
-        ;
+
+            const user = socket['user'];
+                
+            await socket.join(`user_${user}`);
+            this.logger.log(`Usuario ${user} unido a su sala personal`);
+                
+            socket.emit('connectionStatus', { 
+                status: 'connected',
+                userId: user,
+                socketId: socket.id,
+                timestamp: new Date()
+            });
+
+            socket.on("disconnect", () => {
+                this.logger.log(`Cliente desconectado - ID: ${socket.id}`);
+            });
+        } catch (error) {
+            this.logger.error(`Error en la conexión para socket ${socket.id}:`, error);
+            socket.disconnect();
+        };
     }
 
     @SubscribeMessage('notificationView')
-    handleClientEvent(
+    async handleUpdateView(
         @ConnectedSocket() socket: Socket,
         @MessageBody() notificationId: string
-    ): void {
-
-        this.logger.log(notificationId);
+    ): Promise<void> {
         try {
-            this.notificationsService.notificationView(notificationId);
-          
-            this.logger.log(notificationId);
+            await this.notificationsService.notificationView(notificationId);
             socket.emit('serverResponse', {
                 status: 'success',
                 message: 'Notificación marcada como vista'
@@ -98,13 +80,8 @@ export class NotificationsGateway implements OnGatewayConnection {
 
     // Método para enviar una notificación a un usuario específico
     async sendToUser(userId: string, event: string, notification: Notification) {
-        
         try {
-            this.logger.log(notification);
-            this.server.to(`user_${userId}`).emit(event, 
-                notification
-        );
-            this.logger.debug(`Notificación enviada al usuario ${userId}`);
+            await this.server.to(`user_${userId}`).emit(event, notification);
         } catch (error) {
             this.logger.error(`Error al enviar notificación al usuario ${userId}:`, error);
             throw error;
@@ -114,4 +91,3 @@ export class NotificationsGateway implements OnGatewayConnection {
     
     
 }
-
