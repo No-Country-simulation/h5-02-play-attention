@@ -10,14 +10,14 @@ const TicketList = ({ tickets = [], onCreateTicket, onViewTicket }) => {
         <Button
           variant='primary'
           size='sm'
-          className='flex items-center gap-2 bg-purple-600 hover:bg-purple-700'
+          className='flex text-white items-center gap-2 bg-purple-600 hover:bg-purple-700'
           onClick={onCreateTicket}
         >
           <span>+</span> Crear Ticket
         </Button>
       </div>
 
-      <div className='border rounded-md overflow-hidden'>
+      <div className='border rounded-md overflow-hidden text-white'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead>
             <tr className='bg-gray-50'>
@@ -77,7 +77,7 @@ const TicketList = ({ tickets = [], onCreateTicket, onViewTicket }) => {
                     <Button
                       variant='primary'
                       size='sm'
-                      className='bg-purple-600 hover:bg-purple-700'
+                      className=' px-8 bg-purple-600 hover:bg-purple-700'
                       onClick={() => onViewTicket(ticket.id)}
                     >
                       Ver

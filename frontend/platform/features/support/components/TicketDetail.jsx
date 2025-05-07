@@ -1,6 +1,7 @@
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Separator } from '@/shared/ui/separator';
+import { ArrowLeft, Send } from 'lucide-react';
 import React, { useState } from 'react';
 
 const TicketDetail = ({ ticket, onBack, onEdit }) => {
@@ -31,30 +32,26 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
   return (
     <div className='h-full flex flex-col bg-white rounded-lg border overflow-hidden'>
       {/* Header */}
-      <div className='p-4 border-b flex items-center'>
-        <Button variant='ghost' onClick={onBack} className='mr-3' size='sm'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            width='18'
-            height='18'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          >
-            <path d='M19 12H5M12 19l-7-7 7-7' />
-          </svg>
-          <span className='ml-1'>Volver</span>
+      <div className='py-2 px-4 border-b flex items-center'>
+        <Button variant='ghost' onClick={onBack} className='mr-2' size='sm'>
+          <ArrowLeft className='h-4 w-4 mr-1' />
+          <span>Tipo</span>
         </Button>
 
         <div className='flex-1'>
-          <h1 className='text-lg font-semibold'>{ticket.subject}</h1>
-          <div className='flex items-center text-sm text-gray-500 space-x-2'>
-            <span>TK-{ticket.id}</span>
+          <h1 className='text-md font-semibold'>{ticket.subject}</h1>
+          <div className='flex items-center text-xs text-gray-500 space-x-2'>
+            <span>{ticket.id}</span>
             <span>•</span>
             <span>Creado: {ticket.createdAt}</span>
+            {ticket.category && (
+              <>
+                <span>•</span>
+                <span className='px-1.5 py-0.5 bg-gray-100 rounded text-xs'>
+                  {ticket.category}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -62,7 +59,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
           className='ml-4'
           variant={
             ticket.status === 'Abierto'
-              ? 'default'
+              ? 'secondary'
               : ticket.status === 'En proceso'
               ? 'warning'
               : 'success'
@@ -73,85 +70,84 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
       </div>
 
       {/* Conversación */}
-      <div className='flex-1 p-4 overflow-y-auto bg-gray-50'>
+      <div className='flex-1 p-4 overflow-y-auto bg-gray-50 max-h-[400px]'>
         <div className='space-y-4'>
           {ticket.conversation &&
             ticket.conversation.map((message, index) => (
               <div
                 key={index}
-                className={`max-w-3xl ${
-                  message.isUser
-                    ? 'ml-auto bg-purple-900 text-white'
-                    : 'bg-gray-100'
-                } p-4 rounded-lg`}
+                className={`flex ${
+                  message.isUser ? 'justify-end' : 'justify-start'
+                }`}
               >
-                <div className='flex items-center gap-2 mb-1'>
-                  {!message.isUser && (
-                    <div className='bg-gray-200 text-purple-700 w-8 h-8 flex items-center justify-center rounded-full'>
+                {!message.isUser && (
+                  <div className='h-8 w-8 rounded-full overflow-hidden mr-2 mt-1 flex-shrink-0'>
+                    <div className='bg-purple-600 text-white w-full h-full flex items-center justify-center font-semibold text-sm'>
                       {message.author.charAt(0).toUpperCase()}
                     </div>
-                  )}
-                  <div>
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] rounded-lg py-3 px-4 ${
+                    message.isUser
+                      ? 'bg-purple-900 text-white'
+                      : 'bg-white border border-gray-200'
+                  }`}
+                >
+                  <div className='flex justify-between items-center'>
                     <p
-                      className={`text-sm font-medium ${
+                      className={`font-medium text-sm ${
                         message.isUser ? 'text-white' : 'text-gray-800'
                       }`}
                     >
                       {message.author}
                     </p>
                     <p
-                      className={`text-xs ${
-                        message.isUser ? 'text-gray-200' : 'text-gray-500'
+                      className={`text-xs ml-4 ${
+                        message.isUser ? 'text-purple-200' : 'text-gray-500'
                       }`}
                     >
                       {message.date}
                     </p>
                   </div>
+                  <p
+                    className={`text-sm mt-1 ${
+                      message.isUser ? 'text-white' : 'text-gray-700'
+                    }`}
+                  >
+                    {message.content}
+                  </p>
                 </div>
-                <p
-                  className={`text-sm ${
-                    message.isUser ? 'text-white' : 'text-gray-700'
-                  }`}
-                >
-                  {message.content}
-                </p>
+                {message.isUser && (
+                  <div className='h-8 w-8 rounded-full overflow-hidden ml-2 mt-1 flex-shrink-0'>
+                    <div className='bg-purple-600 text-white w-full h-full flex items-center justify-center font-semibold text-sm'>
+                      U
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
         </div>
       </div>
 
       {/* Input de mensaje */}
-      <div className='border-t p-4'>
+      <div className='border-t px-4 py-2'>
         <form onSubmit={handleSendMessage} className='flex'>
           <input
             type='text'
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
             placeholder='Escribe tu mensaje...'
-            className='flex-1 p-3 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent'
+            className='flex-1 py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent'
           />
           <Button
             type='submit'
-            className='bg-purple-600 hover:bg-purple-700 rounded-l-none'
+            className='ml-2 bg-purple-700 hover:bg-purple-800'
+            size='icon'
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <line x1='22' y1='2' x2='11' y2='13' />
-              <polygon points='22 2 15 22 11 13 2 9 22 2' />
-            </svg>
+            <Send className='h-4 w-4' />
           </Button>
         </form>
-        <p className='text-xs text-gray-500 mt-1'>
-          Pulsa Enter para enviar tu mensaje. Los mensajes no se pueden editar.
-        </p>
       </div>
     </div>
   );
