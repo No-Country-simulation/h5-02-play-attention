@@ -10,9 +10,9 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: 'Play Attention | Panel de Administración',
+  title: 'Play Attention | Plataforma de Usuarios',
   description:
-    'Panel administrativo y CRM para la gestión de contenidos, usuarios y soporte de Play Attention',
+    'Plataforma de Usuarios para la gestión de contenidos, usuarios y soporte de Play Attention',
   icons: {
     icon: '/img/logospinner.png',
     apple: '/img/logospinner.png',
