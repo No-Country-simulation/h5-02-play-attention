@@ -35,7 +35,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
       <div className='py-2 px-4 border-b flex items-center'>
         <Button variant='ghost' onClick={onBack} className='mr-2' size='sm'>
           <ArrowLeft className='h-4 w-4 mr-1' />
-          <span>Tipo</span>
+          <span>Volver</span>
         </Button>
 
         <div className='flex-1'>
