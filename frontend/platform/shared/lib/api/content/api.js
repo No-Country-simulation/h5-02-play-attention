@@ -9,7 +9,7 @@ export async function fetchEducationalMaterials() {
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch educational materials');
+      throw new Error('Failed to fetch published resources');
     }
 
     const data = await response.json();

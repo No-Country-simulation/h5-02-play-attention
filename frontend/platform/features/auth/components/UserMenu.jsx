@@ -114,10 +114,6 @@ function UserMenu() {
               <span>Perfil</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Settings className='mr-2 h-4 w-4' />
-              <span>Configuración</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
               <Bell className='mr-2 h-4 w-4' />
               <span>Notificaciones</span>
             </DropdownMenuItem>
