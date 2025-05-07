@@ -138,7 +138,7 @@ export function SearchBar({
           </div>
 
           {/* Selector de Categoría */}
-          <div className='relative'>
+         {/*  <div className='relative'>
             <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
               <Filter />
               Categoría
@@ -154,7 +154,7 @@ export function SearchBar({
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           {/* Selector de Fecha */}
           <div className='relative'>
