@@ -1,5 +1,6 @@
 import { Filter, LucideFilter } from 'lucide-react';
 import React, { useState } from 'react';
+import TuneIcon from '@mui/icons-material/Tune';
 
 
 export function SearchBar({
@@ -55,7 +56,7 @@ export function SearchBar({
             onClick={() => setShowFilters(!showFilters)}
             className='px-3 py-2 border border-gray-300 bg-white rounded-md flex items-center'
           >
-            <Filter className='text-gray-500' />
+             <TuneIcon className='text-gray-500' fontSize='small' />
           </button>
         </div>
 
@@ -159,7 +160,7 @@ export function SearchBar({
           {/* Selector de Fecha */}
           <div className='relative'>
             <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
-              <Filter />
+            <TuneIcon className='text-gray-500' fontSize='small' />
               fecha
             </button>
             <select
