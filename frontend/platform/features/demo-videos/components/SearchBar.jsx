@@ -62,7 +62,7 @@ export function SearchBar({
         {showFilters && (
           <div className='flex flex-col gap-3 mb-3 bg-gray-50 p-3 rounded-md'>
             {/* Selector de Tipo */}
-            <div className='w-full'>
+            {/* <div className='w-full'>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Tipo
               </label>
@@ -82,7 +82,7 @@ export function SearchBar({
                 <TuneIcon className='text-gray-500' fontSize='small' />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Selector de Fecha */}
             <div className='w-full'>
