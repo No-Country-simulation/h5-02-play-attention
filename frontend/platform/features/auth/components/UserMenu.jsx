@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger
 } from '@/shared/ui/dropdown-menu';
 import { User, Settings, LogOut, HelpCircle, Bell, Menu } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * Componente de menú de usuario para el header
@@ -109,9 +110,11 @@ function UserMenu() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <User className='mr-2 h-4 w-4' />
-              <span>Perfil</span>
+            <DropdownMenuItem >
+              <Link href="/profile" className="flex items-start">              
+                <User className='mr-2 h-4 w-4' />
+                <span>Perfil</span>
+              </Link>                                          
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Bell className='mr-2 h-4 w-4' />

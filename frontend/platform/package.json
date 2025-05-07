@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@hookform/resolvers": "^5.0.1",
     "@mui/icons-material": "^7.0.2",
     "@radix-ui/react-avatar": "^1.1.8",
     "@radix-ui/react-dialog": "^1.1.13",
@@ -33,13 +34,15 @@
     "pdfjs-dist": "3.4.120",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.2",
     "react-icons": "^5.5.0",
     "react-pdf": "^9.2.1",
     "react-player": "^2.16.0",
     "react-select": "^5.10.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
-    "tw-animate-css": "^1.2.5"
+    "tw-animate-css": "^1.2.5",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
