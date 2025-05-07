@@ -70,7 +70,7 @@ export default function UserManagement() {
   // Estado de carga
   if (isLoading) {
     return (
-      <div className='p-3 sm:p-4 lg:p-6 max-w-full mx-auto lg:max-w-7xl'>
+      <div className='p-3 sm:p-4 max-w-full mx-auto lg:max-w-7xl'>
         <PageHeader title={title} description={description} />
         <div className='flex justify-center items-center mt-10'>
           <LoadingSpinner text='Cargando usuarios' size={42} />
@@ -82,7 +82,7 @@ export default function UserManagement() {
   // Estado de error
   if (error) {
     return (
-      <div className='p-3 sm:p-4 lg:p-6 max-w-full mx-auto lg:max-w-7xl'>
+      <div className='p-3 sm:p-4 max-w-full mx-auto lg:max-w-7xl'>
         <PageHeader title={title} description={description} />
         <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-6'>
           <p>Error al cargar los usuarios: {error.message}</p>
@@ -92,7 +92,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className='p-3 sm:p-4 lg:p-6 max-w-full mx-auto lg:max-w-7xl'>
+    <div className=' max-w-full mx-auto lg:max-w-7xl'>
       <PageHeader title={title} description={description} />
 
       {/* Estadísticas de usuarios */}

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -33,6 +33,7 @@ export default function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isValidatingToken, setIsValidatingToken] = useState(false);
   const [error, setError] = useState('');
+  const [tokenError, setTokenError] = useState('');
   const [success, setSuccess] = useState(false);
   const [tokenValidated, setTokenValidated] = useState(false);
 
@@ -67,12 +68,16 @@ export default function ResetPasswordForm() {
 
   // Función para validar el token
   const validateToken = async token => {
-    if (!token) return;
+    if (!token || token.length !== TOKEN_LENGTH) return;
 
     setIsValidatingToken(true);
     setError('');
+    setTokenError('');
 
     try {
+      console.log('Validando token:', token);
+      console.log('Endpoint:', API_ENDPOINTS.auth.confirmToken);
+
       const response = await fetch(API_ENDPOINTS.auth.confirmToken, {
         method: 'POST',
         headers: {
@@ -89,10 +94,43 @@ export default function ResetPasswordForm() {
 
       setTokenValidated(true);
     } catch (err) {
-      setError(err.message);
+      console.error('Error validando token:', err);
+      setTokenError(err.message);
       setTokenValidated(false);
     } finally {
       setIsValidatingToken(false);
+    }
+  };
+
+  // Manejar evento de pegar en cualquier input de código
+  const handlePaste = e => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    const cleanedText = pastedText.replace(/\D/g, '').slice(0, TOKEN_LENGTH);
+
+    if (cleanedText) {
+      // Llenar todos los campos con los dígitos pegados
+      const newDigits = Array(TOKEN_LENGTH).fill('');
+
+      cleanedText.split('').forEach((digit, idx) => {
+        if (idx < TOKEN_LENGTH) {
+          newDigits[idx] = digit;
+        }
+      });
+
+      setTokenDigits(newDigits);
+      const newToken = newDigits.join('');
+      setFormData(prev => ({ ...prev, token: newToken }));
+
+      // Validar automáticamente si el token está completo
+      if (newToken.length === TOKEN_LENGTH) {
+        validateToken(newToken);
+      }
+
+      // Enfocar el siguiente campo si el código no está completo
+      if (cleanedText.length < TOKEN_LENGTH) {
+        inputRefs.current[cleanedText.length].focus();
+      }
     }
   };
 
@@ -268,20 +306,53 @@ export default function ResetPasswordForm() {
             >
               Código de Recuperación
             </Label>
-            <div className='flex justify-center gap-2'>
-              {Array.from({ length: TOKEN_LENGTH }).map((_, index) => (
-                <Input
-                  key={index}
-                  type='text'
-                  maxLength={1}
-                  value={tokenDigits[index]}
-                  className='w-11 h-10 text-center border-0 border-b border-purple-300 bg-transparent focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 rounded-none focus:border-purple-300 outline-none !shadow-none'
-                  style={{ boxShadow: 'none' }}
-                  onChange={e => handleDigitChange(index, e.target.value)}
-                  onKeyDown={e => handleKeyDown(index, e)}
-                  ref={el => (inputRefs.current[index] = el)}
-                />
-              ))}
+            <div className='flex flex-col items-center gap-2'>
+              <div className='flex justify-center gap-2'>
+                {Array.from({ length: TOKEN_LENGTH }).map((_, index) => (
+                  <Input
+                    key={index}
+                    type='text'
+                    maxLength={1}
+                    value={tokenDigits[index]}
+                    className={`w-11 h-10 text-center border-0 border-b bg-transparent focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 rounded-none outline-none !shadow-none ${
+                      tokenValidated
+                        ? 'border-green-500 text-green-600'
+                        : tokenError
+                        ? 'border-red-500 text-red-600'
+                        : 'border-purple-300 focus:border-purple-300'
+                    }`}
+                    style={{ boxShadow: 'none' }}
+                    onChange={e => handleDigitChange(index, e.target.value)}
+                    onKeyDown={e => handleKeyDown(index, e)}
+                    ref={el => (inputRefs.current[index] = el)}
+                    onPaste={handlePaste}
+                  />
+                ))}
+              </div>
+
+              {/* Indicador de estado del token */}
+              <div className='w-full flex items-center justify-center h-6 mt-1'>
+                {isValidatingToken && (
+                  <div className='flex items-center text-purple-600 text-xs'>
+                    <Loader2 className='w-4 h-4 mr-1 animate-spin' />
+                    Validando código...
+                  </div>
+                )}
+
+                {!isValidatingToken && tokenValidated && (
+                  <div className='flex items-center text-green-600 text-xs'>
+                    <CheckCircle2 className='w-4 h-4 mr-1' />
+                    Código válido
+                  </div>
+                )}
+
+                {!isValidatingToken && tokenError && (
+                  <div className='flex items-center text-red-600 text-xs'>
+                    <XCircle className='w-4 h-4 mr-1' />
+                    {tokenError}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -303,6 +374,7 @@ export default function ResetPasswordForm() {
                 value={formData.password}
                 onChange={handleChange}
                 className='w-full h-10 rounded border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 pr-10'
+                disabled={!tokenValidated}
               />
               <button
                 type='button'
@@ -336,6 +408,7 @@ export default function ResetPasswordForm() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className='w-full h-10 rounded border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 pr-10'
+                disabled={!tokenValidated}
               />
               <button
                 type='button'
@@ -359,8 +432,12 @@ export default function ResetPasswordForm() {
 
           <Button
             type='submit'
-            disabled={isLoading}
-            className='w-full h-10 bg-purple-800 hover:bg-purple-900 text-white rounded'
+            disabled={isLoading || !tokenValidated}
+            className={`w-full h-10 text-white rounded ${
+              tokenValidated
+                ? 'bg-purple-800 hover:bg-purple-900'
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
           >
             {isLoading ? (
               <>

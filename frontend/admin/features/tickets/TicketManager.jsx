@@ -305,7 +305,7 @@ export default function TicketManager() {
   }
 
   return (
-    <div className='p-6 max-w-7xl mx-auto'>
+    <div className=' max-w-7xl mx-auto'>
       {!selectedTicket && (
         <PageHeader title={title} description={description} />
       )}

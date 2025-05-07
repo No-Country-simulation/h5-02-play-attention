@@ -263,7 +263,7 @@ export default function LeadManager() {
     );
 
   return (
-    <div className='p-4 md:p-6 max-w-7xl mx-auto'>
+    <div className='max-w-7xl mx-auto'>
       <PageHeader title={title} description={description} />
 
       <Tabs
