@@ -4,10 +4,12 @@
 
 export async function fetchEducationalMaterials() {
   try {
-    const response = await fetch('https://play-attention.onrender.com/api/resources/published?published=true');
+    const response = await fetch(
+      'https://play-attention.onrender.com/api/resources/published?published=true'
+    );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch educational materials');
+      throw new Error('Failed to fetch published resources');
     }
 
     const data = await response.json();

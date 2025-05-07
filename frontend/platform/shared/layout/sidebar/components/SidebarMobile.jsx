@@ -58,9 +58,9 @@ export default function SidebarMobile() {
   // Orden de los items principales
   const mainItems = [
     { name: 'Panel de control', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Actividades', icon: PenTool, path: '/activities' },
+    /* { name: 'Actividades', icon: PenTool, path: '/activities' }, */
     { name: 'Soporte', icon: MessageCircle, path: '/support' },
-    { name: 'Configuración', icon: Settings, path: '/settings' }
+   /*  { name: 'Configuración', icon: Settings, path: '/settings' } */
   ];
 
   // Items de contenido que se mostrarán/ocultarán

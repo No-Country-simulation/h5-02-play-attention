@@ -1,6 +1,5 @@
+import { Filter, LucideFilter } from 'lucide-react';
 import React, { useState } from 'react';
-import TuneIcon from '@mui/icons-material/Tune';
-import { FiFilter } from 'react-icons/fi';
 
 export function SearchBar({
   searchQuery,
@@ -23,8 +22,8 @@ export function SearchBar({
 
   return (
     <div className='mb-6'>
-      {/* Vista móvil y tablet: Búsqueda simple + botón de filtros */}
-      <div className='lg:hidden'>
+      {/* Vista móvil: Búsqueda simple + botón de filtros */}
+      <div className='md:hidden'>
         <div className='flex items-center gap-2 mb-3'>
           <div className='relative flex-grow'>
             <input
@@ -55,11 +54,11 @@ export function SearchBar({
             onClick={() => setShowFilters(!showFilters)}
             className='px-3 py-2 border border-gray-300 bg-white rounded-md flex items-center'
           >
-            <FiFilter className='text-gray-500' />
+            <Filter className='text-gray-500' />
           </button>
         </div>
 
-        {/* Filtros expandibles para móvil y tablet */}
+        {/* Filtros expandibles para móvil */}
         {showFilters && (
           <div className='flex flex-col gap-3 mb-3 bg-gray-50 p-3 rounded-md'>
             {/* Selector de Tipo */}
@@ -80,7 +79,7 @@ export function SearchBar({
                   ))}
                 </select>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                  <TuneIcon className='text-gray-500' fontSize='small' />
+                  <Filter className='text-gray-500' fontSize='small' />
                 </div>
               </div>
             </div>
@@ -100,7 +99,7 @@ export function SearchBar({
                   <option value='oldest'>Más antiguo primero</option>
                 </select>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                  <TuneIcon className='text-gray-500' fontSize='small' />
+                  <LucideFilter className='text-gray-500' fontSize='small' />
                 </div>
               </div>
             </div>
@@ -109,7 +108,7 @@ export function SearchBar({
       </div>
 
       {/* Vista desktop: Búsqueda y filtros en línea */}
-      <div className='hidden lg:block'>
+      <div className='hidden md:block'>
         <div className='flex items-center gap-2'>
           <div className='relative flex-grow'>
             <input
@@ -135,31 +134,12 @@ export function SearchBar({
                 />
               </svg>
             </div>
-          </div>
-
-          {/* Selector de Tipo */}
-          <div className='relative'>
-            <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
-              <TuneIcon />
-              Tipo
-            </button>
-            <select
-              value={fileType}
-              onChange={e => onFileTypeChange(e.target.value)}
-              className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
-            >
-              {fileTypes.map(type => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
+          </div>          
 
           {/* Selector de Fecha */}
           <div className='relative'>
             <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
-              <TuneIcon />
+              <Filter />
               fecha
             </button>
             <select
@@ -175,4 +155,4 @@ export function SearchBar({
       </div>
     </div>
   );
-}
+} 

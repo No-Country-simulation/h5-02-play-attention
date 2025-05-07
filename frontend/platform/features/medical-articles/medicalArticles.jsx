@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { SearchBar } from './components/SearchBar';
 import { MaterialsTable } from './components/MaterialsTable';
-import { useEducationalMaterials } from './lib/hooks/useEducationalMaterials';
+import { useMedicalArticles } from './lib/hooks/useMedicalArticles';
 import PageHeader from '@/shared/layout/sectionheader/pageHeader';
 
 /**
  * Main Educational Material component
  * Responsible for displaying and managing educational materials
  */
-export default function EducationalMaterial() {
+export default function MedicalArticles() {
   const { materials, isLoading, error, handleDownload, validateMaterial } =
-    useEducationalMaterials();
+    useMedicalArticles();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMaterials, setFilteredMaterials] = useState([]);
   const [fileType, setFileType] = useState('Todos');
@@ -58,16 +58,8 @@ export default function EducationalMaterial() {
   }, [materials, searchQuery, fileType, dateSort]);
 
   return (
-    <div className='w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8'>
-  {/*     <div className='mb-4 sm:mb-6'>
-        <h1 className='text-xl sm:text-2xl font-bold text-gray-900'>
-          Material Educativo
-        </h1>
-        <p className='text-sm sm:text-base text-gray-600 mt-1'>
-          Explora y accede a recursos educativos para mejorar tus habilidades
-        </p>
-      </div> */}
-      <PageHeader sectionKey={'materialEducativo'} />
+    <div className='w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 '>
+     <PageHeader sectionKey={'medicalArticles'} />
 
       <SearchBar
         searchQuery={searchQuery}
@@ -118,3 +110,10 @@ export default function EducationalMaterial() {
     </div>
   );
 }
+
+// Viewport export para Next.js
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1
+};

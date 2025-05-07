@@ -17,7 +17,7 @@ const getFileSize = async url => {
   }
 };
 
-export function useEducationalMaterials() {
+export function useMedicalArticles() {
   const [materials, setMaterials] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,8 +28,9 @@ export function useEducationalMaterials() {
       setError(null);
       try {
         const data = await fetchEducationalMaterials();
+        console.log(data);
         const filteredData = data.filter(
-          item => item.category?.name === 'Material Eductaivo'
+          item => item.category?.name === 'Artículos Médicos'
         );
 
         // Get file sizes for all materials
@@ -104,7 +105,7 @@ export function useEducationalMaterials() {
         // Para PDFs, forzamos la descarga con extensión .pdf
         if (material.type.toLowerCase() === 'pdf') {
           // Preparar nombre de archivo con la extensión correcta
-          let fileName = material.title || 'material_educativo';
+          let fileName = material.title || 'Artículos_Médicos';
           if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
           }
@@ -145,7 +146,7 @@ export function useEducationalMaterials() {
           link.href = material.url;
 
           // Preparar nombre de archivo con la extensión correcta
-          let fileName = material.title || 'material_educativo';
+          let fileName = material.title || 'Artículos_Médicos';
 
           // Para otros tipos de archivo, podemos agregar la extensión correspondiente si no la tiene
           if (
