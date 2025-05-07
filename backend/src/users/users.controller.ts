@@ -6,12 +6,16 @@ import {
   Delete,
   Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { QueryUsersDto } from './dto/query-user.dto';
 import { MongoIdValidationPipe } from '../common/pipes/isMongoIdValidation.pipe';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetUser } from 'src/common/decorators/getUserId';
+import { UpdateUserPasswordDto } from './dto/update-password.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @ApiTags("users")
 @Controller('api/users')
@@ -37,6 +41,17 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id', MongoIdValidationPipe) id: string) {
     return this.usersService.findById(id);
+  }
+
+  @ApiBearerAuth('playAttentionToken')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  @Put('password')
+  updateUserPassword(
+    @GetUser() userId: string,
+    @Body() dto: UpdateUserPasswordDto,
+  ) {
+    return this.usersService.updateUserPassword(userId, dto);
   }
 
   @ApiOperation({summary:"Actualizar usuario por id"})

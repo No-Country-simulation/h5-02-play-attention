@@ -8,6 +8,7 @@ import { User, UserDocument, UserRoleType } from './schema/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
+import { UpdateUserPasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -35,11 +36,16 @@ export class UsersService {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
-      this.userModel.find().limit(limit).skip(skip).sort({createdAt:-1}).exec(),
+      this.userModel
+        .find()
+        .limit(limit)
+        .skip(skip)
+        .sort({ createdAt: -1 })
+        .exec(),
       this.userModel.countDocuments().exec(),
     ]);
 
-    if (!users.length) return {message:"No existen usuarios",users:[]}
+    if (!users.length) return { message: 'No existen usuarios', users: [] };
 
     return {
       data: users,
@@ -54,7 +60,7 @@ export class UsersService {
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
     if (!user) {
-      throw new BadRequestException(`Usuario con ID ${id} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
 
     if (updateUserDto.email && updateUserDto.email !== user.email) {
@@ -68,7 +74,6 @@ export class UsersService {
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-
     Object.keys(updateUserDto).forEach((key) => {
       if (updateUserDto[key] !== undefined) {
         user[key] = updateUserDto[key];
@@ -91,5 +96,20 @@ export class UsersService {
     if (!user) throw new NotFoundException('Usuario no encontrado');
     await user.deleteOne();
     return { message: 'Usuario eliminado' };
+  }
+
+  async updateUserPassword(userId: string, dto: UpdateUserPasswordDto) {
+    try {
+      const user = await this.userModel.findById(userId);
+      const isSame = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!isSame) {
+        throw new BadRequestException('Contraseña actual inválida');
+      }
+      await this.update(userId, { password: dto.newPassword });
+      return { ok: true };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
