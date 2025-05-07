@@ -21,6 +21,13 @@ export class SupportTicketRepository implements ISupportTicketsRepository {
     return await newTicket.save();
   }
 
+  async findSupportTicketByUser(id:string): Promise<SupportTickets[]> {
+    return await this.model
+      .find({ user_id: id })
+      .populate([{ path: 'assigned_to' }, { path: 'user_id' }]);
+  }
+
+
   async findSupportTicket(id: string): Promise<SupportTickets> {
     return await this.model
       .findOne({ _id: id })

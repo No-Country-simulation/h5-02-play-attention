@@ -48,6 +48,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
         "http://localhost:3000",
+        "http://localhost:3001",
      "http://localhost:5173",
      "https://crm-admin-platform.vercel.app",
         "https://playatenttion-platform.vercel.app",

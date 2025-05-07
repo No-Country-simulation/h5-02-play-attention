@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { SupportTicketService } from './support-ticket.service';
 import { MongoIdValidationPipe } from 'src/common/pipes/isMongoIdValidation.pipe';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import {
   ResponseSupportTicketDto,
   SupportTicketPaginationDto,
@@ -27,6 +27,18 @@ import { UpdateSupportTicketDto } from './dto/update-ticket.dto';
 @Controller('api/support-tickets')
 export class SupportTicketController {
   constructor(private readonly _service: SupportTicketService) {}
+
+
+  @Get("/user")
+  @ApiBearerAuth('playAttentionToken')
+  @ApiBody({ type: GetTicketsFilterDto })
+  @ApiOkResponse({ type: SupportTicketPaginationDto })
+  @UseGuards(AuthGuard)
+  getByUser(@GetUser() userId: string){
+    return this._service.getByUser(userId);
+  }
+
+
 
   @Get(':ticketId')
   @ApiOkResponse({ type: ResponseSupportTicketDto })

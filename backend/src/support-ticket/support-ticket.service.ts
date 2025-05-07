@@ -24,6 +24,13 @@ export class SupportTicketService implements ISupportTicketService {
     private readonly _userService: UsersService,
   ) {}
 
+  async getByUser(
+    userId: string
+  ){
+      const tickets=this._repository.findSupportTicketByUser(userId);
+      return tickets;
+    }
+
   async userCreateSupportTicket(
     userId: string,
     dto: UserGenerateSupportTicketDto,

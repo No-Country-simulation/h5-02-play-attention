@@ -187,18 +187,22 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
     if (!user) {
+      this.logger.warn(`Login fallido,usuario con email ${loginDto.email} no encontrado`);
       return new NotFoundException('Usuario no encontrado');
+      
     }
     const isValidPassword = await bcrypt.compare(
       loginDto.password,
       user.password,
     );
     if (!isValidPassword) {
+      this.logger.warn(`Login fallido,contraseña inválida para ${loginDto.email}`);
       return new UnauthorizedException(
         'El email o la contraseña no son válidos',
       );
     }
     const payload = { user: user._id };
+    this.logger.log(`Login exitoso para ${user.email}`);
     return {
       playAttentionToken: await this.jwtService.signAsync(payload, {
         secret: this.configService.get('jwt.secret'),

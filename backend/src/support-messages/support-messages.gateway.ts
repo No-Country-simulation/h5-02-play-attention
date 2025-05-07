@@ -1,9 +1,10 @@
 import { Logger } from "@nestjs/common";
-import { ConnectedSocket, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { WsGuard } from "../auth/ws.guard";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { SupportMessagesService } from "./support-messages.service";
 
 
 @WebSocketGateway({
@@ -20,6 +21,7 @@ export class ChatGateway implements OnGatewayConnection{
     constructor(
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly supportMessageService:SupportMessagesService
     ){
         this.wsGuard=new WsGuard(jwtService, configService);
     }
@@ -42,6 +44,7 @@ export class ChatGateway implements OnGatewayConnection{
                 const user = socket['user'];
                 this.logger.log(`Usuario autenticado: ${JSON.stringify(user)}`);
                 
+                 socket.emit('user', user);
                 await socket.join(`user_${user}`);
                 this.logger.log(`Usuario ${user} unido a su sala personal`);
                 
@@ -68,5 +71,25 @@ handleJoinTicket(client: Socket, ticketId: string) {
   client.join(ticketId);
   client.emit("joinedTicket", ticketId);
 }
+
+
+@SubscribeMessage('newMessage')
+async handleMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { text: string; ticket_id: string }
+) {
+    this.logger.log(`Nuevo mensaje recibido de ${client.id}: ${JSON.stringify(data)}`);
+    
+    const newMessage = await this.supportMessageService.create({
+    user_id: client['user'], 
+    text: data.text,
+    ticket_id: data.ticket_id
+  });
+
+  this.server.to(data.ticket_id).emit('newMessage', newMessage); 
+
+    return data.text;
+}
+
 
 }
