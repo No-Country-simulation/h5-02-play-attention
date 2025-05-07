@@ -356,10 +356,10 @@ export default function SidebarMobile() {
 
             {/* Lista de opciones */}
             <div className='space-y-1'>
-              <button className='flex items-center w-full p-3 text-sm text-left hover:bg-white/10 rounded-md transition-colors text-white'>
+              <Link href="/profile" className='flex items-center w-full p-3 text-sm text-left hover:bg-white/10 rounded-md transition-colors text-white'>
                 <User className='mr-3 h-5 w-5 text-white' />
                 <span>Perfil</span>
-              </button>
+              </Link>
               <button className='flex items-center w-full p-3 text-sm text-left hover:bg-white/10 rounded-md transition-colors text-white'>
                 <Settings className='mr-3 h-5 w-5 text-white' />
                 <span>Configuración</span>
