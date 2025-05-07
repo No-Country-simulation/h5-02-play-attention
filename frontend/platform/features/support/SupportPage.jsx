@@ -12,22 +12,44 @@ import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 export default function SupportPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showTicketDetail, setShowTicketDetail] = useState(false);
+  const [ticketFilters, setTicketFilters] = useState({
+    page: 1,
+    take: 500,
+    sort_by: 'created_at',
+    order: 'desc'
+  });
+
   const {
     tickets,
+    meta,
     selectedTicket,
     loading,
     error,
+    isCreating,
     createTicket,
     selectTicket,
     setSelectedTicket
-  } = useTickets();
+  } = useTickets({ filters: ticketFilters });
 
   const handleCreateTicket = async data => {
-    const result = await createTicket(data);
-    if (result.success) {
-      setIsCreateDialogOpen(false);
-    }
-    return result;
+    return new Promise(resolve => {
+      createTicket(data, {
+        onSuccess: result => {
+          if (result.success) {
+            setIsCreateDialogOpen(false);
+            resolve({ success: true });
+          } else {
+            resolve({ success: false, error: result.error });
+          }
+        },
+        onError: error => {
+          resolve({
+            success: false,
+            error: error.message || 'Error al crear el ticket'
+          });
+        }
+      });
+    });
   };
 
   const handleViewTicket = ticketId => {
@@ -42,6 +64,14 @@ export default function SupportPage() {
 
   const handleContactSupport = () => {
     setIsCreateDialogOpen(true);
+  };
+
+  const handleFilterChange = newFilters => {
+    setTicketFilters(prev => ({
+      ...prev,
+      ...newFilters,
+      take: 500
+    }));
   };
 
   return (
@@ -87,8 +117,11 @@ export default function SupportPage() {
                 ) : (
                   <TicketList
                     tickets={tickets}
+                    meta={meta}
                     onCreateTicket={() => setIsCreateDialogOpen(true)}
                     onViewTicket={handleViewTicket}
+                    onFilterChange={handleFilterChange}
+                    currentFilters={ticketFilters}
                   />
                 )}
               </div>
@@ -99,6 +132,7 @@ export default function SupportPage() {
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
             onSubmit={handleCreateTicket}
+            isSubmitting={isCreating}
           />
         </>
       )}

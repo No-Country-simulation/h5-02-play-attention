@@ -1,9 +1,14 @@
 import React from 'react';
 
 import CreateTicketForm from './CreateTicketForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/ui/dialog';
 
-const CreateTicketDialog = ({ open, onOpenChange, onSubmit }) => {
+const CreateTicketDialog = ({ open, onOpenChange, onSubmit, isSubmitting }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-[500px]'>
@@ -13,8 +18,9 @@ const CreateTicketDialog = ({ open, onOpenChange, onSubmit }) => {
         <CreateTicketForm
           onClose={() => onOpenChange(false)}
           onSubmit={data => {
-            onSubmit?.(data);
+            return onSubmit?.(data);
           }}
+          isSubmitting={isSubmitting}
         />
       </DialogContent>
     </Dialog>

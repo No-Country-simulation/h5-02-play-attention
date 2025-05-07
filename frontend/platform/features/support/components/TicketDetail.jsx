@@ -2,10 +2,115 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Separator } from '@/shared/ui/separator';
 import { ArrowLeft, Send } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import useTicketMessages from '../hooks/useTicketMessages';
+import useUsers from '../hooks/useUsers';
+import { LoadingSpinner } from '@/shared/ui/loading-spinner';
+import { getUserInfoFromCookie } from '../lib/utils/cookies';
 
 const TicketDetail = ({ ticket, onBack, onEdit }) => {
   const [newMessage, setNewMessage] = useState('');
+  const messagesContainerRef = useRef(null);
+  const { messages, loading, error, isSending, sendMessage, refetch } =
+    useTicketMessages(ticket?.id);
+  const { userMap, loading: loadingUsers, getUserNameById } = useUsers();
+
+  // Depuración: mostrar los usuarios disponibles
+  useEffect(() => {
+    if (userMap && Object.keys(userMap).length > 0) {
+      console.log('Usuarios disponibles en userMap:', userMap);
+    }
+  }, [userMap]);
+
+  // Desplazarse automáticamente al final de la conversación cuando llegan nuevos mensajes
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Obtener información del usuario actual
+  const currentUser = getUserInfoFromCookie();
+
+  // Transformar mensajes del API al formato que espera el componente
+  const transformMessages = () => {
+    if (!messages || !Array.isArray(messages)) {
+      console.log('No hay mensajes o formato incorrecto:', messages);
+      return [];
+    }
+
+    console.log('Transformando mensajes:', messages);
+
+    return messages.map(message => {
+      // Adaptado para manejar el formato que muestra la API
+      // Usar user_id o _id según lo que venga del servidor
+      const messageUserId =
+        message.user_id ||
+        (message.user && (message.user.id || message.user._id));
+
+      // Depuración: mostrar el ID del usuario del mensaje
+      console.log('Mensaje con user_id:', messageUserId, message);
+
+      // Determinar si el mensaje es del usuario actual
+      const isUser =
+        currentUser &&
+        (messageUserId === currentUser.id ||
+          String(messageUserId) === String(currentUser.id));
+
+      // Obtener el nombre del usuario desde el mapa o usar alternativas
+      let authorName = 'Soporte';
+
+      // Si tenemos el userMap, usarlo para obtener el nombre
+      if (userMap && messageUserId && userMap[messageUserId]) {
+        authorName = userMap[messageUserId].name;
+        console.log(
+          `Usuario encontrado en userMap para ID ${messageUserId}:`,
+          userMap[messageUserId]
+        );
+      } else {
+        // Intentar obtener el nombre directamente usando getUserNameById
+        authorName = getUserNameById(messageUserId);
+        console.log(
+          `Buscando nombre para usuario ${messageUserId} manualmente:`,
+          authorName
+        );
+      }
+
+      // Si es el usuario actual, mostrar "Tú" como nombre
+      if (isUser) {
+        authorName = 'Tú';
+      }
+
+      // Convertir las fechas o usar valores predeterminados
+      let messageDate;
+      try {
+        messageDate = new Date(
+          message.createdAt || message.created_at || message.date || Date.now()
+        ).toLocaleString('es-ES', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        messageDate = 'Fecha desconocida';
+      }
+
+      // Extraer el contenido del mensaje - ahora puede estar en text o content
+      const content = message.text || message.content || message.message || '';
+
+      return {
+        id: message._id || message.id,
+        author: authorName,
+        date: messageDate,
+        content: content,
+        isUser,
+        userId: messageUserId
+      };
+    });
+  };
 
   if (!ticket) {
     return (
@@ -24,9 +129,40 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    // En un caso real, aquí enviaríamos el mensaje al backend
-    console.log('Mensaje enviado:', newMessage);
-    setNewMessage('');
+    sendMessage(
+      { content: newMessage.trim() },
+      {
+        onSuccess: () => {
+          setNewMessage('');
+          // Pequeña pausa antes de refrescar para dar tiempo a que el servidor procese
+          setTimeout(() => {
+            refetch(); // Forzar la actualización de mensajes
+          }, 300);
+        },
+        onError: error => {
+          console.error('Error al enviar mensaje:', error);
+          alert('Error al enviar mensaje. Intenta nuevamente.');
+        }
+      }
+    );
+  };
+
+  // Convertir la conversación al formato esperado por el componente
+  const conversation = transformMessages();
+
+  // Formatear datos del ticket para mostar
+  const formattedTicket = {
+    id: ticket.id || '',
+    subject: ticket.title || ticket.subject || 'Sin título',
+    createdAt: new Date(
+      ticket.created_at || ticket.date || Date.now()
+    ).toLocaleString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }),
+    category: ticket.category || '',
+    status: ticket.status || 'Abierto'
   };
 
   return (
@@ -39,16 +175,16 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
         </Button>
 
         <div className='flex-1'>
-          <h1 className='text-md font-semibold'>{ticket.subject}</h1>
+          <h1 className='text-md font-semibold'>{formattedTicket.subject}</h1>
           <div className='flex items-center text-xs text-gray-500 space-x-2'>
-            <span>{ticket.id}</span>
+            <span>{formattedTicket.id}</span>
             <span>•</span>
-            <span>Creado: {ticket.createdAt}</span>
-            {ticket.category && (
+            <span>Creado: {formattedTicket.createdAt}</span>
+            {formattedTicket.category && (
               <>
                 <span>•</span>
                 <span className='px-1.5 py-0.5 bg-gray-100 rounded text-xs'>
-                  {ticket.category}
+                  {formattedTicket.category}
                 </span>
               </>
             )}
@@ -58,24 +194,51 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
         <Badge
           className='ml-4'
           variant={
-            ticket.status === 'Abierto'
+            formattedTicket.status.toLowerCase() === 'abierto' ||
+            formattedTicket.status.toLowerCase() === 'open'
               ? 'secondary'
-              : ticket.status === 'En proceso'
+              : formattedTicket.status.toLowerCase() === 'en proceso' ||
+                formattedTicket.status.toLowerCase() === 'in_progress'
               ? 'warning'
               : 'success'
           }
         >
-          {ticket.status}
+          {formattedTicket.status}
         </Badge>
       </div>
 
       {/* Conversación */}
-      <div className='flex-1 p-4 overflow-y-auto bg-gray-50 max-h-[400px]'>
-        <div className='space-y-4'>
-          {ticket.conversation &&
-            ticket.conversation.map((message, index) => (
+      <div
+        ref={messagesContainerRef}
+        className='flex-1 p-4 overflow-y-auto bg-gray-50 max-h-[400px]'
+      >
+        {loading || loadingUsers ? (
+          <div className='flex justify-center items-center h-full'>
+            <LoadingSpinner />
+          </div>
+        ) : error ? (
+          <div className='text-center py-10 text-red-500'>
+            <p>Error al cargar los mensajes: {error}</p>
+            <Button
+              variant='outline'
+              onClick={() => refetch()}
+              className='mt-4'
+            >
+              Reintentar
+            </Button>
+          </div>
+        ) : conversation.length === 0 ? (
+          <div className='text-center py-10 text-gray-500'>
+            <p>Aún no hay mensajes en este ticket.</p>
+            <p className='text-sm mt-1'>
+              Escribe abajo para iniciar la conversación.
+            </p>
+          </div>
+        ) : (
+          <div className='space-y-4'>
+            {conversation.map((message, index) => (
               <div
-                key={index}
+                key={message.id || index}
                 className={`flex ${
                   message.isUser ? 'justify-end' : 'justify-start'
                 }`}
@@ -121,13 +284,14 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
                 {message.isUser && (
                   <div className='h-8 w-8 rounded-full overflow-hidden ml-2 mt-1 flex-shrink-0'>
                     <div className='bg-purple-600 text-white w-full h-full flex items-center justify-center font-semibold text-sm'>
-                      U
+                      {currentUser?.name?.charAt(0).toUpperCase() || 'T'}
                     </div>
                   </div>
                 )}
               </div>
             ))}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Input de mensaje */}
@@ -139,13 +303,19 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
             onChange={e => setNewMessage(e.target.value)}
             placeholder='Escribe tu mensaje...'
             className='flex-1 py-1.5 px-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent'
+            disabled={isSending}
           />
           <Button
             type='submit'
             className='ml-2 bg-purple-700 hover:bg-purple-800'
             size='icon'
+            disabled={isSending || !newMessage.trim()}
           >
-            <Send className='h-4 w-4' />
+            {isSending ? (
+              <LoadingSpinner size='sm' />
+            ) : (
+              <Send className='h-4 w-4' />
+            )}
           </Button>
         </form>
       </div>
