@@ -111,36 +111,38 @@ export default function SupportPage() {
   };
 
   return (
-    <div className='container mx-auto px-4 py-6 max-w-6xl'>
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold'>Soporte</h1>
-        <p className='text-gray-500'>
+    <div className='container mx-auto px-2 md:px-4 py-3 md:py-6 max-w-6xl'>
+      <div className='mb-3 md:mb-6'>
+        <h1 className='text-xl md:text-2xl font-bold'>Soporte</h1>
+        <p className='text-sm md:text-base text-gray-500'>
           Tickets y preguntas frecuentes para asistencia técnica
         </p>
       </div>
 
       {showTicketDetail ? (
-        <TicketDetail
-          ticket={selectedTicket}
-          onBack={handleBackToList}
-          onEdit={() => {}} // Implement edit functionality if needed
-        />
+        <div className='md:mt-4'>
+          <TicketDetail
+            ticket={selectedTicket}
+            onBack={handleBackToList}
+            onEdit={() => {}} // Implement edit functionality if needed
+          />
+        </div>
       ) : (
         <>
           <SupportTabs defaultTab={activeTab} onTabChange={handleTabChange}>
             <SupportTabs.TabPanel label='Preguntas frecuentes'>
-              <div className='mt-4'>
+              <div className='mt-2 md:mt-4'>
                 <FAQ onContactSupport={handleContactSupport} />
               </div>
             </SupportTabs.TabPanel>
             <SupportTabs.TabPanel label='Mis tickets'>
-              <div className='mt-4'>
+              <div className='mt-2 md:mt-4'>
                 {loading ? (
                   <div className='flex justify-center items-center h-40'>
                     <LoadingSpinner />
                   </div>
                 ) : error ? (
-                  <div className='text-center py-10'>
+                  <div className='text-center py-6 md:py-10'>
                     <p className='text-red-500'>{error}</p>
                     <Button
                       variant='outline'

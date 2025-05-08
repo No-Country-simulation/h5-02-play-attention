@@ -60,20 +60,75 @@ const TicketList = ({
     return ticket.status || 'Desconocido';
   };
 
-  return (
-    <div className='w-full'>
-      <div className='flex justify-between items-center mb-4'>
-        <h2 className='text-xl font-semibold'>Mis Tickets</h2>
-        <Button
-          variant='primary'
-          size='sm'
-          className='flex text-white items-center gap-2 bg-purple-600 hover:bg-purple-700'
-          onClick={onCreateTicket}
-        >
-          <span>+</span> Crear Ticket
-        </Button>
-      </div>
+  // Renderizar versión móvil - tarjetas en lugar de tabla
+  const renderMobileCards = () => {
+    if (tickets.length === 0) {
+      return (
+        <div className='text-center py-8 px-4 text-gray-500'>
+          No hay tickets disponibles
+        </div>
+      );
+    }
 
+    return (
+      <div className='space-y-4 px-2'>
+        {tickets.map(ticket => (
+          <div
+            key={ticket.id}
+            className='border rounded-md p-4 bg-white shadow-sm'
+          >
+            <div className='flex justify-between items-start mb-2'>
+              <div className='text-xs text-gray-500'>
+                {formatTicketId(ticket.id)}
+              </div>
+              <Badge
+                variant={
+                  getTicketStatus(ticket) === 'Abierto'
+                    ? 'secondary'
+                    : getTicketStatus(ticket) === 'En proceso'
+                    ? 'warning'
+                    : getTicketStatus(ticket) === 'Resuelto'
+                    ? 'success'
+                    : 'default'
+                }
+              >
+                {getTicketStatus(ticket)}
+              </Badge>
+            </div>
+
+            <div className='mb-3'>
+              <h3 className='font-medium text-gray-900'>
+                {formatTitle(ticket)}
+              </h3>
+              {ticket.category && (
+                <span className='inline-block px-1.5 py-0.5 bg-gray-100 rounded text-xs mt-1'>
+                  {ticket.category}
+                </span>
+              )}
+            </div>
+
+            <div className='flex justify-between items-center'>
+              <div className='text-xs text-gray-500'>
+                {formatDate(ticket.created_at || ticket.date)}
+              </div>
+              <Button
+                variant='primary'
+                size='sm'
+                className='bg-purple-600 hover:bg-purple-700'
+                onClick={() => onViewTicket(ticket.id)}
+              >
+                Ver
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Renderizar versión desktop - tabla completa
+  const renderDesktopTable = () => {
+    return (
       <div className='border rounded-md overflow-hidden'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead>
@@ -159,6 +214,28 @@ const TicketList = ({
           </tbody>
         </table>
       </div>
+    );
+  };
+
+  return (
+    <div className='w-full'>
+      <div className='flex justify-between items-center mb-4'>
+        <h2 className='text-xl font-semibold'>Mis Tickets</h2>
+        <Button
+          variant='primary'
+          size='sm'
+          className='flex text-white items-center gap-2 bg-purple-600 hover:bg-purple-700'
+          onClick={onCreateTicket}
+        >
+          <span>+</span> Crear Ticket
+        </Button>
+      </div>
+
+      {/* Vista desktop para tablets y pantallas grandes */}
+      <div className='hidden md:block'>{renderDesktopTable()}</div>
+
+      {/* Vista mobile para smartphones */}
+      <div className='md:hidden'>{renderMobileCards()}</div>
 
       {/* Información sobre la cantidad de tickets (sin paginación) */}
       {meta && meta.total > 0 && (

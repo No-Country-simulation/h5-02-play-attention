@@ -26,7 +26,7 @@ const SupportTabs = ({ children, defaultTab = 0, onTabChange }) => {
         {childrenArray.map((child, index) => (
           <button
             key={index}
-            className={`flex-1 px-6 py-3 font-medium text-sm text-center ${
+            className={`flex-1 px-2 md:px-6 py-2 md:py-3 font-medium text-xs md:text-sm text-center ${
               activeTab === index
                 ? 'text-white bg-purple-900 hover:bg-purple-800'
                 : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
@@ -46,7 +46,7 @@ const SupportTabs = ({ children, defaultTab = 0, onTabChange }) => {
 };
 
 const TabPanel = ({ children }) => {
-  return <div className='p-4'>{children}</div>;
+  return <div className='p-2 md:p-4'>{children}</div>;
 };
 
 SupportTabs.TabPanel = TabPanel;

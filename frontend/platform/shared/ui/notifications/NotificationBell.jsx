@@ -75,29 +75,33 @@ export function NotificationBell() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-80 p-0' align='end'>
-        <div className='flex items-center justify-between border-b p-3'>
-          <div className='flex items-center gap-2'>
+        <div className='border-b'>
+          {/* Encabezado de notificaciones */}
+          <div className='p-3'>
             <h3 className='font-medium'>Notificaciones</h3>
-            {notifications.length > 0 && (
+          </div>
+
+          {/* Botones de acción */}
+          {notifications.length > 0 && (
+            <div className='flex border-t px-3 py-2 bg-gray-50 justify-between'>
               <Button
                 variant='ghost'
                 size='sm'
                 onClick={markAllAsRead}
-                className='text-xs'
+                className='text-xs py-1 h-7'
               >
                 Marcar todas como leídas
               </Button>
-            )}
-          </div>
-          {notifications.length > 0 && (
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={clearAll}
-              className='text-xs py-1 px-2'
-            >
-              Limpiar
-            </Button>
+
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={clearAll}
+                className='text-xs py-1 h-7'
+              >
+                Limpiar
+              </Button>
+            </div>
           )}
         </div>
 

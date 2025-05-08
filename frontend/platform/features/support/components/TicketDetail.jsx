@@ -167,8 +167,53 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
 
   return (
     <div className='h-full flex flex-col bg-white rounded-lg border overflow-hidden'>
-      {/* Header */}
-      <div className='py-2 px-4 border-b flex items-center'>
+      {/* Header - Versión móvil */}
+      <div className='md:hidden py-2 px-3 border-b'>
+        <div className='flex items-center mb-2'>
+          <Button
+            variant='ghost'
+            onClick={onBack}
+            className='mr-1 p-1 h-8 w-8'
+            size='sm'
+          >
+            <ArrowLeft className='h-4 w-4' />
+            <span className='sr-only'>Volver</span>
+          </Button>
+          <h1 className='text-sm font-semibold flex-1 line-clamp-1'>
+            {formattedTicket.subject}
+          </h1>
+          <Badge
+            className='ml-1'
+            variant={
+              formattedTicket.status.toLowerCase() === 'abierto' ||
+              formattedTicket.status.toLowerCase() === 'open'
+                ? 'secondary'
+                : formattedTicket.status.toLowerCase() === 'en proceso' ||
+                  formattedTicket.status.toLowerCase() === 'in_progress'
+                ? 'warning'
+                : 'success'
+            }
+          >
+            {formattedTicket.status}
+          </Badge>
+        </div>
+        <div className='flex flex-wrap text-xs text-gray-500 px-2'>
+          <span className='mr-2'>{formattedTicket.id}</span>
+          <span className='mr-2'>•</span>
+          <span>{formattedTicket.createdAt}</span>
+          {formattedTicket.category && (
+            <>
+              <span className='mr-2 ml-2'>•</span>
+              <span className='px-1.5 py-0.5 bg-gray-100 rounded text-xs'>
+                {formattedTicket.category}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Header - Versión desktop */}
+      <div className='hidden md:flex py-2 px-4 border-b items-center'>
         <Button variant='ghost' onClick={onBack} className='mr-2' size='sm'>
           <ArrowLeft className='h-4 w-4 mr-1' />
           <span>Volver</span>
@@ -210,7 +255,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
       {/* Conversación */}
       <div
         ref={messagesContainerRef}
-        className='flex-1 p-4 overflow-y-auto bg-gray-50 max-h-[400px]'
+        className='flex-1 p-2 md:p-4 overflow-y-auto bg-gray-50 max-h-[calc(100vh-250px)]'
       >
         {loading || loadingUsers ? (
           <div className='flex justify-center items-center h-full'>
@@ -235,7 +280,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
             </p>
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div className='space-y-3'>
             {conversation.map((message, index) => (
               <div
                 key={message.id || index}
@@ -251,7 +296,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-lg py-3 px-4 ${
+                  className={`max-w-[85%] md:max-w-[80%] rounded-lg py-2 px-3 md:py-3 md:px-4 ${
                     message.isUser
                       ? 'bg-purple-900 text-white'
                       : 'bg-white border border-gray-200'
@@ -259,14 +304,14 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
                 >
                   <div className='flex justify-between items-center'>
                     <p
-                      className={`font-medium text-sm ${
+                      className={`font-medium text-xs md:text-sm ${
                         message.isUser ? 'text-white' : 'text-gray-800'
                       }`}
                     >
                       {message.author}
                     </p>
                     <p
-                      className={`text-xs ml-4 ${
+                      className={`text-xs ml-2 ${
                         message.isUser ? 'text-purple-200' : 'text-gray-500'
                       }`}
                     >
@@ -274,7 +319,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
                     </p>
                   </div>
                   <p
-                    className={`text-sm mt-1 ${
+                    className={`text-xs md:text-sm mt-1 break-words ${
                       message.isUser ? 'text-white' : 'text-gray-700'
                     }`}
                   >
@@ -295,7 +340,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
       </div>
 
       {/* Input de mensaje */}
-      <div className='border-t px-4 py-2'>
+      <div className='border-t px-2 md:px-4 py-2'>
         <form onSubmit={handleSendMessage} className='flex'>
           <input
             type='text'
