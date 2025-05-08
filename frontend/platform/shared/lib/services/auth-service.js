@@ -3,7 +3,7 @@ import { getUserById } from '../api/users';
 import { jwtDecode } from 'jwt-decode';
 
 // Claves para el almacenamiento local
-const TOKEN_KEY = 'auth_token';
+const TOKEN_KEY = 'auth_token_user';
 const USER_KEY = 'auth_user';
 
 /**

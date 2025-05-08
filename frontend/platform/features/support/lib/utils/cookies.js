@@ -75,7 +75,7 @@ export const getUserInfoFromCookie = () => {
 export const getAuthTokenFromCookie = () => {
   try {
     // Posibles nombres de cookie para el token
-    const possibleTokenNames = ['auth_token=', 'token=', 'authorization='];
+    const possibleTokenNames = ['auth_token_user=', 'token=', 'authorization='];
     const cookies = document.cookie.split(';');
 
     // Buscar en diferentes formatos de cookie
@@ -95,7 +95,7 @@ export const getAuthTokenFromCookie = () => {
     // Intentar obtener el token del localStorage como alternativa
     if (typeof window !== 'undefined' && window.localStorage) {
       const localStorageToken =
-        localStorage.getItem('auth_token') ||
+        localStorage.getItem('auth_token_user') ||
         localStorage.getItem('token') ||
         localStorage.getItem('authorization');
 

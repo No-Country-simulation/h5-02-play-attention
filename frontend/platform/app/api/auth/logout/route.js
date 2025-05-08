@@ -10,7 +10,7 @@ export async function POST() {
     const cookieStore = cookies();
 
     // Eliminar todas las cookies relacionadas con la autenticación
-    cookieStore.delete('auth_token');
+    cookieStore.delete('auth_token_user');
     cookieStore.delete('playAttentionToken');
     cookieStore.delete('user_info');
 

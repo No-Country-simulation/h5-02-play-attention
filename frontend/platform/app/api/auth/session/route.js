@@ -10,7 +10,7 @@ export async function GET() {
   try {
     // Obtener las cookies
     const cookieStore = cookies();
-    const token = cookieStore.get('auth_token')?.value;
+    const token = cookieStore.get('auth_token_user')?.value;
     const userInfoCookie = cookieStore.get('user_info')?.value;
 
     // Si no hay token, no hay sesión
