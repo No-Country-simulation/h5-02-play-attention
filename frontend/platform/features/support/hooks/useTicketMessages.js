@@ -5,6 +5,9 @@ import {
   updateMessage,
   deleteMessage
 } from '../lib/api/messages';
+import { useNotifications } from '@/shared/providers/NotificationProvider';
+import { useEffect, useRef } from 'react';
+import { getUserInfoFromCookie } from '../lib/utils/cookies';
 
 /**
  * Hook para gestionar mensajes de un ticket específico
@@ -13,6 +16,8 @@ import {
  */
 export const useTicketMessages = ticketId => {
   const queryClient = useQueryClient();
+  const { addNotification } = useNotifications();
+  const previousMessagesRef = useRef([]);
 
   // Obtener mensajes del ticket
   const messagesQuery = useQuery({
@@ -22,6 +27,61 @@ export const useTicketMessages = ticketId => {
     staleTime: 1 * 60 * 1000, // 1 minuto
     refetchInterval: 10000 // Refrescar cada 10 segundos para ver nuevos mensajes
   });
+
+  // Detectar nuevos mensajes y notificar
+  useEffect(() => {
+    const currentMessages = getMessagesData();
+
+    // Si no hay mensajes previos o actuales, salimos
+    if (!previousMessagesRef.current.length || !currentMessages.length) {
+      previousMessagesRef.current = currentMessages;
+      return;
+    }
+
+    // Buscar nuevos mensajes (que no estaban en el array anterior)
+    const newMessages = currentMessages.filter(currentMsg => {
+      // Considerar un mensaje como nuevo si no existe su ID en los mensajes anteriores
+      return !previousMessagesRef.current.some(
+        prevMsg =>
+          (prevMsg.id && prevMsg.id === currentMsg.id) ||
+          (prevMsg._id && prevMsg._id === currentMsg._id)
+      );
+    });
+
+    // Actualizar referencia de mensajes previos
+    previousMessagesRef.current = currentMessages;
+
+    // Notificar por cada mensaje nuevo que no sea del usuario actual
+    const userInfo = getUserInfoFromCookie() || {};
+
+    newMessages.forEach(message => {
+      // Solo notificar mensajes que no sean del usuario actual
+      const isFromCurrentUser =
+        userInfo.id &&
+        (message.user_id === userInfo.id ||
+          (message.user && message.user.id === userInfo.id));
+
+      if (!isFromCurrentUser) {
+        // Obtener el título del ticket
+        const ticket = queryClient.getQueryData(['ticket', ticketId]);
+        const ticketTitle =
+          ticket?.title || ticket?.subject || 'Ticket de soporte';
+
+        // Crear la notificación
+        addNotification({
+          title: `Nuevo mensaje en ticket #${ticketId}`,
+          message: message.text || message.content || 'Nuevo mensaje recibido',
+          type: 'message',
+          onClick: () => {
+            // Al hacer clic se podría navegar al ticket específico
+            if (typeof window !== 'undefined') {
+              window.location.href = `/dashboard/support/tickets/${ticketId}`;
+            }
+          }
+        });
+      }
+    });
+  }, [messagesQuery.data, ticketId, addNotification, queryClient]);
 
   // Mutación para crear un nuevo mensaje
   const createMessageMutation = useMutation({
