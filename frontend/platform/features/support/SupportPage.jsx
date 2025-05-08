@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import TicketList from './components/TicketList';
 import TicketDetail from './components/TicketDetail';
 import FAQ from './components/FAQ';
@@ -10,8 +11,11 @@ import { Button } from '@/shared/ui/button';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 export default function SupportPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showTicketDetail, setShowTicketDetail] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const [ticketFilters, setTicketFilters] = useState({
     page: 1,
     take: 500,
@@ -30,6 +34,26 @@ export default function SupportPage() {
     selectTicket,
     setSelectedTicket
   } = useTickets({ filters: ticketFilters });
+
+  // Efecto para manejar parámetros de URL
+  useEffect(() => {
+    // Verificar si hay un ticketId en la URL
+    const ticketId = searchParams.get('ticketId');
+    const view = searchParams.get('view');
+
+    if (ticketId && view === 'chat') {
+      // Cargar el ticket específico y mostrar su detalle
+      selectTicket(ticketId)
+        .then(() => {
+          setShowTicketDetail(true);
+          // Asegurarse de que estamos en la pestaña de "Mis tickets"
+          setActiveTab(1);
+        })
+        .catch(err => {
+          console.error('Error al cargar el ticket:', err);
+        });
+    }
+  }, [searchParams, selectTicket]);
 
   const handleCreateTicket = async data => {
     return new Promise(resolve => {
@@ -53,11 +77,18 @@ export default function SupportPage() {
   };
 
   const handleViewTicket = ticketId => {
+    // Actualizar la URL cuando se ve un ticket específico
+    const newUrl = `/support?view=chat&ticketId=${ticketId}`;
+    router.push(newUrl, { scroll: false });
+
     selectTicket(ticketId);
     setShowTicketDetail(true);
   };
 
   const handleBackToList = () => {
+    // Volver a la URL base al regresar a la lista
+    router.push('/support', { scroll: false });
+
     setShowTicketDetail(false);
     setSelectedTicket(null);
   };
@@ -72,6 +103,11 @@ export default function SupportPage() {
       ...newFilters,
       take: 500
     }));
+  };
+
+  // Manejar cambio de pestaña
+  const handleTabChange = index => {
+    setActiveTab(index);
   };
 
   return (
@@ -91,7 +127,7 @@ export default function SupportPage() {
         />
       ) : (
         <>
-          <SupportTabs defaultTab={0}>
+          <SupportTabs defaultTab={activeTab} onTabChange={handleTabChange}>
             <SupportTabs.TabPanel label='Preguntas frecuentes'>
               <div className='mt-4'>
                 <FAQ onContactSupport={handleContactSupport} />

@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const SupportTabs = ({ children, defaultTab = 0 }) => {
+const SupportTabs = ({ children, defaultTab = 0, onTabChange }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Cuando cambia defaultTab externamente, actualizar el estado interno
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
 
   // Ensure children is an array
   const childrenArray = React.Children.toArray(children);
+
+  // Función para cambiar de pestaña
+  const handleTabChange = index => {
+    setActiveTab(index);
+    // Notificar al componente padre si se proporcionó onTabChange
+    if (onTabChange && typeof onTabChange === 'function') {
+      onTabChange(index);
+    }
+  };
 
   return (
     <div className='w-full'>
@@ -17,7 +31,7 @@ const SupportTabs = ({ children, defaultTab = 0 }) => {
                 ? 'text-white bg-purple-900 hover:bg-purple-800'
                 : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
             }`}
-            onClick={() => setActiveTab(index)}
+            onClick={() => handleTabChange(index)}
           >
             {child.props.label}
           </button>

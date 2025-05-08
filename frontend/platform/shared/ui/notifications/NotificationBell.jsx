@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useNotifications } from '@/shared/providers/NotificationProvider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
@@ -8,6 +8,7 @@ import { Button } from '@/shared/ui/button';
 import { ScrollArea } from '@/shared/ui/scroll-area';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useRouter } from 'next/navigation';
 
 /**
  * Componente de campana de notificaciones para el header
@@ -22,6 +23,8 @@ export function NotificationBell() {
     removeNotification,
     clearAll
   } = useNotifications();
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   // Formato relativo de fecha (ej: "hace 5 minutos", "hoy a las 14:30")
   const formatRelativeTime = date => {
@@ -40,15 +43,26 @@ export function NotificationBell() {
   // Manejar el clic en una notificación
   const handleNotificationClick = notification => {
     markAsRead(notification.id);
+    setIsOpen(false);
 
-    // Si la notificación tiene una acción, ejecutarla
-    if (notification.onClick) {
+    // Manejar la navegación en base al tipo de notificación
+    if (notification.type === 'message' && notification.ticketId) {
+      // Navegar directamente a la vista de chat del ticket individual
+      router.push(`/support?view=chat&ticketId=${notification.ticketId}`);
+    } else if (notification.url) {
+      // Si la notificación tiene una URL directa, navegar a ella
+      router.push(notification.url);
+    } else if (
+      notification.onClick &&
+      typeof notification.onClick === 'function'
+    ) {
+      // Si hay una función onClick y todavía es válida (no se ha perdido en sessionStorage)
       notification.onClick();
     }
   };
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button variant='ghost' size='icon' className='relative'>
           <Bell className='h-5 w-5' />
@@ -62,16 +76,28 @@ export function NotificationBell() {
       </PopoverTrigger>
       <PopoverContent className='w-80 p-0' align='end'>
         <div className='flex items-center justify-between border-b p-3'>
-          <h3 className='font-medium'>Notificaciones</h3>
-          {notifications.length > 0 && (
-            <div className='flex gap-2'>
-              <Button variant='ghost' size='sm' onClick={markAllAsRead}>
+          <div className='flex items-center gap-2'>
+            <h3 className='font-medium'>Notificaciones</h3>
+            {notifications.length > 0 && (
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={markAllAsRead}
+                className='text-xs'
+              >
                 Marcar todas como leídas
               </Button>
-              <Button variant='ghost' size='sm' onClick={clearAll}>
-                Limpiar
-              </Button>
-            </div>
+            )}
+          </div>
+          {notifications.length > 0 && (
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={clearAll}
+              className='text-xs py-1 px-2'
+            >
+              Limpiar
+            </Button>
           )}
         </div>
 

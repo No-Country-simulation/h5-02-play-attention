@@ -5,6 +5,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 // Definir el contexto
 const NotificationContext = createContext();
 
+// Clave para almacenar las notificaciones en sessionStorage
+const STORAGE_KEY = 'play_attention_notifications';
+
 /**
  * Provider para gestionar notificaciones en la aplicación
  * @param {Object} props - Props del componente
@@ -14,6 +17,44 @@ export function NotificationProvider({ children }) {
   // Estado de notificaciones
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Cargar notificaciones desde sessionStorage al iniciar
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedNotifications = sessionStorage.getItem(STORAGE_KEY);
+        if (storedNotifications) {
+          // Convertir fechas almacenadas como strings de vuelta a objetos Date
+          const parsedNotifications = JSON.parse(storedNotifications).map(
+            notification => ({
+              ...notification,
+              timestamp: new Date(notification.timestamp)
+            })
+          );
+          setNotifications(parsedNotifications);
+        }
+      } catch (error) {
+        console.error(
+          'Error al cargar notificaciones desde sessionStorage:',
+          error
+        );
+      }
+    }
+  }, []);
+
+  // Actualizar sessionStorage cuando cambia el array de notificaciones
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+      } catch (error) {
+        console.error(
+          'Error al guardar notificaciones en sessionStorage:',
+          error
+        );
+      }
+    }
+  }, [notifications]);
 
   // Actualizar contador de no leídas cuando cambia el array de notificaciones
   useEffect(() => {
@@ -70,6 +111,16 @@ export function NotificationProvider({ children }) {
   // Limpiar todas las notificaciones
   const clearAll = () => {
     setNotifications([]);
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.error(
+          'Error al limpiar notificaciones del sessionStorage:',
+          error
+        );
+      }
+    }
   };
 
   // Valor del contexto

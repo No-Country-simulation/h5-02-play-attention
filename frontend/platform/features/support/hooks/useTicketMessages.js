@@ -8,6 +8,7 @@ import {
 import { useNotifications } from '@/shared/providers/NotificationProvider';
 import { useEffect, useRef } from 'react';
 import { getUserInfoFromCookie } from '../lib/utils/cookies';
+import { getTicketById } from '../lib/api/tickets';
 
 /**
  * Hook para gestionar mensajes de un ticket específico
@@ -51,36 +52,69 @@ export const useTicketMessages = ticketId => {
     // Actualizar referencia de mensajes previos
     previousMessagesRef.current = currentMessages;
 
+    // Si no hay mensajes nuevos, salimos
+    if (newMessages.length === 0) return;
+
     // Notificar por cada mensaje nuevo que no sea del usuario actual
     const userInfo = getUserInfoFromCookie() || {};
 
-    newMessages.forEach(message => {
-      // Solo notificar mensajes que no sean del usuario actual
-      const isFromCurrentUser =
-        userInfo.id &&
-        (message.user_id === userInfo.id ||
-          (message.user && message.user.id === userInfo.id));
+    // Obtener el título del ticket de la caché o consultar si no está presente
+    const getTicketTitle = async () => {
+      // Intentar obtener el ticket de la caché de React Query
+      let ticket = queryClient.getQueryData(['ticket', ticketId]);
 
-      if (!isFromCurrentUser) {
-        // Obtener el título del ticket
-        const ticket = queryClient.getQueryData(['ticket', ticketId]);
-        const ticketTitle =
-          ticket?.title || ticket?.subject || 'Ticket de soporte';
-
-        // Crear la notificación
-        addNotification({
-          title: `Nuevo mensaje en ticket #${ticketId}`,
-          message: message.text || message.content || 'Nuevo mensaje recibido',
-          type: 'message',
-          onClick: () => {
-            // Al hacer clic se podría navegar al ticket específico
-            if (typeof window !== 'undefined') {
-              window.location.href = `/dashboard/support/tickets/${ticketId}`;
-            }
-          }
-        });
+      // Si no está en caché, intentar obtenerlo de tickets (lista)
+      if (!ticket) {
+        const ticketsList = queryClient.getQueryData(['tickets']);
+        const ticketsArray = ticketsList?.data || [];
+        ticket = ticketsArray.find(
+          t => t.id === ticketId || t._id === ticketId
+        );
       }
-    });
+
+      // Si aún no lo encontramos, consultar a la API
+      if (!ticket) {
+        try {
+          ticket = await getTicketById(ticketId);
+          // Guardar en caché para futuros usos
+          queryClient.setQueryData(['ticket', ticketId], ticket);
+        } catch (error) {
+          console.error('Error al obtener ticket para notificación:', error);
+        }
+      }
+
+      return ticket?.title || ticket?.subject || `Ticket #${ticketId}`;
+    };
+
+    // Procesar cada mensaje nuevo
+    const processNewMessages = async () => {
+      const ticketTitle = await getTicketTitle();
+
+      newMessages.forEach(message => {
+        // Solo notificar mensajes que no sean del usuario actual
+        const isFromCurrentUser =
+          userInfo.id &&
+          (message.user_id === userInfo.id ||
+            (message.user && message.user.id === userInfo.id));
+
+        if (!isFromCurrentUser) {
+          // Crear la notificación con datos persistentes
+          addNotification({
+            title: `Nuevo mensaje en ${ticketTitle}`,
+            message:
+              message.text || message.content || 'Nuevo mensaje recibido',
+            type: 'message',
+            ticketId: ticketId, // Guardar el ID del ticket para navegación después de recargar
+            url: `/support?view=chat&ticketId=${ticketId}`, // URL directa para la vista de chat
+            messageId: message.id || message._id, // ID del mensaje para referencia
+            timestamp: new Date()
+          });
+        }
+      });
+    };
+
+    // Iniciar el proceso
+    processNewMessages();
   }, [messagesQuery.data, ticketId, addNotification, queryClient]);
 
   // Mutación para crear un nuevo mensaje
