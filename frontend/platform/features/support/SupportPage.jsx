@@ -53,8 +53,13 @@ export default function SupportPage() {
         .catch(err => {
           console.error('Error al cargar el ticket:', err);
         });
+    } else if (!ticketId && showTicketDetail) {
+      // Si se elimina ticketId de la URL y estamos en vista detalle,
+      // volver automáticamente a la lista
+      setShowTicketDetail(false);
+      setSelectedTicket(null);
     }
-  }, [searchParams, selectTicket]);
+  }, [searchParams, selectTicket, showTicketDetail]);
 
   const handleCreateTicket = async data => {
     try {
@@ -79,20 +84,24 @@ export default function SupportPage() {
   };
 
   const handleViewTicket = ticketId => {
-    // Actualizar la URL cuando se ve un ticket específico
-    const newUrl = `/support?view=chat&ticketId=${ticketId}`;
-    router.push(newUrl, { scroll: false });
+    // Primero cargar y seleccionar el ticket
+    selectTicket(ticketId).then(() => {
+      // Luego actualizar el estado
+      setShowTicketDetail(true);
 
-    selectTicket(ticketId);
-    setShowTicketDetail(true);
+      // Finalmente actualizar la URL
+      const newUrl = `/support?view=chat&ticketId=${ticketId}`;
+      router.replace(newUrl, { scroll: false });
+    });
   };
 
   const handleBackToList = () => {
-    // Volver a la URL base al regresar a la lista
-    router.push('/support', { scroll: false });
-
+    // Primero actualizar el estado para volver a la lista
     setShowTicketDetail(false);
     setSelectedTicket(null);
+
+    // Luego actualizar la URL (sin parámetros)
+    router.replace('/support', { scroll: false });
   };
 
   const handleContactSupport = () => {

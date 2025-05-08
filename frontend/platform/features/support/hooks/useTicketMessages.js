@@ -6,7 +6,7 @@ import {
   deleteMessage
 } from '../lib/api/messages';
 import { useNotifications } from '@/shared/providers/NotificationProvider';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getUserInfoFromCookie } from '../lib/utils/cookies';
 import { getTicketById } from '../lib/api/tickets';
 
@@ -19,6 +19,7 @@ export const useTicketMessages = ticketId => {
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
   const previousMessagesRef = useRef([]);
+  const [hasMessages, setHasMessages] = useState(false);
 
   // Obtener mensajes del ticket
   const messagesQuery = useQuery({
@@ -26,7 +27,11 @@ export const useTicketMessages = ticketId => {
     queryFn: () => getTicketMessages(ticketId),
     enabled: !!ticketId, // Solo ejecutar si hay ticketId
     staleTime: 1 * 60 * 1000, // 1 minuto
-    refetchInterval: 10000 // Refrescar cada 10 segundos para ver nuevos mensajes
+    refetchInterval: hasMessages ? 10000 : 30000, // Polling más frecuente solo si hay mensajes
+    onSuccess: data => {
+      const messagesData = getMessagesData(data);
+      setHasMessages(messagesData.length > 0);
+    }
   });
 
   // Detectar nuevos mensajes y notificar
@@ -125,6 +130,9 @@ export const useTicketMessages = ticketId => {
         ticketId
       }),
     onSuccess: () => {
+      // Indicar que ahora tenemos mensajes para activar el polling más frecuente
+      setHasMessages(true);
+
       // Invalidar consulta de mensajes para refrescar la lista
       queryClient.invalidateQueries({ queryKey: ['ticketMessages', ticketId] });
 
@@ -154,9 +162,7 @@ export const useTicketMessages = ticketId => {
   });
 
   // Obtener los mensajes de la respuesta, manejar diferentes estructuras
-  const getMessagesData = () => {
-    const responseData = messagesQuery.data;
-
+  const getMessagesData = (responseData = messagesQuery.data) => {
     if (!responseData) return [];
 
     // Si es un array directo
@@ -177,6 +183,7 @@ export const useTicketMessages = ticketId => {
   return {
     // Datos
     messages: getMessagesData(),
+    hasMessages,
 
     // Estado de las consultas
     loading: messagesQuery.isLoading,

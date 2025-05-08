@@ -118,7 +118,14 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
         <p className='text-gray-500'>
           Selecciona un ticket para ver los detalles
         </p>
-        <Button variant='outline' onClick={onBack} className='mt-4'>
+        <Button
+          variant='outline'
+          onClick={e => {
+            e.preventDefault();
+            onBack();
+          }}
+          className='mt-4'
+        >
           Volver a la lista
         </Button>
       </div>
@@ -172,7 +179,10 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
         <div className='flex items-center mb-2'>
           <Button
             variant='ghost'
-            onClick={onBack}
+            onClick={e => {
+              e.preventDefault();
+              onBack();
+            }}
             className='mr-1 p-1 h-8 w-8'
             size='sm'
           >
@@ -214,7 +224,15 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
 
       {/* Header - Versión desktop */}
       <div className='hidden md:flex py-2 px-4 border-b items-center'>
-        <Button variant='ghost' onClick={onBack} className='mr-2' size='sm'>
+        <Button
+          variant='ghost'
+          onClick={e => {
+            e.preventDefault();
+            onBack();
+          }}
+          className='mr-2'
+          size='sm'
+        >
           <ArrowLeft className='h-4 w-4 mr-1' />
           <span>Volver</span>
         </Button>
@@ -280,6 +298,7 @@ const TicketDetail = ({ ticket, onBack, onEdit }) => {
             </p>
           </div>
         ) : (
+          // Renderizar los mensajes cuando existen
           <div className='space-y-3'>
             {conversation.map((message, index) => (
               <div

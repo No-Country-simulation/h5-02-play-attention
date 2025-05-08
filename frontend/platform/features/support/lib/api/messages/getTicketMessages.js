@@ -21,9 +21,29 @@ export const getTicketMessages = async ticketId => {
       headers
     });
 
+    // Si el error es 404 (no encontrado) o un error específico de "no hay mensajes",
+    // retornar un array vacío en lugar de lanzar un error
+    if (response.status === 404) {
+      console.log('No se encontraron mensajes para este ticket (404)');
+      return { data: [] };
+    }
+
     if (!response.ok) {
       const error = await response.json();
       console.error('Error completo del servidor:', error);
+
+      // Si el mensaje de error indica que no hay mensajes, retornar un array vacío
+      if (
+        error.message?.includes('no hay mensajes') ||
+        error.message?.toLowerCase().includes('no messages')
+      ) {
+        console.log(
+          'No hay mensajes para este ticket según el servidor:',
+          error.message
+        );
+        return { data: [] };
+      }
+
       throw new Error(
         error.message || 'Error al obtener los mensajes del ticket'
       );
