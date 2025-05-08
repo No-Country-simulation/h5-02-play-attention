@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import TuneIcon from '@mui/icons-material/Tune';
-import { FiFilter } from 'react-icons/fi';
+import { GiSettingsKnobs } from 'react-icons/gi';
 
 export function SearchBar({
   searchQuery,
@@ -55,7 +54,7 @@ export function SearchBar({
             onClick={() => setShowFilters(!showFilters)}
             className='px-3 py-2 border border-gray-300 bg-white rounded-md flex items-center'
           >
-            <FiFilter className='text-gray-500' />
+            <GiSettingsKnobs className='text-gray-500' size={18} />
           </button>
         </div>
 
@@ -80,7 +79,7 @@ export function SearchBar({
                   ))}
                 </select>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                  <TuneIcon className='text-gray-500' fontSize='small' />
+                  <GiSettingsKnobs className='text-gray-500' size={18} />
                 </div>
               </div>
             </div>
@@ -100,7 +99,7 @@ export function SearchBar({
                   <option value='oldest'>Más antiguo primero</option>
                 </select>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                  <TuneIcon className='text-gray-500' fontSize='small' />
+                  <GiSettingsKnobs className='text-gray-500' size={18} />
                 </div>
               </div>
             </div>
@@ -140,7 +139,7 @@ export function SearchBar({
           {/* Selector de Tipo */}
           <div className='relative'>
             <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
-              <TuneIcon />
+              <GiSettingsKnobs className='text-gray-500' size={18} />
               Tipo
             </button>
             <select
@@ -159,7 +158,7 @@ export function SearchBar({
           {/* Selector de Fecha */}
           <div className='relative'>
             <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
-              <TuneIcon />
+              <GiSettingsKnobs className='text-gray-500' size={18} />
               fecha
             </button>
             <select

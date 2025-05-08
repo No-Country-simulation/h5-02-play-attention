@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import TuneIcon from '@mui/icons-material/Tune';
+import { GiSettingsKnobs } from 'react-icons/gi';
 
 export function SearchBar({
   searchQuery,
@@ -54,7 +54,7 @@ export function SearchBar({
             onClick={() => setShowFilters(!showFilters)}
             className='px-3 py-2 border border-gray-300 bg-white rounded-md flex items-center'
           >
-            <TuneIcon className='text-gray-500' fontSize='small' />
+            <GiSettingsKnobs className='text-gray-500' size={18} />
           </button>
         </div>
 
@@ -79,7 +79,7 @@ export function SearchBar({
                   ))}
                 </select>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                <TuneIcon className='text-gray-500' fontSize='small' />
+                <GiSettingsKnobs className='text-gray-500' size={18} />
                 </div>
               </div>
             </div> */}
@@ -99,7 +99,7 @@ export function SearchBar({
                   <option value='oldest'>Más antiguo primero</option>
                 </select>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none'>
-                  <LucideFilter className='text-gray-500' fontSize='small' />
+                  <GiSettingsKnobs className='text-gray-500' size={18} />
                 </div>
               </div>
             </div>
@@ -134,12 +134,12 @@ export function SearchBar({
                 />
               </svg>
             </div>
-          </div>          
+          </div>
 
           {/* Selector de Fecha */}
           <div className='relative'>
             <button className='px-4 py-2 border border-gray-300 bg-white rounded-md flex items-center gap-2'>
-            <TuneIcon className='text-gray-500' fontSize='small' />
+              <GiSettingsKnobs className='text-gray-500' size={18} />
               fecha
             </button>
             <select
@@ -155,4 +155,4 @@ export function SearchBar({
       </div>
     </div>
   );
-} 
+}
