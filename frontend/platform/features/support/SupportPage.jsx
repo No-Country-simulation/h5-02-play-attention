@@ -9,6 +9,7 @@ import CreateTicketDialog from './components/CreateTicketDialog';
 import useTickets from './hooks/useTickets';
 import { Button } from '@/shared/ui/button';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
+import { toast } from 'sonner';
 
 export default function SupportPage() {
   const searchParams = useSearchParams();
@@ -56,24 +57,25 @@ export default function SupportPage() {
   }, [searchParams, selectTicket]);
 
   const handleCreateTicket = async data => {
-    return new Promise(resolve => {
-      createTicket(data, {
-        onSuccess: result => {
-          if (result.success) {
-            setIsCreateDialogOpen(false);
-            resolve({ success: true });
-          } else {
-            resolve({ success: false, error: result.error });
-          }
-        },
-        onError: error => {
-          resolve({
-            success: false,
-            error: error.message || 'Error al crear el ticket'
-          });
-        }
+    try {
+      await createTicket(data);
+      // Close modal immediately on success
+      setIsCreateDialogOpen(false);
+      // Show success toast
+      toast.success('Ticket creado exitosamente', {
+        description: 'Tu solicitud ha sido enviada al equipo de soporte'
       });
-    });
+      return { success: true };
+    } catch (error) {
+      toast.error('Error al crear el ticket', {
+        description:
+          error.message || 'No se pudo crear el ticket, intenta nuevamente'
+      });
+      return {
+        success: false,
+        error: error.message || 'Error al crear el ticket'
+      };
+    }
   };
 
   const handleViewTicket = ticketId => {

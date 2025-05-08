@@ -114,7 +114,7 @@ const TicketList = ({
               <Button
                 variant='primary'
                 size='sm'
-                className='bg-purple-600 hover:bg-purple-700'
+                className='bg-purple-600 text-white hover:bg-purple-700'
                 onClick={() => onViewTicket(ticket.id)}
               >
                 Ver
@@ -193,7 +193,7 @@ const TicketList = ({
                     <Button
                       variant='primary'
                       size='sm'
-                      className='px-8 bg-purple-600 hover:bg-purple-700'
+                      className='px-8 text-white bg-purple-600 hover:bg-purple-700'
                       onClick={() => onViewTicket(ticket.id)}
                     >
                       Ver

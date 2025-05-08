@@ -13,7 +13,6 @@ const CreateTicketForm = ({ onClose, onSubmit, isSubmitting }) => {
   });
 
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -48,8 +47,6 @@ const CreateTicketForm = ({ onClose, onSubmit, isSubmitting }) => {
       const result = await onSubmit(formData);
 
       if (result && result.success) {
-        setSuccess(true);
-
         // Reset form
         setFormData({
           title: '',
@@ -57,11 +54,7 @@ const CreateTicketForm = ({ onClose, onSubmit, isSubmitting }) => {
           description: ''
         });
 
-        // Close after success
-        setTimeout(() => {
-          setSuccess(false);
-          if (onClose) onClose();
-        }, 2000);
+        // Note: The modal will be closed by the parent component
       } else if (result && result.error) {
         // Mostrar el error específico que viene del backend
         setErrors({ submit: result.error });
@@ -82,36 +75,6 @@ const CreateTicketForm = ({ onClose, onSubmit, isSubmitting }) => {
           soporte técnico.
         </p>
       </div>
-
-      {success && (
-        <Alert className='bg-green-50 border-green-200 mb-4'>
-          <div className='flex items-center gap-2 text-green-700'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16'
-              height='16'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <path d='M22 11.08V12a10 10 0 1 1-5.93-9.14'></path>
-              <polyline points='22 4 12 14.01 9 11.01'></polyline>
-            </svg>
-            <div>
-              <p className='font-semibold text-green-700'>
-                ¡Ticket creado con éxito!
-              </p>
-              <p className='text-sm'>
-                Tu ticket ha sido enviado al equipo de soporte. Te responderemos
-                lo antes posible.
-              </p>
-            </div>
-          </div>
-        </Alert>
-      )}
 
       {errors.submit && (
         <Alert className='bg-red-50 border-red-200 mb-4'>
