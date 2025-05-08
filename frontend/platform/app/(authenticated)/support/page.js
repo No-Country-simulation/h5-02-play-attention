@@ -1,5 +1,10 @@
 import SupportPage from '@/features/support/SupportPage';
+import { Suspense } from 'react';
 
 export default function SupportRoute() {
-  return <SupportPage />;
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <SupportPage />
+    </Suspense>
+  );
 }

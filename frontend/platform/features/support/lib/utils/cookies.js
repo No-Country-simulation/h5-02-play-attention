@@ -4,6 +4,14 @@
  */
 export const getUserInfoFromCookie = () => {
   try {
+    // Verificar si estamos en un entorno de navegador
+    if (typeof document === 'undefined') {
+      // En el servidor, retornar null o un valor por defecto para SSR
+      return process.env.NODE_ENV === 'development'
+        ? { id: '68125a24dec51d7e0b27a2db', name: 'Usuario de Prueba SSR' }
+        : null;
+    }
+
     // Posibles nombres de cookie para usuario
     const possibleCookieNames = [
       'user_info=',
@@ -74,6 +82,14 @@ export const getUserInfoFromCookie = () => {
  */
 export const getAuthTokenFromCookie = () => {
   try {
+    // Verificar si estamos en un entorno de navegador
+    if (typeof document === 'undefined') {
+      // En el servidor, retornar null o un token de desarrollo para SSR
+      return process.env.NODE_ENV === 'development'
+        ? 'mock-token-for-ssr'
+        : null;
+    }
+
     // Posibles nombres de cookie para el token
     const possibleTokenNames = ['auth_token_user=', 'token=', 'authorization='];
     const cookies = document.cookie.split(';');
