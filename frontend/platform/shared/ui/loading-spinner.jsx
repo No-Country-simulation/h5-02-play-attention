@@ -2,8 +2,7 @@
 
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
-
+import { cn } from '@/lib/utils';
 /**
  * Componente reutilizable de spinner de carga con logo centrado y animaciones avanzadas
  *

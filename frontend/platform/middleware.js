@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
  */
 export function middleware(request) {
   // Obtener la cookie de autenticación
-  const authCookie = request.cookies.get('auth_token');
+  const authCookie = request.cookies.get('auth_token_user');
   const userInfoCookie = request.cookies.get('user_info');
 
   // Ruta actual

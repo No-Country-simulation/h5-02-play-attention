@@ -1,6 +1,6 @@
 import { Roboto } from 'next/font/google';
 import './globals.css';
-import { QueryProvider } from '@/shared/providers';
+import { QueryProvider, NotificationProvider } from '@/shared/providers';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -10,9 +10,9 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: 'Play Attention | Panel de Administración',
+  title: 'Play Attention | Plataforma de Usuarios',
   description:
-    'Panel administrativo y CRM para la gestión de contenidos, usuarios y soporte de Play Attention',
+    'Plataforma de Usuarios para la gestión de contenidos, usuarios y soporte de Play Attention',
   icons: {
     icon: '/img/logospinner.png',
     apple: '/img/logospinner.png',
@@ -33,7 +33,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang='es'>
       <body className={`${roboto.variable} font-sans antialiased`}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <NotificationProvider>{children}</NotificationProvider>
+        </QueryProvider>
       </body>
     </html>
   );

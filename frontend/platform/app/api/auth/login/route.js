@@ -58,7 +58,7 @@ export async function POST(request) {
     const cookieStore = cookies();
 
     // Establecer cookie con el token
-    cookieStore.set('auth_token', token, {
+    cookieStore.set('auth_token_user', token, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
