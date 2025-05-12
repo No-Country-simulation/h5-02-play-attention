@@ -69,8 +69,38 @@ export async function GET() {
       );
     }
 
-    // Extraer datos del usuario
-    const userData = await response.json();
+    // Extraer datos del usuario con manejo de errores robusto
+    let userData;
+    try {
+      const responseText = await response.text();
+      try {
+        userData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error(
+          'Error al parsear respuesta JSON del usuario:',
+          parseError
+        );
+        console.error('Texto de respuesta recibido:', responseText);
+        return NextResponse.json(
+          {
+            isAuthenticated: false,
+            user: null,
+            error: 'Error al procesar datos de usuario'
+          },
+          { status: 200 }
+        );
+      }
+    } catch (error) {
+      console.error('Error al leer respuesta del usuario:', error);
+      return NextResponse.json(
+        {
+          isAuthenticated: false,
+          user: null,
+          error: 'Error al leer datos de usuario'
+        },
+        { status: 200 }
+      );
+    }
 
     // Preparar datos de usuario
     const userInfo = {
