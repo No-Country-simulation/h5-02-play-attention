@@ -29,8 +29,24 @@ export async function POST(request) {
       body: JSON.stringify({ email, password })
     });
 
-    // Obtener datos de respuesta
-    const data = await backendResponse.json();
+    // Obtener texto de respuesta para analizar manualmente
+    const responseText = await backendResponse.text();
+
+    // Intentar parsear la respuesta como JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Error al parsear respuesta JSON:', parseError);
+      console.error('Texto de respuesta recibido:', responseText);
+      return NextResponse.json(
+        {
+          error:
+            'Error al procesar la respuesta del servidor. Por favor, intenta nuevamente.'
+        },
+        { status: 500 }
+      );
+    }
 
     // Si la respuesta no es exitosa, devolver el error
     if (!backendResponse.ok) {
@@ -108,7 +124,14 @@ export async function POST(request) {
         throw new Error('Error al obtener datos de usuario');
       }
 
-      const userData = await userResponse.json();
+      let userData;
+      try {
+        const userResponseText = await userResponse.text();
+        userData = JSON.parse(userResponseText);
+      } catch (parseError) {
+        console.error('Error al parsear respuesta de usuario:', parseError);
+        throw new Error('Error al procesar los datos de usuario');
+      }
 
       // Preparar datos de usuario para la cookie
       const userInfo = {
