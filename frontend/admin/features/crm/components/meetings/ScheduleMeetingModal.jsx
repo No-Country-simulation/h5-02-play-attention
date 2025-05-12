@@ -142,7 +142,7 @@ export default function ScheduleMeetingModal({
     title: '',
     date: preselectedDate || new Date(),
     time: '',
-    leadId: preselectedLead || '',
+    lead: preselectedLead || '',
     location: '',
     description: '',
     duration: '30',
@@ -187,7 +187,7 @@ export default function ScheduleMeetingModal({
             title: meeting.title || '',
             date: meetingDate,
             time: timeString,
-            leadId: meeting.leadId || '',
+            lead: meeting.leadId || meeting.lead || '',
             location: meeting.location || '',
             description: meeting.description || '',
             duration: meeting.duration?.toString() || '30',
@@ -205,7 +205,7 @@ export default function ScheduleMeetingModal({
           title: '',
           date: preselectedDate || new Date(),
           time: '',
-          leadId: preselectedLead || '',
+          lead: preselectedLead || '',
           location: '',
           description: '',
           duration: '30',
@@ -386,9 +386,9 @@ export default function ScheduleMeetingModal({
         newErrors.title = 'El título es obligatorio';
       }
 
-      // Validación estricta para el ID del lead (cliente)
-      if (!formData.leadId) {
-        newErrors.leadId = 'Selecciona un cliente (obligatorio)';
+      // Validación estricta para el lead (cliente)
+      if (!formData.lead) {
+        newErrors.lead = 'Selecciona un cliente (obligatorio)';
       }
     }
 
@@ -419,22 +419,16 @@ export default function ScheduleMeetingModal({
     const meetingDate = new Date(formData.date);
     meetingDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0);
 
-    // Calcular hora de fin
-    const [endHours, endMinutes] = calculateEndTime(
-      formData.time,
-      parseInt(formData.duration, 10)
-    ).split(':');
-    const endDate = new Date(formData.date);
-    endDate.setHours(parseInt(endHours, 10), parseInt(endMinutes, 10), 0);
-
-    // Crear objeto de reunión
+    // Crear objeto de reunión (sin incluir startTime/endTime como strings)
     const meetingData = {
       ...formData,
       date: meetingDate.toISOString(),
-      endTime: endDate.toISOString(),
+      // Incluir solo leadId para compatibilidad con componentes existentes
+      leadId: formData.lead,
       ...(meeting && { id: meeting.id })
     };
 
+    console.log('Datos para enviar al backend:', meetingData);
     onSave(meetingData);
     onClose();
   };
@@ -609,16 +603,16 @@ export default function ScheduleMeetingModal({
 
       {/* Lead */}
       <div>
-        <Label htmlFor='leadId' className='block mb-1'>
+        <Label htmlFor='lead' className='block mb-1'>
           Lead <span className='text-red-500'>*</span>
         </Label>
         <Select
-          value={formData.leadId}
-          onValueChange={value => handleChange('leadId', value)}
+          value={formData.lead}
+          onValueChange={value => handleChange('lead', value)}
         >
           <SelectTrigger
-            id='leadId'
-            className={errors.leadId ? 'border-destructive' : ''}
+            id='lead'
+            className={errors.lead ? 'border-destructive' : ''}
           >
             <SelectValue placeholder='Selecciona un lead' />
           </SelectTrigger>
@@ -630,8 +624,8 @@ export default function ScheduleMeetingModal({
             ))}
           </SelectContent>
         </Select>
-        {errors.leadId && (
-          <p className='text-xs text-destructive mt-1'>{errors.leadId}</p>
+        {errors.lead && (
+          <p className='text-xs text-destructive mt-1'>{errors.lead}</p>
         )}
       </div>
 
@@ -690,7 +684,7 @@ export default function ScheduleMeetingModal({
   // Paso 3: Resumen y confirmación
   const renderStep3 = () => {
     // Encontrar el cliente seleccionado
-    const selectedLead = leads.find(lead => lead.id === formData.leadId);
+    const selectedLead = leads.find(lead => lead.id === formData.lead);
     const leadName = selectedLead
       ? selectedLead.name || selectedLead.email
       : 'Lead no seleccionado';

@@ -66,7 +66,7 @@ export const useContentForm = (initialData, onCancel, onSuccess) => {
       return;
     }
 
-    console.log('Inicializando categoría para modo edición');
+   
 
     // Si el contenido tiene ya un categoryId, buscar y establecer esa categoría
     if (initialData.categoryId) {
@@ -114,11 +114,10 @@ export const useContentForm = (initialData, onCancel, onSuccess) => {
 
     // Caso especial para el cambio de categoría
     if (name === 'categoryId') {
-      console.log('Categoría seleccionada manualmente:', value);
       const selectedCategory = categories.find(cat => cat.id === value);
 
       if (selectedCategory) {
-        console.log('Estableciendo categoría a:', selectedCategory.name);
+
 
         // Usar Object.assign para forzar una actualización más profunda
         const updatedFormData = Object.assign({}, formData, {
@@ -290,7 +289,7 @@ export const useContentForm = (initialData, onCancel, onSuccess) => {
   };
 
   // Opciones disponibles para el formulario
-  const typeOptions = ['Artículo', 'Video', 'PDF', 'Imagen', 'Presentación'];
+  const typeOptions = ['Artículo', 'Video', 'PDF', 'Imagen'];
   const statusOptions = ['Borrador', 'Publicado'];
 
   return {

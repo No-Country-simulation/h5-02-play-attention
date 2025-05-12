@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Mail,
   Phone,
@@ -10,7 +10,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronRight as ArrowRight,
-  ClipboardList
+  ClipboardList,
+  CheckCircle,
+  CircleAlert
 } from 'lucide-react';
 import {
   Table,
@@ -37,6 +39,15 @@ import { cn } from '@/shared/lib/utils';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from '@/shared/ui/dialog';
+import { Input } from '@/shared/ui/input';
 
 // Mapeo simple y directo entre estados UI y backend
 const ESTADOS_LEAD = [
@@ -66,6 +77,11 @@ export default function LeadList({
   const [leadStatuses, setLeadStatuses] = useState({});
   const [localNewsletterState, setLocalNewsletterState] = useState({});
   const [updatingNewsletterLeads, setUpdatingNewsletterLeads] = useState([]);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [validationCode, setValidationCode] = useState('');
+  const [isCodeValid, setIsCodeValid] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   // Los leads ya vienen ordenados del componente padre
   const sortedLeads = leads;
@@ -217,6 +233,21 @@ export default function LeadList({
       return;
     }
 
+    // Si el nuevo estado es "cliente", mostrar el modal de validación
+    if (uiStatus === 'cliente') {
+      setPendingStatusChange({ leadId, uiStatus });
+      setValidationCode('');
+      setIsCodeValid(false);
+      setShowCodeModal(true);
+      return;
+    }
+
+    // Para otros estados, proceder normalmente
+    applyStatusChange(leadId, uiStatus);
+  };
+
+  // Función para aplicar el cambio de estado después de la validación
+  const applyStatusChange = (leadId, uiStatus) => {
     // Guardar localmente para UI inmediata
     setLeadStatuses(prev => ({
       ...prev,
@@ -244,6 +275,59 @@ export default function LeadList({
         return updated;
       });
     }
+  };
+
+  // Verificar el código de validación (simularemos validación)
+  const validateCode = () => {
+    if (!validationCode) {
+      toast.error('Ingrese un código de validación');
+      return;
+    }
+
+    setIsValidating(true);
+
+    // Simulamos una validación con el backend (código correcto: "123456")
+    setTimeout(() => {
+      const isValid = validationCode === '123456';
+      setIsCodeValid(isValid);
+
+      if (isValid) {
+        toast.success('Código validado correctamente');
+      } else {
+        toast.error('Código de validación incorrecto');
+      }
+
+      setIsValidating(false);
+    }, 1000);
+  };
+
+  // Confirmar el cambio de estado después de validar el código
+  const confirmStatusChange = () => {
+    if (!isCodeValid) {
+      toast.error('Debe validar el código correctamente');
+      return;
+    }
+
+    if (pendingStatusChange) {
+      const { leadId, uiStatus } = pendingStatusChange;
+      applyStatusChange(leadId, uiStatus);
+
+      // Limpiar estado del modal
+      setPendingStatusChange(null);
+      setShowCodeModal(false);
+      setValidationCode('');
+      setIsCodeValid(false);
+
+      toast.success('Lead actualizado a estado Cliente');
+    }
+  };
+
+  // Cancelar el cambio de estado
+  const cancelStatusChange = () => {
+    setPendingStatusChange(null);
+    setShowCodeModal(false);
+    setValidationCode('');
+    setIsCodeValid(false);
   };
 
   // Manejo del cambio de newsletter
@@ -649,6 +733,70 @@ export default function LeadList({
           </div>
         </div>
       )}
+
+      {/* Modal de validación de código */}
+      <Dialog open={showCodeModal} onOpenChange={setShowCodeModal}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Validación requerida</DialogTitle>
+            <DialogDescription>
+              Para cambiar el estado a Cliente, necesitas ingresar un código de
+              validación dado por Play Attention.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='grid gap-4 py-4'>
+            <div className='flex flex-col gap-2'>
+              <Input
+                id='validation-code'
+                placeholder='Ingrese el código'
+                className='col-span-3'
+                value={validationCode}
+                onChange={e => setValidationCode(e.target.value)}
+                disabled={isValidating || isCodeValid}
+              />
+              {!isCodeValid && (
+                <Button
+                  type='button'
+                  variant='secondary'
+                  onClick={validateCode}
+                  disabled={isValidating || !validationCode}
+                  className='w-full'
+                >
+                  {isValidating ? (
+                    <>
+                      <LoadingSpinner size='sm' className='mr-2' />
+                      Validando...
+                    </>
+                  ) : (
+                    'Validar Código'
+                  )}
+                </Button>
+              )}
+
+              {isCodeValid && (
+                <div className='flex items-center text-green-600 text-sm'>
+                  <CheckCircle className='h-4 w-4 mr-1' />
+                  Código validado correctamente
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className='flex space-x-2 justify-end'>
+            <Button variant='outline' onClick={cancelStatusChange}>
+              Cancelar
+            </Button>
+            <Button
+              type='button'
+              onClick={confirmStatusChange}
+              disabled={!isCodeValid}
+            >
+              Confirmar Cambio
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

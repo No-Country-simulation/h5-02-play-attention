@@ -219,7 +219,7 @@ export default function ContentForm({ initialData, onCancel, onSuccess }) {
             htmlFor='content'
             className='block text-sm font-medium text-gray-700 mb-1'
           >
-            Contenido o Descripción
+            Contenido o Descripción <span className='text-red-500'>*</span>
           </label>
           <textarea
             id='content'

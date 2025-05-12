@@ -146,13 +146,15 @@ export default function LeadDashboard({
   const handleSaveMeeting = async meeting => {
     try {
       // Buscar el lead para obtener el nombre del cliente
-      const lead = leads.find(lead => lead.id === meeting.leadId);
+      const lead = leads.find(
+        lead => lead.id === (meeting.lead || meeting.leadId)
+      );
       if (lead) {
         meeting.client = lead.name;
       }
 
       // Verificar datos obligatorios antes de intentar guardar
-      if (!meeting.leadId) {
+      if (!meeting.lead && !meeting.leadId) {
         throw new Error('El ID del lead es obligatorio');
       }
 
