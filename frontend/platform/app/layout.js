@@ -14,7 +14,10 @@ export const metadata = {
   description:
     'Plataforma de Usuarios para la gestión de contenidos, usuarios y soporte de Play Attention',
   icons: {
-    icon: '/img/logospinner.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/img/logospinner.png', type: 'image/png' }
+    ],
     apple: '/img/logospinner.png',
     shortcut: '/img/logospinner.png'
   },
@@ -32,6 +35,9 @@ const publicPages = ['/login', '/register', '/forgot-password'];
 export default function RootLayout({ children }) {
   return (
     <html lang='es'>
+      <head>
+        <link rel='icon' href='/favicon.ico' sizes='any' />
+      </head>
       <body className={`${roboto.variable} font-sans antialiased`}>
         <QueryProvider>
           <NotificationProvider>{children}</NotificationProvider>
