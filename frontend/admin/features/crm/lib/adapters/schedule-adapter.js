@@ -81,7 +81,7 @@ export const clientToApiSchedule = clientSchedule => {
     // Construir fecha ISO 8601 completa combinando fecha y hora
     let meetingDate;
     if (clientSchedule.date instanceof Date) {
-      meetingDate = clientSchedule.date;
+      meetingDate = new Date(clientSchedule.date);
     } else if (typeof clientSchedule.date === 'string') {
       meetingDate = new Date(clientSchedule.date);
     } else {
@@ -89,18 +89,26 @@ export const clientToApiSchedule = clientSchedule => {
     }
 
     // Si recibimos la hora del cliente como string (HH:MM), actualizar la fecha
+    const startDate = new Date(meetingDate);
     if (clientSchedule.time && typeof clientSchedule.time === 'string') {
       const [hours, minutes] = clientSchedule.time.split(':');
-      meetingDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+      startDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
     }
+
+    // Calcular fecha de fin
+    const duration = parseInt(clientSchedule.duration || '30', 10);
+    const endDate = new Date(startDate);
+    endDate.setMinutes(endDate.getMinutes() + duration);
 
     // Datos a enviar al servidor
     return {
       id: clientSchedule.id,
       title: clientSchedule.title || '',
-      date: meetingDate.toISOString(),
+      date: startDate.toISOString(),
+      startTime: startDate.toISOString(), // Enviar como ISO string completo
+      endTime: endDate.toISOString(), // Enviar como ISO string completo
       duration: clientSchedule.duration?.toString() || '30',
-      leadId: clientSchedule.leadId || null,
+      lead: clientSchedule.lead || clientSchedule.leadId || null,
       location: clientSchedule.location || '',
       description: clientSchedule.description || '',
       status: clientSchedule.status || 'Pending'

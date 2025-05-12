@@ -67,7 +67,9 @@ export default function UpcomingMeetings() {
   const handleSaveMeeting = async meetingData => {
     try {
       // Buscar el lead para obtener el nombre del cliente
-      const lead = leads.find(lead => lead.id === meetingData.leadId);
+      const lead = leads.find(
+        lead => lead.id === (meetingData.lead || meetingData.leadId)
+      );
       if (lead) {
         meetingData.client = lead.name;
       }

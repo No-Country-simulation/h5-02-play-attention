@@ -75,7 +75,6 @@ export const useCreateSchedule = () => {
     onSuccess: () => {
       // Invalidar consultas para recargar datos
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
-      toast.success('Horario creado correctamente');
     },
     onError: error => {
       toast.error(`Error al crear horario: ${error.message}`);
