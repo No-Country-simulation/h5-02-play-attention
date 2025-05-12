@@ -230,7 +230,6 @@ export default function UserCreateModal({ isOpen, onClose, onSubmit }) {
                               <SelectItem value='Comercial'>
                                 Comercial
                               </SelectItem>
-                              <SelectItem value='Usuario'>Usuario</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
