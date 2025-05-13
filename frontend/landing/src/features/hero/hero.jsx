@@ -17,7 +17,7 @@ export function HeroSection() {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
-            <h1 className="text-4xl font-bold text-primary-900 leading-tight">
+            <h1 className="text-5xl font-extrabold text-primary-900 leading-tight">
               Entrenamiento Cerebral con Tecnología de la NASA.
               <span className="block">Ahora en Argentina.</span>
             </h1>
@@ -35,15 +35,15 @@ export function HeroSection() {
           </div>
           <div className="relative">
             <div className="absolute inset-0">
-              <BackgroundShapes className="z-0 rounded-2xl w-full" />
+              {/* <BackgroundShapes className="z-0 rounded-2xl w-full" /> */}
             </div>
 
             <Image
-              src="/hero.png"
-              alt="Profesional médico mostrando el dispositivo Play Attention BodyWave"
-              width={500}
-              height={600}
-               className="relative z-10 mx-auto w-full max-w-[500px] h-[500px] sm:h-[600px] max-h-[600px]"
+              src="/banner.png"
+              alt="Play attention pulsera en acción"
+              width={786}
+              height={524}
+              className="relative z-10 mx-auto w-full max-w-[786px] h-auto object-contain rounded-2xl my-16"
               priority
             />
           </div>
