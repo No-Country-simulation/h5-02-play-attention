@@ -122,11 +122,7 @@ export default function HeroVideoDialog({
   config = {
     youtube: {
       playerVars: {
-        autoplay: 1,
-        cc_load_policy: 1,
-        cc_lang_pref: "es",
-        subtitlesLang: "es",
-        hl: "es",
+        autoplay: 1,        
         modestbranding: 1,
         rel: 0,
       },
