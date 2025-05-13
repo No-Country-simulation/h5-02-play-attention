@@ -32,8 +32,7 @@ export function Navbar() {
         "demo-videos",
         "contact",
         "pricing-plans",
-        "testimonials",
-        "about-us",
+        "testimonials",        
       ];
       const scrollPosition = window.scrollY + 100;
 

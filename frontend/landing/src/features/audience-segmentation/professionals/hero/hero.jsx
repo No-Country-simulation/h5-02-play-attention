@@ -38,9 +38,9 @@ export function HeroSection() {
             <Image
               src="/professionals/hero.png"
               alt="Persona usando el dispositivo Play Attention"
-              width={500}            
-              height={600}
-              className="relative z-10 mx-auto w-full max-w-[500px] h-[500px] sm:h-[600px] max-h-[600px]"
+              width={1237}
+              height={688}
+              className="relative z-10 mx-auto w-full h-auto max-w-[800px] object-cover md:object-contain"
               priority
             />
           </div>
