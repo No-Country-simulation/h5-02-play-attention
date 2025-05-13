@@ -4,6 +4,7 @@ import { BenefitsSection } from "@/features/audience-segmentation/companies/bene
 import { FaqSection } from "@/features/audience-segmentation/companies/faq/faq";
 import { TestimonialsSection } from "@/features/testimonials/testimonials";
 import { ContactSection } from "@/features/contact/contact";
+import { CognitivePlansSection } from "@/features/cognitive-plans/cognitive-plans";
 
 export default function IndividualsPage() {
   return (
@@ -23,9 +24,16 @@ export default function IndividualsPage() {
         <BenefitsSection />
       </section>
 
+
+
       {/* Testimonials */}
       <section id="testimonials">
         <TestimonialsSection />
+      </section>
+
+      {/* Cognitive Plans */}
+      <section id="cognitive-plans">
+        <CognitivePlansSection />
       </section>
 
       {/* FAQ */}
