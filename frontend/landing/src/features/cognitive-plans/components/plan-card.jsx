@@ -10,20 +10,28 @@ export const PlanCard = ({
   benefits,
   buttonText,
   buttonAction,
-  additionalBenefits
+  additionalBenefits,
+  isPrimary = false
 }) => {
   return (
-    <div className='flex flex-col h-full bg-white rounded-lg p-6 shadow-sm border border-gray-200'>
+    <div className='flex flex-col h-full bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]'>
       <div className='mb-6'>
         <h3 className='text-2xl font-bold mb-1'>{title}</h3>
-        <p className='text-sm text-gray-600'>{subtitle}</p>
+        <p className='text-sm text-gray-600 mb-3'>{subtitle}</p>
       </div>
 
-      <div className='space-y-3 mb-6 flex-grow'>
+      <div className='space-y-3 mb-6'>
         {benefits.map((benefit, index) => (
-          <div key={index} className='flex items-start'>
-            <Check className='h-5 w-5 text-[#838394] mr-2 flex-shrink-0' />
-            <span className='text-sm'>{benefit}</span>
+          <div
+            key={index}
+            className={`flex items-start ${index === 0 ? 'mb-4' : ''}`}
+          >
+            <div className='rounded-full p-1 mr-2 mt-0.5'>
+              <Check className='h-4 w-4 text-[#838394]' />
+            </div>
+            <span className={`text-sm ${index === 0 ? 'font-medium' : ''}`}>
+              {benefit}
+            </span>
           </div>
         ))}
       </div>
@@ -32,11 +40,13 @@ export const PlanCard = ({
 
       {additionalBenefits && additionalBenefits.length > 0 && (
         <div className='mb-6'>
-          <h4 className='font-bold mb-4'>Beneficios</h4>
+          <h4 className='font-bold mb-4 text-[#240547]'>Beneficios</h4>
           <div className='space-y-3'>
             {additionalBenefits.map((benefit, index) => (
-              <div key={index} className='flex items-start'>
-                <Check className='h-5 w-5 text-[#838394] mr-2 flex-shrink-0' />
+              <div key={index} className='flex items-start group'>
+                <div className='rounded-full p-1 mr-2 mt-0.5 group-hover:bg-[#240547]/10 transition-all duration-300'>
+                  <Check className='h-4 w-4 text-[#838394] group-hover:text-[#240547] transition-colors duration-300' />
+                </div>
                 <span className='text-sm'>{benefit}</span>
               </div>
             ))}
@@ -46,7 +56,11 @@ export const PlanCard = ({
 
       <Button
         onClick={buttonAction}
-        className='w-full bg-[#240547] hover:bg-[#240547]/90 text-white'
+        className={`w-full ${
+          isPrimary
+            ? 'bg-[#240547] hover:bg-[#240547]/90 text-white'
+            : 'bg-white border border-[#240547] text-[#240547] hover:bg-[#240547]/5'
+        } rounded-lg py-3 text-base font-medium transition-all duration-300`}
       >
         {buttonText}
       </Button>
