@@ -138,7 +138,7 @@ export default function NavbarMobile({
           >
             Testimonios
           </button>
-          <button
+          {/* <button
             onClick={() => {
               scrollToSection("about-us");
               setIsMenuOpen(false);
@@ -149,7 +149,7 @@ export default function NavbarMobile({
             )}
           >
             Nosotros
-          </button>
+          </button> */}
           <Button
             className="max-w-3xs rounded-md"
             onClick={() => {

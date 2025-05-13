@@ -91,7 +91,7 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
       >
         Testimonios
       </Button>
-      <Button
+      {/* <Button
         onClick={() => scrollToSection("about-us")}
         variant="link"
         className={cn(
@@ -99,7 +99,7 @@ export default function NavbarDesktop({ scrollToSection, activeSection }) {
         )}
       >
         Nosotros
-      </Button>
+      </Button> */}
       <Button className="rounded-md" onClick={() => scrollToSection("contact")}>
         Contacto
       </Button>
