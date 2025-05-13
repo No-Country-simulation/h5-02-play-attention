@@ -56,11 +56,7 @@ export const PlanCard = ({
 
       <Button
         onClick={buttonAction}
-        className={`w-full ${
-          isPrimary
-            ? 'bg-[#240547] hover:bg-[#240547]/90 text-white'
-            : 'bg-white border border-[#240547] text-[#240547] hover:bg-[#240547]/5'
-        } rounded-lg py-3 text-base font-medium transition-all duration-300`}
+        className={`w-full rounded-[6px] py-3 text-base font-medium transition-all duration-300`}
       >
         {buttonText}
       </Button>

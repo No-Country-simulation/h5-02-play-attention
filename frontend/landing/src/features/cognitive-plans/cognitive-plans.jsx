@@ -38,6 +38,19 @@ export function CognitivePlansSection() {
     'Seis ejercicios cognitivos incluidos'
   ];
 
+  // Función para dirigir al usuario al formulario de contacto
+  const scrollToContactForm = () => {
+    // Obtener el elemento del formulario por su ID
+    const contactFormElement = document.getElementById('contactForm');
+    // Si existe el elemento, desplazarse hasta él
+    if (contactFormElement) {
+      contactFormElement.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Si no existe, podemos navegar usando el fragmento de URL
+      window.location.href = '#contact';
+    }
+  };
+
   return (
     <div className='py-24 relative overflow-hidden'>
       {/* Elementos decorativos de fondo */}
@@ -66,7 +79,7 @@ export function CognitivePlansSection() {
               subtitle='Perfecto para uso doméstico'
               benefits={hogarCardBenefits}
               buttonText='Adquirir Plan'
-              buttonAction={() => console.log('Adquirir Plan Hogar')}
+              buttonAction={scrollToContactForm}
               additionalBenefits={hogarCardBenefits}
               isPrimary={false}
             />
@@ -79,7 +92,7 @@ export function CognitivePlansSection() {
               subtitle='Ideal para profesionales y clínicas'
               benefits={profesionalCardBenefits}
               buttonText='Consultar Plan'
-              buttonAction={() => console.log('Consultar Plan Profesional')}
+              buttonAction={scrollToContactForm}
               additionalBenefits={profesionalBenefits}
               isPrimary={true}
             />
