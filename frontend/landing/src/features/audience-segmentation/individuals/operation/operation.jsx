@@ -30,6 +30,14 @@ export function OperationSection() {
               videoSrc="https://www.youtube.com/embed/MajIHSZN0oY"
               thumbnailSrc="https://img.youtube.com/vi/MajIHSZN0oY/maxresdefault.jpg"
               thumbnailAlt="Funcionalidad del dispositivo Play Attention en personas"
+              customSubtitles={[
+                {
+                  src: "/segmentation/subtittles.vtt",
+                  label: "Español",
+                  srcLang: "es",
+                  default: true,
+                },
+              ]}
             />
             <HeroVideoDialog
               className="hidden dark:block"
@@ -37,6 +45,14 @@ export function OperationSection() {
               videoSrc="https://www.youtube.com/embed/MajIHSZN0oY"
               thumbnailSrc="https://img.youtube.com/vi/MajIHSZN0oY/maxresdefault.jpg"
               thumbnailAlt="Funcionalidad del dispositivo Play Attention en personas"
+              customSubtitles={[
+                {
+                  src: "/segmentation/subtittles.vtt",
+                  label: "Español",
+                  srcLang: "es",
+                  default: true,
+                },
+              ]}
             />
           </div>
 
@@ -44,7 +60,7 @@ export function OperationSection() {
             onClick={() => scrollToSection("contact")}
             className="min-w-3xs mt-2"
           >
-            ¡Pídelo ahora mismo!
+            Quiero mejorar mi atención
           </Button>
         </div>
       </div>

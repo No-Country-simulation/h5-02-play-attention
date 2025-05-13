@@ -15,9 +15,9 @@ export function AudienceSegmentationSection() {
     <div className="bg-secondary-100 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-primary-900 mb-6">
+          <h2 className="text-3xl font-bold text-primary-900 mb-6">
             ¿Por qué elegir Play Attention?
-          </h1>
+          </h2>
           <p className="text-primary-900 max-w-3xl mx-auto">
             Nuestra tecnología de neurofeedback está diseñada para ayudar a
             diferentes perfiles
@@ -32,9 +32,9 @@ export function AudienceSegmentationSection() {
                 <div className="bg-secondary-300 p-3 rounded-full mb-4">
                   <User className="h-6 w-6 text-primary-300" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-900 mb-4">
+                <h3 className="text-xl font-bold text-primary-900 mb-4">
                   Personas
-                </h2>
+                </h3>
               </div>
               <ul className="space-y-2 text-sm text-secondary-800">
                 <li className="flex items-start">
@@ -75,9 +75,9 @@ export function AudienceSegmentationSection() {
                 <div className="bg-secondary-300 p-3 rounded-full mb-4">
                   <Building2 className="h-6 w-6 text-primary-300" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-900 mb-4">
+                <h3 className="text-xl font-bold text-primary-900 mb-4">
                   Empresas
-                </h2>
+                </h3>
               </div>
               <ul className="space-y-2 text-sm text-secondary-800">
                 <li className="flex items-start">
@@ -118,9 +118,9 @@ export function AudienceSegmentationSection() {
                 <div className="bg-secondary-300 p-3 rounded-full mb-4">
                   <Briefcase className="h-6 w-6 text-primary-300" />
                 </div>
-                <h2 className="text-xl font-bold text-primary-900 mb-4">
+                <h3 className="text-xl font-bold text-primary-900 mb-4">
                   Profesionales
-                </h2>
+                </h3>
               </div>
               <ul className="space-y-2 text-sm text-secondary-800">
                 <li className="flex items-start">
@@ -153,7 +153,7 @@ export function AudienceSegmentationSection() {
       </div>
 
       <div className="container mx-auto px-4 pt-18">
-        <motion.h1
+        <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -161,7 +161,7 @@ export function AudienceSegmentationSection() {
         >
           Resultados medibles en la atención, el autocontrol y la calidad de
           vida.
-        </motion.h1>
+        </motion.h2>
 
         <div className="max-w-5xl mx-auto">
           {benefits.map((feature, index) => (
@@ -258,7 +258,7 @@ const FeatureCard = ({
           <h2 className="text-2xl font-bold mb-4 text-primary-900">{title}</h2>
           <p className="text-secondary-800 mb-6">{description}</p>
           <Button
-            className="min-w-3xs"
+            className="min-w-3xs w-full sm:w-3xs"
             onClick={() => scrollToSection("contact")}
           >
             Más info

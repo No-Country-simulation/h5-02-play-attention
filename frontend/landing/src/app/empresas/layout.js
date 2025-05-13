@@ -1,4 +1,5 @@
 import { Navbar } from "@/features/audience-segmentation/companies/navbar/navbar";
+import { FloatingSocialMedia } from "@/features/contact/floatingSocialMedia";
 import { Footer } from "@/shared/components/footer";
 
 export const metadata = {
@@ -59,6 +60,8 @@ export default function LandingLayout({ children }) {
     <>
       <Navbar />
       {children}
+      <FloatingSocialMedia />
+
       <Footer />
     </>
   );

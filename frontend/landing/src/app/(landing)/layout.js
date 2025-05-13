@@ -1,8 +1,11 @@
+import { FloatingSocialMedia } from "@/features/contact/floatingSocialMedia";
 import { Footer } from "@/shared/components/footer";
 import { Navbar } from "@/shared/components/navbar/navbar";
 
+import dynamic from "next/dynamic";
+
 export const metadata = {
-  title: "Play Attention Argentina",
+  title: "Play Attention Argentina - Proveedores Certificados",
   description:
     "Programa de neuroentrenamiento con tecnología BrainAware™ para potenciar habilidades cognitivas y funciones ejecutivas. Ideal para personas con TDAH, profesionales, instituciones educativas y empresas.",
   keywords: [
@@ -57,6 +60,7 @@ export default function LandingLayout({ children }) {
     <>
       <Navbar />
       {children}
+      <FloatingSocialMedia />
       <Footer />
     </>
   );

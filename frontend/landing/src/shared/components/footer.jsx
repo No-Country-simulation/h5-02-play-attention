@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
+// import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
+import { FaFacebookF, FaYoutube } from 'react-icons/fa';
+import { BiLogoInstagramAlt } from "react-icons/bi";
 
 export function Footer() {
   return (
@@ -35,8 +37,8 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Facebook
-                className="h-5 w-5 text-neutral-white-100"
+              <FaFacebookF
+                className="h-8 w-8 text-neutral-white-100"
                 fill="white"
               />
             </Link>
@@ -49,7 +51,7 @@ export function Footer() {
           >
             <Link href="#" target="_blank" rel="noopener noreferrer">
               <Twitter
-                className="h-5 w-5 text-neutral-white-100"
+                className="h-8 w-8 text-neutral-white-100"
                 fill="white"
               />
             </Link>
@@ -65,7 +67,8 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Instagram className="h-5 w-5 text-neutral-white-100" />
+
+              <BiLogoInstagramAlt className="h-8 w-8 text-neutral-white-100" />
             </Link>
           </Button>
           {/* <Button
@@ -75,19 +78,19 @@ export function Footer() {
             aria-label="LinkedIn"
           >
             <Link href="#" target="_blank" rel="noopener noreferrer">
-              <Linkedin className="h-5 w-5 text-neutral-white-100" fill="white"/>
+              <Linkedin className="h-8 w-8 text-neutral-white-100" fill="white"/>
             </Link>
           </Button> */}
-          {/* <Button
+          <Button
             size="icon"
             className="bg-secondary-800"
             asChild
             aria-label="YouTube"
           >
-            <Link href="#" target="_blank" rel="noopener noreferrer">
-              <Youtube className="h-5 w-5 text-neutral-white-100" />
+            <Link href="https://www.youtube.com/@playattention888" target="_blank" rel="noopener noreferrer">
+              <FaYoutube className="h-8 w-8 text-neutral-white-100" />
             </Link>
-          </Button> */}
+          </Button>
         </div>
       </div>
     </footer>
