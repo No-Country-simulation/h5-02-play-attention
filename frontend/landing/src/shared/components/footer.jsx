@@ -12,7 +12,7 @@ export function Footer() {
       <div className="container mx-auto flex flex-col items-center justify-between md:flex-row">
         {/* Logo */}
         <div className="mb-4 md:mb-0">
-          <img src="/logo-deeper-v2.png" alt="Logo" className="h-8 w-auto" />
+          <img src="/logo.jpg" alt="Logo" className="h-12 w-auto rounded-full" />
         </div>
 
         {/* Copyright */}
