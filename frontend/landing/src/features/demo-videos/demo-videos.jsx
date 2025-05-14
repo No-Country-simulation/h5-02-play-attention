@@ -5,7 +5,7 @@ import HeroVideoDialog from "@/shared/ui/hero-video-dialog"
 
 export function DemoVideosSection() {
   return (
-    <div className="py-16">
+    <div className="pb-16">
       <div className="container mx-auto px-4 lg:px-20">
         <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-semibold text-primary-900">Funcionamiento</h2>

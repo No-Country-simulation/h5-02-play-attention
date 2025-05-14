@@ -23,8 +23,7 @@ export function HeroSection() {
             </h1>
             <p className="text-2xl text-primary-400">
               Transformá la concentración, el autocontrol y el rendimiento
-              cognitivo con Play Attention, el sistema de neurofeedback más
-              completo del mundo.
+              cognitivo con Play Attention.
             </p>
             <Button
               onClick={() => scrollToSection("contact")}

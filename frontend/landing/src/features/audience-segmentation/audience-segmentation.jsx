@@ -19,7 +19,7 @@ export function AudienceSegmentationSection() {
             ¿Por qué elegir Play Attention?
           </h2>
           <p className="text-primary-900 max-w-3xl mx-auto">
-            Nuestra tecnología de neurofeedback está diseñada para ayudar a
+            Nuestra tecnología está diseñada para ayudar a
             diferentes perfiles
           </p>
         </div>

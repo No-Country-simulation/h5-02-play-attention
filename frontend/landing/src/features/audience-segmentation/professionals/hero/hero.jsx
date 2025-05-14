@@ -16,7 +16,7 @@ export function HeroSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl font-bold text-primary-900 leading-tight">
-              Neurotecnología Clínicamente Validada para Profesionales de la
+              Tecnología clínicamente validada para Profesionales de la
               Salud Mental
             </h1>
             <p className="text-2xl text-primary-400">

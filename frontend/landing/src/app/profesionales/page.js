@@ -2,7 +2,7 @@ import { HeroSection } from '@/features/audience-segmentation/professionals/hero
 import { OperationSection } from '@/features/audience-segmentation/professionals/operation/operation';
 import { BenefitsSection } from '@/features/audience-segmentation/professionals/benefits/benefits';
 import { FaqSection } from '@/features/audience-segmentation/professionals/faq/faq';
-import { TestimonialsSection } from '@/features/testimonials/testimonials';
+import { TestimonialsCarousel, TestimonialsSection } from '@/features/testimonials/testimonials';
 import { ContactSection } from '@/features/contact/contact';
 import { CognitivePlansSection } from '@/features/cognitive-plans/cognitive-plans';
 
@@ -26,7 +26,7 @@ export default function IndividualsPage() {
 
       {/* Testimonials */}
       <section id='testimonials'>
-        <TestimonialsSection />
+         <TestimonialsCarousel />
       </section>
 
       {/* Cognitive Plans */}

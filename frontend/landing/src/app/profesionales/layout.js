@@ -5,15 +5,14 @@ import { Footer } from "@/shared/components/footer";
 export const metadata = {
   title: "Play Attention Argentina | Profesionales de la Salud Mental",
   description:
-    "Neurotecnología clínicamente validada para mejorar el rendimiento de los profesionales de la salud mental. Herramientas avanzadas para psicólogos, neurólogos y educadores, desde detección temprana hasta informes de progreso automatizados.",
+    "Tecnología clínicamente validada para mejorar el rendimiento de los profesionales de la salud mental. Herramientas avanzadas para psicólogos, neurólogos y educadores, desde detección temprana hasta informes de progreso automatizados.",
   keywords: [
-    "neurotecnología",
+    "Tecnología",
     "salud mental",
     "psicólogos",
     "neurólogos",
     "educadores",
     "atención",
-    "neurofeedback",
     "tecnología avanzada",
     "diagnóstico temprano",
     "informes de progreso",
@@ -29,7 +28,7 @@ export const metadata = {
 
   openGraph: {
     title:
-      "Neurotecnología para Profesionales de la Salud Mental | Play Attention Argentina",
+      "Tecnología para Profesionales de la Salud Mental | Play Attention Argentina",
     description:
       "Herramientas validadas científicamente para psicólogos, neurólogos y educadores, desde la detección temprana hasta informes de progreso automatizados, basadas en la tecnología BrainAware™ de la NASA.",
     images: [
@@ -45,7 +44,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "Neurotecnología para Profesionales de la Salud Mental | Play Attention Argentina",
+      "Tecnología para Profesionales de la Salud Mental | Play Attention Argentina",
     description:
       "Tecnología avanzada para mejorar atención y funciones ejecutivas, diseñada para psicólogos, neurólogos y educadores. Validadas científicamente para un mejor diagnóstico y tratamiento.",
     images: [

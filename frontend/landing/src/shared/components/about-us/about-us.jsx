@@ -13,7 +13,7 @@ export function AboutUsSection() {
           <div className="md:w-1/2">
             <Image
               src="/about-us.png"
-              alt="Niño usando tecnología de neurofeedback"
+              alt="Niño usando tecnología"
               width={300}
               height={300}
               className="object-cover w-full"
@@ -22,13 +22,13 @@ export function AboutUsSection() {
           <div className="md:w-1/2 space-y-4">
             <p className="text-secondary-800">
               Play Attention nació de la colaboración entre científicos de la
-              NASA y expertos en neurociencia, con el objetivo de crear una
+              NASA y expertos en ciencia, con el objetivo de crear una
               herramienta que pudiera ayudar a mejorar la concentración y el
               rendimiento cognitivo.
             </p>
             <p className="text-secondary-800">
               Desde nuestros inicios, nos hemos dedicado a perfeccionar nuestra
-              tecnología de neurofeedback para hacerla accesible a personas de
+              tecnología para hacerla accesible a personas de
               todas las edades y condiciones. Hoy, Play Attention es utilizado
               por miles de personas en todo el mundo.
             </p>

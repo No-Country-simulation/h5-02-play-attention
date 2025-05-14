@@ -4,7 +4,7 @@ export const benefits = [
     subtitle: "Potencia tu mente. Mantén el enfoque y conquista tus metas",
     phrase: "Con Play Attention, cada momento cuenta.",
     description:
-      "La tecnología de neurofeedback de Play Attention fortalece tu capacidad de atención sostenida, permitiéndote mantener el enfoque por períodos más largos y reducir las distracciones.",
+      "La tecnología de Play Attention fortalece tu capacidad de atención sostenida, permitiéndote mantener el enfoque por períodos más largos y reducir las distracciones.",
     imageSrc: "/segmentation/goals.jpg",
   },
   {

@@ -48,12 +48,12 @@ export function FaqSection() {
       question:
         "¿Qué diferencia a esta herramienta de otros programas de estimulación cognitiva?",
       answer:
-        "Integra neurofeedback en tiempo real, informes personalizados y seguimiento continuo, con base científica y resultados comprobables. No es solo estimulación pasiva.",
+        "Integra estimulación en tiempo real, informes personalizados y seguimiento continuo, con base científica y resultados comprobables. No es solo estimulación pasiva.",
     },
     {
       id: "item-7",
       question:
-        "¿Puedo integrar esta herramienta con otros tratamientos o estudios como EEG o pruebas neuropsicológicas?",
+        "¿Puedo integrar esta herramienta con otros tratamientos o estudios como EEG o pruebas psicológicas?",
       answer:
         "Sí. Es compatible con abordajes interdisciplinarios, potenciando los diagnósticos y el seguimiento clínico con métricas objetivas y exportables.",
     },
