@@ -12,7 +12,7 @@ export function Footer() {
       <div className="container mx-auto flex flex-col items-center justify-between md:flex-row">
         {/* Logo */}
         <div className="mb-4 md:mb-0">
-          <img src="/logo-deeper-v2.png" alt="Logo" className="h-8 w-auto" />
+          <img src="/logo.jpg" alt="Logo" className="h-12 w-auto rounded-full" />
         </div>
 
         {/* Copyright */}
@@ -33,7 +33,7 @@ export function Footer() {
             aria-label="Facebook"
           >
             <Link
-              href="https://www.facebook.com/profile.php?id=100063829610982"
+              href="https://www.facebook.com/myplayattention/"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -63,7 +63,7 @@ export function Footer() {
             aria-label="Instagram"
           >
             <Link
-              href="https://www.instagram.com/dislexiayconducta"
+              href="https://www.instagram.com/playattentionargentina"
               target="_blank"
               rel="noopener noreferrer"
             >

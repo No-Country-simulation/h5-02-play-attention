@@ -15,10 +15,9 @@ const robotoMono = Roboto_Mono({
 export const metadata = {
   title: "Play Attention Argentina",
   description:
-    "Programa de neuroentrenamiento con tecnología BrainAware™ para potenciar habilidades cognitivas y funciones ejecutivas. Ideal para personas con TDAH, profesionales, instituciones educativas y empresas.",
+    "Programa con tecnología BrainAware™ para potenciar habilidades cognitivas y funciones ejecutivas. Ideal para personas con TDAH, profesionales, instituciones educativas y empresas.",
   keywords: [
     "TDAH",
-    "neurofeedback",
     "atención",
     "entrenamiento cerebral",
     "cognición",

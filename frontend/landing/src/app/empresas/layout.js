@@ -8,7 +8,6 @@ export const metadata = {
     "Impulsá el rendimiento de tus equipos con herramientas científicas basadas en la tecnología BrainAware™ de la NASA. Aplicable en empresas, instituciones educativas y organizaciones deportivas.",
   keywords: [
     "TDAH",
-    "neurofeedback",
     "desempeño laboral",
     "educación",
     "deporte",
@@ -45,7 +44,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Soluciones para Empresas y Educación | Play Attention Argentina",
     description:
-      "Neuroentrenamiento con tecnología de la NASA para mejorar atención y funciones ejecutivas en equipos companiess, docentes y deportistas.",
+      "Entrenamiento con tecnología de la NASA para mejorar atención y funciones ejecutivas en equipos companiess, docentes y deportistas.",
     images: [
       {
         url: "/companies/hero.png",

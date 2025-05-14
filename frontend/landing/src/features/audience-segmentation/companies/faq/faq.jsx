@@ -59,7 +59,7 @@ export function FaqSection() {
       id: "item-8",
       question: "¿Cómo aceleran la recuperación mental?",
       answer:
-        "Incorporamos técnicas de neurofeedback y entrenamiento cognitivo que fortalecen las funciones ejecutivas del cerebro, acelerando la recuperación tras episodios de estrés o fatiga mental.",
+        "Incorporamos técnicas y entrenamiento cognitivo que fortalecen las funciones ejecutivas del cerebro, acelerando la recuperación tras episodios de estrés o fatiga mental.",
     },
     {
       id: "item-9",

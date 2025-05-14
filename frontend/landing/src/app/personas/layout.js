@@ -8,7 +8,6 @@ export const metadata = {
     "Descubrí cómo la tecnología BrainAware™ basada en la NASA ayuda a adultos, adolescentes y padres a mejorar su atención, concentración y funciones ejecutivas. Ahora en Argentina.",
   keywords: [
     "TDAH",
-    "neurofeedback",
     "atención",
     "entrenamiento cerebral",
     "cognición",
@@ -45,7 +44,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "TDAH bajo tu control | Play Attention Argentina",
     description:
-      "Neuroentrenamiento con tecnología de la NASA para mejorar atención y funciones ejecutivas. Para adultos, adolescentes y padres.",
+      "Entrenamiento con tecnología de la NASA para mejorar atención y funciones ejecutivas. Para adultos, adolescentes y padres.",
     images: [
       {
         url: "/individuals/hero.png",

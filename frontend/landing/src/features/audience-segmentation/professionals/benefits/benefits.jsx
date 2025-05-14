@@ -93,7 +93,7 @@ export function BenefitsSection() {
                 </CardHeader>
                 <CardContent className="text-center px-4 pb-6">
                   <p className="text-primary-900">
-                    Monitorea TDAH y trastornos del neurodesarrollo con
+                    Monitorea TDAH y trastornos del desarrollo con
                     tecnología que complementa EEG y pruebas cognitivas. Detecta
                     cambios y tratamientos con precisión.
                   </p>

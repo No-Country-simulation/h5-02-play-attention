@@ -34,7 +34,7 @@ export const FloatingSocialMedia = () => {
           />
         </svg>
       ),
-      url: "https://www.instagram.com/direct/t/100827541499487",
+      url: "https://www.instagram.com/direct/t/17844259170482940",
       color: "hover:bg-white",
     },
     {
@@ -56,7 +56,7 @@ export const FloatingSocialMedia = () => {
           />
         </svg>
       ),
-      url: "https://wa.me/56940551892",
+      url: "https://wa.me/5491124593834",
       color: "hover:bg-white",
     },
   ];

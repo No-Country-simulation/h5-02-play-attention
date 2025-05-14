@@ -7,10 +7,9 @@ import dynamic from "next/dynamic";
 export const metadata = {
   title: "Play Attention Argentina - Proveedores Certificados",
   description:
-    "Programa de neuroentrenamiento con tecnología BrainAware™ para potenciar habilidades cognitivas y funciones ejecutivas. Ideal para personas con TDAH, profesionales, instituciones educativas y empresas.",
+    "Programa con tecnología BrainAware™ para potenciar habilidades cognitivas y funciones ejecutivas. Ideal para personas con TDAH, profesionales, instituciones educativas y empresas.",
   keywords: [
     "TDAH",
-    "neurofeedback",
     "atención",
     "entrenamiento cerebral",
     "cognición",
@@ -45,7 +44,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Play Attention",
     description:
-      "Tecnología de neurofeedback para potenciar habilidades cognitivas. Ideal para personas con TDAH y entornos educativos.",
+      "Tecnología para potenciar habilidades cognitivas. Ideal para personas con TDAH y entornos educativos.",
     images: [
       {
         url: "/hero.png",
