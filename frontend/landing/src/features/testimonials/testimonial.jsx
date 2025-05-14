@@ -1,12 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Star } from "lucide-react";
 
-
 export const TestimonialCard = ({ id, name, description, text, image }) => {
   return (
     <div
       key={id}
-      className="p-6 rounded-lg shadow-sm border-lg border-1 border-black-100 max-w-xs sm:max-w-sm"
+      className="p-6 rounded-lg shadow-sm border-lg border-1  max-w-xs sm:max-w-sm min-h-[95%] max-h-[95%] bg-[#ffffff]"
     >
       <div className="flex mb-4">
         {[...Array(5)].map((_, i) => (
@@ -15,9 +14,9 @@ export const TestimonialCard = ({ id, name, description, text, image }) => {
       </div>
 
       <div className="flex items-center mb-4">
-        <Avatar className="w-12 h-12 mr-4">
+        <Avatar className="w-12 h-12 mr-4 !bg-[#cccccc]">
           <AvatarImage src={image || "/placeholder.svg"} alt={name} />
-          <AvatarFallback>{name[0]}</AvatarFallback>{" "}          
+          <AvatarFallback>{name[0]}</AvatarFallback>{" "}
         </Avatar>
         <div>
           <h3 className="font-bold text-lg">{name}</h3>

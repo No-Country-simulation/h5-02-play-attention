@@ -11,7 +11,7 @@ export const testimonials = [
     id: 2,
     name: "Juan Ramos",
     description: "Diseñador Gráfico",
-    text: "Logré dejar el metilfenidato y mantener mi productividad. Jamás pensé que sería posible.",
+    text: " Logré dejar el metilfenidato y mantener mi productividad. Jamás pensé que sería posible.Logré dejar el metilfenidato y mantener mi productividad. Jamás pensé que sería posible.",
     image: "/placeholder.svg?height=60&width=60",
     type: "individuals",
   },
