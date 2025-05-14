@@ -11,11 +11,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 export function TestimonialsCarousel() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollPrev = useCallback(() => {
+    emblaApi?.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    emblaApi?.scrollNext();
+  }, [emblaApi]);
 
   return (
-    <div className="py-12 bg-[#f5f5f5] ">
+    <div className="py-12 bg-[#f5f5f5]">
       <div className="container mx-auto px-4 lg:px-20">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-primary-900">
           Testimonios de nuestros clientes
@@ -35,12 +40,10 @@ export function TestimonialsCarousel() {
           {/* Carrusel */}
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-4 px-4">
-              {" "}
-              {/* padding al contenedor, no a cada card */}
               {testimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="min-w-[300px] flex-shrink-0 box-border" // sin padding interno
+                  className="min-w-[300px] flex-shrink-0 box-border"
                 >
                   <TestimonialCard {...testimonial} />
                 </div>
