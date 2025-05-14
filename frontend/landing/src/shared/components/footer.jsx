@@ -33,7 +33,7 @@ export function Footer() {
             aria-label="Facebook"
           >
             <Link
-              href="https://www.facebook.com/profile.php?id=100063829610982"
+              href="https://www.facebook.com/myplayattention/"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -63,7 +63,7 @@ export function Footer() {
             aria-label="Instagram"
           >
             <Link
-              href="https://www.instagram.com/dislexiayconducta"
+              href="https://www.instagram.com/playattentionargentina"
               target="_blank"
               rel="noopener noreferrer"
             >

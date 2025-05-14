@@ -5,12 +5,12 @@ const contactItems = [
   {
     icon: Phone,
     title: "Teléfono:",
-    details: ["+54 11 1234-5678", "Lunes a Viernes, 9:00 - 18:00"],
+    details: ["+54 9 11 2459-3834", "Lunes a Viernes, 9:00 - 18:00"],
   },
   {
     icon: Mail,
     title: "Email:",
-    details: ["info@playattention.com.ar", "soporte@playattention.com.ar"],
+    details: ["playattentionargentina@gmail.com"],
   },
   {
     icon: MapPin,
@@ -24,7 +24,7 @@ const iconClasses =
 
 export const StaticContact = () => {
   const handleClick = () => {
-    window.open("https://wa.me/56940551892", "_blank", "noopener,noreferrer");
+    window.open("https://wa.me/5491124593834", "_blank", "noopener,noreferrer");
   };
   return (
     <div className="w-full md:w-[29%] max-w-full flex flex-col gap-4 md:gap-6 px-2 md:px-0 border-none shadow-none max-h-[90%] ">
