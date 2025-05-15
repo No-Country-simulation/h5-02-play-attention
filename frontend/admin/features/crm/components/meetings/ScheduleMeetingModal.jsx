@@ -200,10 +200,11 @@ export default function ScheduleMeetingModal({
           console.error('Error al cargar los datos de la reunión:', error);
         }
       } else {
-        // Nueva reunión: resetear formulario
+        // Nueva reunión: resetear formulario con fecha actual
+        const currentDate = new Date();
         setFormData({
           title: '',
-          date: preselectedDate || new Date(),
+          date: preselectedDate || currentDate,
           time: '',
           lead: preselectedLead || '',
           location: '',
@@ -361,6 +362,8 @@ export default function ScheduleMeetingModal({
   // Validar formulario por paso
   const validateStep = step => {
     const newErrors = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     if (step === 1) {
       if (!formData.date) {
@@ -370,6 +373,13 @@ export default function ScheduleMeetingModal({
         const dayOfWeek = formData.date.getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) {
           newErrors.date = 'No se pueden agendar reuniones en fines de semana';
+        }
+
+        // Verificar que no sea una fecha anterior a hoy
+        const selectedDate = new Date(formData.date);
+        selectedDate.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          newErrors.date = 'No se pueden agendar reuniones en fechas pasadas';
         }
       }
 
@@ -389,6 +399,11 @@ export default function ScheduleMeetingModal({
       // Validación estricta para el lead (cliente)
       if (!formData.lead) {
         newErrors.lead = 'Selecciona un cliente (obligatorio)';
+      }
+
+      // Validación para la descripción
+      if (!formData.description || !formData.description.trim()) {
+        newErrors.description = 'La descripción es obligatoria';
       }
     }
 
@@ -469,117 +484,134 @@ export default function ScheduleMeetingModal({
   );
 
   // Paso 1: Selección de fecha, duración y horario
-  const renderStep1 = () => (
-    <div className='space-y-4'>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        {/* Selección de fecha */}
-        <div>
-          <Label className='block mb-2'>
-            Fecha <span className='text-red-500'>*</span>
-          </Label>
-          <div className='border rounded-md p-3'>
-            <Calendar
-              mode='single'
-              selected={formData.date}
-              onSelect={date => handleChange('date', date)}
-              locale={es}
-              className='mx-auto'
-              disabled={{
-                before: new Date(),
-                // Deshabilitar fines de semana (0 = domingo, 6 = sábado)
-                dayOfWeek: [0, 6]
-              }}
-            />
-          </div>
-          {errors.date && (
-            <p className='text-sm text-destructive mt-1'>{errors.date}</p>
-          )}
-        </div>
+  const renderStep1 = () => {
+    // Crear una nueva fecha con la hora a 00:00:00 para comparación de días
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-        <div className='space-y-4'>
-          {/* Duración */}
-          <div>
-            <Label htmlFor='duration' className='block mb-2'>
-              Duración <span className='text-red-500'>*</span>
-            </Label>
-            <Select
-              value={formData.duration}
-              onValueChange={value => handleChange('duration', value)}
-            >
-              <SelectTrigger
-                id='duration'
-                className={errors.duration ? 'border-destructive' : ''}
-              >
-                <SelectValue placeholder='Seleccionar duración' />
-              </SelectTrigger>
-              <SelectContent>
-                {DURATION_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.duration && (
-              <p className='text-sm text-destructive mt-1'>{errors.duration}</p>
-            )}
-            <p className='text-xs text-muted-foreground mt-1'>
-              <Info className='inline h-3 w-3 mr-1' />
-              Al cambiar la duración se recalcularán los horarios disponibles
-            </p>
-          </div>
-
-          {/* Horarios disponibles */}
+    return (
+      <div className='space-y-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {/* Selección de fecha */}
           <div>
             <Label className='block mb-2'>
-              Horario disponible <span className='text-red-500'>*</span>
+              Fecha <span className='text-red-500'>*</span>
             </Label>
-            <div className='grid grid-cols-3 gap-2 mt-1 max-h-[200px] overflow-y-auto p-1'>
-              {availableSlots.length > 0 ? (
-                // Filtrar para mostrar solo los horarios disponibles
-                availableSlots
-                  .filter(slot => slot.available)
-                  .map(slot => (
-                    <Button
-                      key={slot.time}
-                      type='button'
-                      size='sm'
-                      variant={
-                        formData.time === slot.time ? 'default' : 'outline'
-                      }
-                      className={`text-xs py-1 ${
-                        formData.time === slot.time ? 'bg-primary' : ''
-                      }`}
-                      onClick={() => handleChange('time', slot.time)}
-                    >
-                      {slot.time}
-                    </Button>
-                  ))
-              ) : (
-                <p className='text-sm text-muted-foreground col-span-3 text-center py-4'>
-                  {formData.date?.getDay() === 0 ||
-                  formData.date?.getDay() === 6
-                    ? 'No hay horarios disponibles en fines de semana. Por favor, selecciona un día laborable.'
-                    : 'No hay horarios disponibles para esta fecha'}
+            <div className='border rounded-md p-3'>
+              <Calendar
+                mode='single'
+                selected={formData.date}
+                onSelect={date => handleChange('date', date)}
+                locale={es}
+                className='mx-auto'
+                disabled={date => {
+                  // Deshabilitar días anteriores a hoy
+                  const currentDate = new Date();
+                  currentDate.setHours(0, 0, 0, 0);
+
+                  // Deshabilitar si es anterior a hoy
+                  if (date < currentDate) return true;
+
+                  // Deshabilitar fines de semana (0 = domingo, 6 = sábado)
+                  const day = date.getDay();
+                  return day === 0 || day === 6;
+                }}
+                fromDate={today} // Establecer la fecha mínima seleccionable como hoy
+              />
+            </div>
+            {errors.date && (
+              <p className='text-sm text-destructive mt-1'>{errors.date}</p>
+            )}
+          </div>
+
+          <div className='space-y-4'>
+            {/* Duración */}
+            <div>
+              <Label htmlFor='duration' className='block mb-2'>
+                Duración <span className='text-red-500'>*</span>
+              </Label>
+              <Select
+                value={formData.duration}
+                onValueChange={value => handleChange('duration', value)}
+              >
+                <SelectTrigger
+                  id='duration'
+                  className={errors.duration ? 'border-destructive' : ''}
+                >
+                  <SelectValue placeholder='Seleccionar duración' />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.duration && (
+                <p className='text-sm text-destructive mt-1'>
+                  {errors.duration}
                 </p>
               )}
-              {/* Mostrar mensaje si no hay horarios disponibles después de filtrar */}
-              {availableSlots.length > 0 &&
-                availableSlots.filter(slot => slot.available).length === 0 && (
+              <p className='text-xs text-muted-foreground mt-1'>
+                <Info className='inline h-3 w-3 mr-1' />
+                Al cambiar la duración se recalcularán los horarios disponibles
+              </p>
+            </div>
+
+            {/* Horarios disponibles */}
+            <div>
+              <Label className='block mb-2'>
+                Horario disponible <span className='text-red-500'>*</span>
+              </Label>
+              <div className='grid grid-cols-3 gap-2 mt-1 max-h-[200px] overflow-y-auto p-1'>
+                {availableSlots.length > 0 ? (
+                  // Filtrar para mostrar solo los horarios disponibles
+                  availableSlots
+                    .filter(slot => slot.available)
+                    .map(slot => (
+                      <Button
+                        key={slot.time}
+                        type='button'
+                        size='sm'
+                        variant={
+                          formData.time === slot.time ? 'default' : 'outline'
+                        }
+                        className={`text-xs py-1 ${
+                          formData.time === slot.time ? 'bg-primary' : ''
+                        }`}
+                        onClick={() => handleChange('time', slot.time)}
+                      >
+                        {slot.time}
+                      </Button>
+                    ))
+                ) : (
                   <p className='text-sm text-muted-foreground col-span-3 text-center py-4'>
-                    No hay horarios disponibles para esta fecha con la duración
-                    seleccionada
+                    {formData.date?.getDay() === 0 ||
+                    formData.date?.getDay() === 6
+                      ? 'No hay horarios disponibles en fines de semana. Por favor, selecciona un día laborable.'
+                      : 'No hay horarios disponibles para esta fecha'}
                   </p>
                 )}
+                {/* Mostrar mensaje si no hay horarios disponibles después de filtrar */}
+                {availableSlots.length > 0 &&
+                  availableSlots.filter(slot => slot.available).length ===
+                    0 && (
+                    <p className='text-sm text-muted-foreground col-span-3 text-center py-4'>
+                      No hay horarios disponibles para esta fecha con la
+                      duración seleccionada
+                    </p>
+                  )}
+              </div>
+              {errors.time && (
+                <p className='text-sm text-destructive mt-1'>{errors.time}</p>
+              )}
             </div>
-            {errors.time && (
-              <p className='text-sm text-destructive mt-1'>{errors.time}</p>
-            )}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Paso 2: Detalles de la reunión
   const renderStep2 = () => (
@@ -667,7 +699,7 @@ export default function ScheduleMeetingModal({
       {/* Descripción */}
       <div>
         <Label htmlFor='description' className='block mb-1'>
-          Descripción
+          Descripción <span className='text-red-500'>*</span>
         </Label>
         <Textarea
           id='description'
@@ -675,8 +707,13 @@ export default function ScheduleMeetingModal({
           value={formData.description}
           onChange={e => handleChange('description', e.target.value)}
           rows={2}
-          className='resize-none'
+          className={`resize-none ${
+            errors.description ? 'border-destructive' : ''
+          }`}
         />
+        {errors.description && (
+          <p className='text-xs text-destructive mt-1'>{errors.description}</p>
+        )}
       </div>
     </div>
   );
