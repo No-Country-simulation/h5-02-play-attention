@@ -68,15 +68,15 @@ export function Navbar() {
           className="text-2xl font-bold text-secondary cursor-pointer"
         >
           <img
-            src="/logo.jpg"
+            src="/logo.svg"
             alt="Logo"
-            className="h-10 w-auto block lg:hidden xl:block rounded-full"
+            className="h-10 w-auto block lg:hidden xl:block"
           />
 
           <img
-            src="/logo.jpg"
+            src="/logo.svg"
             alt="Logo"
-            className="h-10 w-auto hidden lg:block xl:hidden rounded-full"
+            className="h-10 w-auto hidden lg:block xl:hidden"
           />
         </button>
 
