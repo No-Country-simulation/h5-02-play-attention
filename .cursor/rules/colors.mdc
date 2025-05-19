@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+{
+  "colors": {
+    "background": "#F3F0FF",
+    "text": "#2A1B5C",
+    "buttonPrimary": "#8365F7"
+  },
+  "description": "Paleta base de colores para el proyecto. Usar estos valores en tailwind.config, styled-components o theme según corresponda."
+}
