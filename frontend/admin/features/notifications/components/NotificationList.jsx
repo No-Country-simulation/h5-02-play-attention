@@ -56,7 +56,7 @@ export default function NotificationList({
   const confirmDelete = notification => {
     setNotificationToDelete(notification);
   };
-
+  //comentario
   // Procesar eliminación de notificación
   const handleDelete = () => {
     if (notificationToDelete) {
