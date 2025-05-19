@@ -1,0 +1,427 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.8s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Colores semánticos para entidades del negocio */
+  --color-leads: var(--success);
+  --color-tickets: var(--warning);
+  --color-content: var(--accent);
+  --color-users: var(--info);
+  --color-events: var(--info);
+  --color-notifications: var(--destructive);
+  --color-conversions: var(--primary);
+  --color-finance: var(--warning);
+  --color-neutral: var(--muted);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.147 0.004 49.25);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.147 0.004 49.25);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.147 0.004 49.25);
+  --primary: #330764;
+  --primary-foreground: oklch(0.985 0.001 106.423);
+  --secondary: #b8b8d1;
+  --secondary-foreground: oklch(0.216 0.006 56.043);
+  --muted: oklch(0.97 0.001 106.424);
+  --muted-foreground: oklch(0.553 0.013 58.071);
+  --accent: #330764;
+  --accent-foreground: oklch(0.985 0.001 106.423);
+  --destructive: oklch(0.577 0.22 27.325);
+  --success: oklch(0.55 0.16 140);
+  --warning: oklch(0.65 0.18 80);
+  --info: oklch(0.55 0.13 230);
+  --border: oklch(0.923 0.003 48.717);
+  --input: oklch(0.923 0.003 48.717);
+  --ring: oklch(0.709 0.01 56.259);
+  --chart-1: #330764;
+  --chart-2: #b8b8d1;
+  --chart-3: oklch(0.55 0.16 140);
+  --chart-4: oklch(0.65 0.18 80);
+  --chart-5: oklch(0.577 0.22 27.325);
+  --sidebar: #330764;
+  --sidebar-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-primary: #330764;
+  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-accent: #b8b8d1;
+  --sidebar-accent-foreground: #330764;
+  --sidebar-border: #b8b8d1;
+  --sidebar-ring: oklch(0.709 0.01 56.259);
+  --sidebar-dark-purple: #1e0339; /* Violeta más oscuro para iconos */
+}
+
+.dark {
+  --background: oklch(0.147 0.004 49.25);
+  --foreground: oklch(0.985 0.001 106.423);
+  --card: oklch(0.216 0.006 56.043);
+  --card-foreground: oklch(0.985 0.001 106.423);
+  --popover: oklch(0.216 0.006 56.043);
+  --popover-foreground: oklch(0.985 0.001 106.423);
+  --primary: #330764;
+  --primary-foreground: oklch(0.985 0.001 106.423);
+  --secondary: #b8b8d1;
+  --secondary-foreground: oklch(0.985 0.001 106.423);
+  --muted: oklch(0.268 0.007 34.298);
+  --muted-foreground: oklch(0.709 0.01 56.259);
+  --accent: #330764;
+  --accent-foreground: oklch(0.985 0.001 106.423);
+  --destructive: oklch(0.704 0.191 22.216);
+  --success: oklch(0.5 0.14 140);
+  --warning: oklch(0.6 0.16 80);
+  --info: oklch(0.5 0.11 230);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.553 0.013 58.071);
+  --chart-1: #330764;
+  --chart-2: #b8b8d1;
+  --chart-3: oklch(0.5 0.14 140);
+  --chart-4: oklch(0.6 0.16 80);
+  --chart-5: oklch(0.704 0.191 22.216);
+  --sidebar: #330764;
+  --sidebar-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-primary: #330764;
+  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-accent: #b8b8d1;
+  --sidebar-accent-foreground: #330764;
+  --sidebar-border: #b8b8d1;
+  --sidebar-ring: oklch(0.553 0.013 58.071);
+  --sidebar-dark-purple: #1e0339; /* Violeta más oscuro para iconos */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Utilidades para colores semánticos */
+@layer utilities {
+  /* Leads */
+  .bg-leads {
+    background-color: var(--color-leads);
+  }
+  .bg-leads-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-leads),
+      var(--background) 85%
+    );
+  }
+  .text-leads {
+    color: var(--color-leads);
+  }
+  .border-leads {
+    border-color: var(--color-leads);
+  }
+
+  /* Tickets */
+  .bg-tickets {
+    background-color: var(--color-tickets);
+  }
+  .bg-tickets-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-tickets),
+      var(--background) 85%
+    );
+  }
+  .text-tickets {
+    color: var(--color-tickets);
+  }
+  .border-tickets {
+    border-color: var(--color-tickets);
+  }
+
+  /* Content */
+  .bg-content {
+    background-color: var(--color-content);
+  }
+  .bg-content-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-content),
+      var(--background) 85%
+    );
+  }
+  .text-content {
+    color: var(--color-content);
+  }
+  .border-content {
+    border-color: var(--color-content);
+  }
+
+  /* Users */
+  .bg-users {
+    background-color: var(--color-users);
+  }
+  .bg-users-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-users),
+      var(--background) 85%
+    );
+  }
+  .text-users {
+    color: var(--color-users);
+  }
+  .border-users {
+    border-color: var(--color-users);
+  }
+
+  /* Events */
+  .bg-events {
+    background-color: var(--color-events);
+  }
+  .bg-events-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-events),
+      var(--background) 85%
+    );
+  }
+  .text-events {
+    color: var(--color-events);
+  }
+  .border-events {
+    border-color: var(--color-events);
+  }
+
+  /* Notifications */
+  .bg-notifications {
+    background-color: var(--color-notifications);
+  }
+  .bg-notifications-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-notifications),
+      var(--background) 85%
+    );
+  }
+  .text-notifications {
+    color: var(--color-notifications);
+  }
+  .border-notifications {
+    border-color: var(--color-notifications);
+  }
+
+  /* Conversions */
+  .bg-conversions {
+    background-color: var(--color-conversions);
+  }
+  .bg-conversions-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-conversions),
+      var(--background) 85%
+    );
+  }
+  .text-conversions {
+    color: var(--color-conversions);
+  }
+  .border-conversions {
+    border-color: var(--color-conversions);
+  }
+
+  /* Finance */
+  .bg-finance {
+    background-color: var(--color-finance);
+  }
+  .bg-finance-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-finance),
+      var(--background) 85%
+    );
+  }
+  .text-finance {
+    color: var(--color-finance);
+  }
+  .border-finance {
+    border-color: var(--color-finance);
+  }
+
+  /* Neutral */
+  .bg-neutral {
+    background-color: var(--color-neutral);
+  }
+  .bg-neutral-light {
+    background-color: color-mix(
+      in oklab,
+      var(--color-neutral),
+      var(--background) 85%
+    );
+  }
+  .text-neutral {
+    color: var(--color-neutral);
+  }
+  .border-neutral {
+    border-color: var(--color-neutral);
+  }
+
+  /* Sidebar */
+  .bg-sidebar {
+    background-color: var(--sidebar);
+  }
+  .text-sidebar-foreground {
+    color: var(--sidebar-foreground);
+  }
+  .border-sidebar-border {
+    border-color: var(--sidebar-border);
+  }
+  .bg-sidebar-primary {
+    background-color: var(--sidebar-primary);
+  }
+  .text-sidebar-primary-foreground {
+    color: var(--sidebar-primary-foreground);
+  }
+  .bg-sidebar-accent {
+    background-color: var(--sidebar-accent);
+  }
+  .text-sidebar-accent-foreground {
+    color: var(--sidebar-accent-foreground);
+  }
+
+  /* Utilidades para aplicar el color violeta principal en botones y elementos UI */
+  .bg-purple-600,
+  .bg-purple-700,
+  .bg-purple-800 {
+    background-color: var(--primary) !important;
+  }
+  .hover\:bg-purple-700:hover,
+  .hover\:bg-purple-800:hover {
+    background-color: color-mix(in srgb, var(--primary), black 10%) !important;
+  }
+  .text-purple-800,
+  .text-purple-700,
+  .text-purple-600 {
+    color: var(--primary) !important;
+  }
+  .bg-purple-100 {
+    background-color: color-mix(in srgb, var(--primary), white 85%) !important;
+  }
+  .hover\:bg-purple-100:hover {
+    background-color: color-mix(in srgb, var(--primary), white 80%) !important;
+  }
+  .focus\:ring-purple-500:focus,
+  .focus\:ring-purple-300:focus {
+    --tw-ring-color: color-mix(
+      in srgb,
+      var(--primary),
+      transparent 50%
+    ) !important;
+  }
+  .focus\:border-purple-300:focus,
+  .focus\:border-purple-500:focus {
+    border-color: color-mix(
+      in srgb,
+      var(--primary),
+      transparent 50%
+    ) !important;
+  }
+
+  /* Corregir botones en tablas y otros componentes específicos */
+  .text-indigo-600,
+  .text-indigo-900,
+  .hover\:text-indigo-900:hover {
+    color: var(--primary) !important;
+  }
+
+  /* Para cualquier clase bg-primary que se aplique directamente */
+  .bg-primary {
+    background-color: var(--primary) !important;
+  }
+  .hover\:bg-primary:hover {
+    background-color: var(--primary) !important;
+  }
+}
